@@ -1,52 +1,55 @@
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-// === BU KISIM ÇOK ÖNEMLİ ===
-// Eğer bilgisayarında (localhost) çalışıyorsan, adres boş olsun (proxy devreye girsin).
-// Eğer canlı sitedeysen (Vercel vb.), istekler direkt Railway'e gitsin.
-const BASE_URL = window.location.hostname === "localhost" 
-  ? "" 
-  : "https://web-production-fe7c.up.railway.app";
+// Sayfaların import edilmesi
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import CoachDashboard from './pages/CoachDashboard';
+import StudentDashboard from './pages/StudentDashboard';
+import Students from './pages/Students';
+import StudentDetail from './pages/StudentDetail';
+import Schedule from './pages/Schedule';
+import StudentSchedule from './pages/StudentSchedule';
+import Exams from './pages/Exams';
+import ExamResults from './pages/ExamResults';
+import Assignments from './pages/Assignments';
+import Chat from './pages/Chat';
+import Settings from './pages/Settings';
 
-const API = axios.create({
-  baseURL: BASE_URL, 
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Ana sayfa açılınca Login'e at */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        {/* Login Sayfası */}
+        <Route path="/login" element={<Login />} />
 
-// Request interceptor - CSRF Token ekleme
-API.interceptors.request.use(
-  (config) => {
-    // Tarayıcı cookie'lerinden csrftoken'ı bul
-    const csrfToken = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('csrftoken='))
-      ?.split('=')[1];
-    
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+        {/* Dashboardlar */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/coach-dashboard" element={<CoachDashboard />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
 
-// Response interceptor - 401 hatasında (oturum düşerse) login'e at
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Sadece login sayfasında değilsek yönlendir (döngüye girmesin)
-      if (window.location.pathname !== '/login') {
-        localStorage.clear();
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+        {/* Öğrenci İşlemleri */}
+        <Route path="/students" element={<Students />} />
+        <Route path="/student/:id" element={<StudentDetail />} />
 
-export default API;
+        {/* Program ve Takvim */}
+        <Route path="/schedule" element={<Schedule />} />
+        <Route path="/student-schedule" element={<StudentSchedule />} />
+
+        {/* Sınavlar ve Ödevler */}
+        <Route path="/exams" element={<Exams />} />
+        <Route path="/exam-results" element={<ExamResults />} />
+        <Route path="/assignments" element={<Assignments />} />
+
+        {/* Diğer */}
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
