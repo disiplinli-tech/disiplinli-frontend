@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 
 export default function Login({ setUser }) {
@@ -16,7 +16,7 @@ export default function Login({ setUser }) {
     
     try {
       // Backend'e login istegi at
-      const res = await axios.post("/api/login/", { 
+      const res = await API.post("/api/login/", { 
         email: inputVal, 
         password 
       });

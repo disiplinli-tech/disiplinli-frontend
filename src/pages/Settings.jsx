@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { User, Bell, Shield, Palette, Copy, CheckCheck } from "lucide-react";
-import axios from "axios";
 
 export default function Settings({ user }) {
   const [notifications, setNotifications] = useState(true);
