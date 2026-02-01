@@ -24,11 +24,12 @@ export default function Login({ setUser }) {
       
       console.log("Login response:", res.data);
       
-      // LocalStorage'a kaydet (sayfa yenilenince kaybolmasın)
+      // TOKEN'I KAYDET (en önemli kısım!)
+      localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', res.data.user);
       localStorage.setItem('role', res.data.role);
+      localStorage.setItem('user_id', res.data.user_id);
       
-      // State'i güncelle
       if (setUser) {
         setUser({ 
           name: res.data.user,
@@ -36,7 +37,6 @@ export default function Login({ setUser }) {
         });
       }
       
-      // Dashboard'a yönlendir
       navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err.response?.data || err);
@@ -58,14 +58,12 @@ export default function Login({ setUser }) {
           <p className="text-gray-500 mt-2">YKS Koçluk Platformu</p>
         </div>
         
-        {/* Error */}
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 text-center font-medium border border-red-100">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -115,8 +113,7 @@ export default function Login({ setUser }) {
             disabled={loading}
             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-xl 
               font-bold hover:from-indigo-700 hover:to-purple-700 transition-all 
-              shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed
-              transform hover:scale-[1.02] active:scale-[0.98]"
+              shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -129,7 +126,6 @@ export default function Login({ setUser }) {
           </button>
         </form>
 
-        {/* Footer */}
         <p className="text-center text-gray-400 text-sm mt-8">
           © 2026 KoçumNet - Tüm hakları saklıdır
         </p>

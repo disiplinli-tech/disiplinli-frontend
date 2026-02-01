@@ -1,31 +1,23 @@
 import axios from 'axios';
 
-// === BU KISIM ÇOK ÖNEMLİ ===
-// Eğer bilgisayarında (localhost) çalışıyorsan, adres boş olsun (proxy devreye girsin).
-// Eğer canlı sitedeysen (Vercel vb.), istekler direkt Railway'e gitsin.
+// Backend URL
 const BASE_URL = window.location.hostname === "localhost" 
-  ? "" 
+  ? "http://localhost:8000" 
   : "https://web-production-fe7c.up.railway.app";
 
 const API = axios.create({
-  baseURL: BASE_URL, 
-  withCredentials: true,
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   }
 });
 
-// Request interceptor - CSRF Token ekleme
+// Request interceptor - Her istekte Token ekle
 API.interceptors.request.use(
   (config) => {
-    // Tarayıcı cookie'lerinden csrftoken'ı bul
-    const csrfToken = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('csrftoken='))
-      ?.split('=')[1];
-    
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Token ${token}`;
     }
     return config;
   },
@@ -34,12 +26,12 @@ API.interceptors.request.use(
   }
 );
 
-// Response interceptor - 401 hatasında (oturum düşerse) login'e at
+// Response interceptor - 401 hatasında login'e yönlendir
 API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Sadece login sayfasında değilsek yönlendir (döngüye girmesin)
+      // Login sayfasında değilsek yönlendir
       if (window.location.pathname !== '/login') {
         localStorage.clear();
         window.location.href = '/login';
