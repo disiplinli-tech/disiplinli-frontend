@@ -5,7 +5,7 @@ import axios from 'axios';
 // Eğer canlı sitedeysen (Vercel vb.), istekler direkt Railway'e gitsin.
 const BASE_URL = window.location.hostname === "localhost" 
   ? "" 
-  : "web-production-fe7c.up.railway.app"; 
+  : "https://web-production-fe7c.up.railway.app";
 
 const API = axios.create({
   baseURL: BASE_URL, 
