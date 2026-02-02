@@ -334,18 +334,31 @@ export default function Register() {
               </button>
             </div>
 
-            {/* İçerik */}
+            {/* Modal Content (Scrollable) */}
             <div className="p-6 overflow-y-auto text-sm text-gray-600 leading-relaxed space-y-4 custom-scrollbar">
-              <p><strong>1. TARAFLAR</strong><br/>İşbu sözleşme, KoçumNet platformu ("Platform") ile kullanıcı ("Üye") arasında akdedilmiştir.</p>
               
-              <p><strong>2. HİZMETİN KAPSAMI</strong><br/>Platform, YKS sürecindeki öğrenci ve velilere yönelik eğitim koçluğu, akademik takip ve performans analizi hizmetleri sunmaktadır. Bu hizmetler elektronik ortamda sunulan hizmetler kapsamındadır.</p>
+              <p><strong>1. TARAFLAR VE KONU</strong><br/>
+              İşbu sözleşme, KoçumNet platformu ("Platform") ile hizmetten yararlanan kullanıcı ("Üye") arasında akdedilmiştir. Sözleşmenin konusu, Üye'nin elektronik ortamda sunulan eğitim, akademik takip ve danışmanlık hizmetlerinden yararlanma şartlarının belirlenmesidir.</p>
               
-              <p><strong>3. KİŞİSEL VERİLERİN KORUNMASI (KVKK)</strong><br/>Üye'nin akademik verileri, deneme sonuçları ve koç ile olan mesajlaşmaları, yalnızca eğitim takibi amacıyla işlenmektedir. Bu veriler üçüncü şahıslarla paylaşılmaz.</p>
+              <p><strong>2. HİZMETİN KAPSAMI VE NİTELİĞİ</strong><br/>
+              Platform; sınavlara hazırlık (YKS, LGS vb.), okul takviye ve genel akademik gelişim süreçlerinde; dijital takip, performans analizi, ödevlendirme ve online koçluk hizmetleri sunar. Bu hizmetler, <strong>193 sayılı Gelir Vergisi Kanunu Mükerrer Madde 20/B</strong> kapsamında "İnternet ve benzeri elektronik ortamlar üzerinden sunulan hizmetler" statüsündedir.</p>
               
-              <p><strong>4. SORUMLULUKLAR</strong><br/>Üye, beyan ettiği bilgilerin doğruluğundan sorumludur. Davet kodunun yetkisiz paylaşımı yasaktır.</p>
+              <p><strong>3. KULLANIM ŞARTLARI</strong><br/>
+              Platform, bireysel gelişim ve akademik takip amacıyla tasarlanmıştır. Üye, Platform üzerinden sunulan içerikleri, grafikleri ve analizleri yalnızca kendi bireysel kullanımı için çoğaltabilir. Platformdaki içeriklerin ticari amaçla kopyalanması veya üçüncü şahıslara satılması yasaktır.</p>
 
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 mt-4 text-blue-800 text-xs">
-                 * Bu metin standart bir bilgilendirme metnidir. Onaylayarak platform kurallarını kabul etmiş sayılırsınız.
+              <p><strong>4. KİŞİSEL VERİLER VE GİZLİLİK (KVKK)</strong><br/>
+              Üye'nin akademik verileri, deneme sonuçları, çalışma programları ve Koç ile gerçekleştirdiği dijital iletişim kayıtları; yalnızca eğitimin takibi ve performansın artırılması amacıyla işlenmektedir. Platform, bu verileri "Veri İşleme ve Geliştirme Hizmeti" kapsamında analiz eder. Üye verileri, yasal zorunluluklar haricinde üçüncü kişilerle paylaşılmaz.</p>
+              
+              <p><strong>5. VELİ VE ÖĞRENCİ İLİŞKİSİ</strong><br/>
+              Veli hesabı ile eşleştirilen Öğrenci hesaplarında; Veli, öğrencinin akademik gelişimini, ödev durumunu ve sisteme girdiği verileri görüntüleme hakkına sahiptir. Üye (Öğrenci), bu veri paylaşımını peşinen kabul eder.</p>
+              
+              <p><strong>6. SORUMLULUK REDDİ</strong><br/>
+              Platform, öğrencinin akademik başarısını artırmayı hedefler ancak sınav sonuçları üzerinde kesin bir garanti vermez. Başarı; öğrencinin bireysel çalışmasına ve disiplinine bağlıdır.</p>
+
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mt-4">
+                <p className="text-xs text-blue-800 font-medium leading-5">
+                  ℹ️ <strong>Yasal Bilgilendirme:</strong> Bu platform üzerinden sunulan hizmetler, GVK Mük. Madde 20/B kapsamında "Sosyal İçerik Üreticiliği ve Mobil Uygulama Geliştiriciliği" kazanç istisnası rejimine tabidir. Hizmet sağlayıcı, bir eğitim kurumu (dershane/okul) değil, dijital içerik ve danışmanlık hizmeti sunan bir girişimdir.
+                </p>
               </div>
             </div>
 
