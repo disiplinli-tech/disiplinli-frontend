@@ -27,7 +27,7 @@ export default function Login({ setUser }) {
       // TOKEN'I VE BİLGİLERİ KAYDET
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', res.data.user);
-      localStorage.setItem('role', res.data.role);
+      localStorage.setItem('role', res.data.role); // coach, student, veya parent
       localStorage.setItem('user_id', res.data.user_id);
       
       if (setUser) {

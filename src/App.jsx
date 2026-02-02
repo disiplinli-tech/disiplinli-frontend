@@ -12,6 +12,7 @@ import VerifyEmail from './pages/VerifyEmail';
 
 // Ana Sayfalar
 import Dashboard from './pages/Dashboard';
+import ParentDashboard from './pages/Parentdashboard';
 import Students from './pages/Students';
 import StudentDetail from './pages/StudentDetail';
 import Schedule from './pages/Schedule';
@@ -36,6 +37,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     navigate('/login');
   };
 
+  // Koç menüsü
   const coachMenuItems = [
     { icon: LayoutDashboard, label: 'Koç Paneli', path: '/dashboard' },
     { icon: Users, label: 'Öğrenciler', path: '/students' },
@@ -45,6 +47,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
   ];
 
+  // Öğrenci menüsü
   const studentMenuItems = [
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
@@ -54,7 +57,25 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
   ];
 
-  const menuItems = role === 'coach' ? coachMenuItems : studentMenuItems;
+  // Veli menüsü (sadece dashboard ve ayarlar)
+  const parentMenuItems = [
+    { icon: LayoutDashboard, label: 'Veli Paneli', path: '/dashboard' },
+    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
+  ];
+
+  const menuItems = role === 'coach' ? coachMenuItems : 
+                    role === 'parent' ? parentMenuItems : 
+                    studentMenuItems;
+
+  const getRoleBadge = () => {
+    switch (role) {
+      case 'coach': return { gradient: 'from-amber-500 to-orange-500', emoji: '🎓', label: 'Koç' };
+      case 'parent': return { gradient: 'from-emerald-500 to-teal-500', emoji: '👨‍👩‍👧', label: 'Veli' };
+      default: return { gradient: 'from-indigo-500 to-purple-500', emoji: '📚', label: 'Öğrenci' };
+    }
+  };
+
+  const badge = getRoleBadge();
 
   const sidebarContent = (
     <>
@@ -75,8 +96,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
 
       {/* User Badge */}
       <div className={`p-4 ${collapsed ? 'px-2' : ''}`}>
-        <div className={`bg-gradient-to-r ${role === 'coach' ? 'from-amber-500 to-orange-500' : 'from-indigo-500 to-purple-500'} 
-          rounded-xl p-3 text-white ${collapsed ? 'p-2' : ''}`}>
+        <div className={`bg-gradient-to-r ${badge.gradient} rounded-xl p-3 text-white ${collapsed ? 'p-2' : ''}`}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
               {userName.charAt(0).toUpperCase()}
@@ -84,7 +104,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
             {!collapsed && (
               <div className="min-w-0">
                 <p className="font-semibold text-sm truncate">{userName}</p>
-                <p className="text-xs opacity-80">{role === 'coach' ? '🎓 Koç' : '📚 Öğrenci'}</p>
+                <p className="text-xs opacity-80">{badge.emoji} {badge.label}</p>
               </div>
             )}
           </div>
@@ -214,7 +234,7 @@ function ProtectedRoute({ children }) {
   return <Layout>{children}</Layout>;
 }
 
-// ==================== PUBLIC ROUTE (Login ise Dashboard'a yönlendir) ====================
+// ==================== PUBLIC ROUTE ====================
 function PublicRoute({ children }) {
   const token = localStorage.getItem('token');
   
@@ -223,6 +243,19 @@ function PublicRoute({ children }) {
   }
   
   return children;
+}
+
+// ==================== DASHBOARD ROUTER ====================
+function DashboardRouter() {
+  const role = localStorage.getItem('role');
+  
+  // Veli için ParentDashboard göster
+  if (role === 'parent') {
+    return <ParentDashboard />;
+  }
+  
+  // Koç ve Öğrenci için normal Dashboard
+  return <Dashboard />;
 }
 
 // ==================== APP ====================
@@ -263,7 +296,7 @@ function App() {
         } />
         
         {/* ===== PROTECTED ROUTES ===== */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
         <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
         <Route path="/student/:id" element={<ProtectedRoute><StudentDetail /></ProtectedRoute>} />
         <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />

@@ -1,111 +1,308 @@
-import { useState } from "react";
-import { User, Bell, Shield, Palette, Copy, CheckCheck } from "lucide-react";
+import { useState, useEffect } from 'react';
+import API from '../api';
+import { 
+  Settings as SettingsIcon, User, Mail, KeyRound, Copy, Check, 
+  UserPlus, Users, GraduationCap, AlertCircle, Loader2
+} from 'lucide-react';
 
-export default function Settings({ user }) {
-  const [notifications, setNotifications] = useState(true);
-  const [copied, setCopied] = useState(false);
+export default function Settings() {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Koç bağlama
+  const [coachCode, setCoachCode] = useState('');
+  const [connectLoading, setConnectLoading] = useState(false);
+  const [connectError, setConnectError] = useState('');
+  const [connectSuccess, setConnectSuccess] = useState('');
+  
+  // Kopyalama durumları
+  const [copiedStudent, setCopiedStudent] = useState(false);
+  const [copiedParent, setCopiedParent] = useState(false);
 
-  const copyCode = (code) => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const role = localStorage.getItem('role');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (role === 'student') {
+        const res = await API.get('/api/student/codes/');
+        setUserData(res.data);
+      }
+      setError(null);
+    } catch (err) {
+      console.error('Settings fetch error:', err);
+      setError('Veriler yüklenemedi.');
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleConnectCoach = async (e) => {
+    e.preventDefault();
+    if (!coachCode.trim()) {
+      setConnectError('Lütfen koç kodunu girin.');
+      return;
+    }
+
+    setConnectLoading(true);
+    setConnectError('');
+    setConnectSuccess('');
+
+    try {
+      const res = await API.post('/api/connect-coach/', { coach_code: coachCode });
+      setConnectSuccess(res.data.message);
+      setCoachCode('');
+      fetchData(); // Verileri yenile
+    } catch (err) {
+      console.error('Connect coach error:', err);
+      setConnectError(err.response?.data?.error || 'Bağlantı başarısız.');
+    } finally {
+      setConnectLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text, type) => {
+    navigator.clipboard.writeText(text);
+    if (type === 'student') {
+      setCopiedStudent(true);
+      setTimeout(() => setCopiedStudent(false), 2000);
+    } else {
+      setCopiedParent(true);
+      setTimeout(() => setCopiedParent(false), 2000);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-gray-500">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">Ayarlar</h2>
-        <p className="text-gray-500 text-sm mt-1">Hesap ayarlarını yönet</p>
-      </div>
-
-      {/* Profil */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-blue-100 rounded-xl">
-            <User className="text-blue-600" size={24} />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-800">Profil Bilgileri</h3>
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+          <SettingsIcon className="text-indigo-600" size={24} />
         </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between py-3 border-b border-gray-100">
-            <span className="text-gray-600">Hesap Türü</span>
-            <span className="font-medium text-gray-800">
-              {user?.role === 'coach' ? '🎓 Koç Hesabı' : '📚 Öğrenci Hesabı'}
-            </span>
-          </div>
-          <div className="flex items-center justify-between py-3 border-b border-gray-100">
-            <span className="text-gray-600">Üyelik Durumu</span>
-            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Aktif</span>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Ayarlar</h1>
+          <p className="text-gray-500 text-sm">Hesap ayarlarınızı yönetin</p>
         </div>
       </div>
 
-      {/* Bildirimler */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-green-100 rounded-xl">
-            <Bell className="text-green-600" size={24} />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-800">Bildirimler</h3>
+      {error && (
+        <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl mb-6">
+          {error}
         </div>
-        <div className="flex items-center justify-between">
+      )}
+
+      {/* Öğrenci Ayarları */}
+      {role === 'student' && userData && (
+        <div className="space-y-6">
+          
+          {/* Koç Bağlantısı */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <GraduationCap className="text-amber-600" size={20} />
+              </div>
+              <div>
+                <h2 className="font-bold text-gray-800">Koç Bağlantısı</h2>
+                <p className="text-gray-500 text-sm">Koçunuzla bağlantınızı yönetin</p>
+              </div>
+            </div>
+
+            {userData.has_coach ? (
+              <div className="bg-green-50 border border-green-100 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <Check className="text-green-600" size={24} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-800">Koça Bağlısınız</p>
+                    <p className="text-green-600">Koçunuz: <span className="font-bold">{userData.coach_name}</span></p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="text-amber-500 flex-shrink-0 mt-0.5" size={20} />
+                    <div>
+                      <p className="font-medium text-amber-800">Henüz bir koça bağlı değilsiniz</p>
+                      <p className="text-amber-700 text-sm mt-1">
+                        Koçunuzdan aldığınız davet kodunu girerek bağlanabilirsiniz.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleConnectCoach} className="space-y-4">
+                  {connectError && (
+                    <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm">
+                      {connectError}
+                    </div>
+                  )}
+                  {connectSuccess && (
+                    <div className="bg-green-50 text-green-600 p-3 rounded-xl text-sm">
+                      {connectSuccess}
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-3">
+                    <div className="relative flex-1">
+                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="text"
+                        placeholder="Koç Davet Kodu"
+                        value={coachCode}
+                        onChange={(e) => setCoachCode(e.target.value.toUpperCase())}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 
+                          focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white 
+                          outline-none transition-all uppercase font-mono"
+                        maxLength={10}
+                        disabled={connectLoading}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={connectLoading || !coachCode.trim()}
+                      className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium 
+                        hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                        flex items-center gap-2"
+                    >
+                      {connectLoading ? (
+                        <Loader2 className="animate-spin" size={18} />
+                      ) : (
+                        <UserPlus size={18} />
+                      )}
+                      Bağlan
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+
+          {/* Kodlarım */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <KeyRound className="text-purple-600" size={20} />
+              </div>
+              <div>
+                <h2 className="font-bold text-gray-800">Kodlarım</h2>
+                <p className="text-gray-500 text-sm">Kişisel kodlarınız</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Öğrenci Kodu */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Öğrenci Kodu
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 font-mono text-lg tracking-wider">
+                    {userData.student_code || '-'}
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(userData.student_code, 'student')}
+                    className={`p-3 rounded-xl transition-all ${
+                      copiedStudent 
+                        ? 'bg-green-100 text-green-600' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {copiedStudent ? <Check size={20} /> : <Copy size={20} />}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">Bu kod sizin benzersiz öğrenci kodunuzdur.</p>
+              </div>
+
+              {/* Veli Davet Kodu */}
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-xl p-4">
+                <label className="block text-sm font-medium text-emerald-700 mb-2 flex items-center gap-2">
+                  <Users size={16} />
+                  Veli Davet Kodu
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-white border border-emerald-200 rounded-xl px-4 py-3 font-mono text-lg tracking-wider text-emerald-700">
+                    {userData.parent_invite_code || '-'}
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(userData.parent_invite_code, 'parent')}
+                    className={`p-3 rounded-xl transition-all ${
+                      copiedParent 
+                        ? 'bg-green-100 text-green-600' 
+                        : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
+                    }`}
+                  >
+                    {copiedParent ? <Check size={20} /> : <Copy size={20} />}
+                  </button>
+                </div>
+                <p className="text-xs text-emerald-600 mt-2">
+                  Bu kodu velinize verin. Veli bu kodu kullanarak hesap açıp sizi takip edebilir.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Koç Ayarları */}
+      {role === 'coach' && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+              <GraduationCap className="text-amber-600" size={20} />
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-800">Koç Ayarları</h2>
+              <p className="text-gray-500 text-sm">Koç hesap ayarlarınız</p>
+            </div>
+          </div>
+          
+          <p className="text-gray-500">Koç ayarları yakında eklenecek...</p>
+        </div>
+      )}
+
+      {/* Hesap Bilgileri */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <User className="text-blue-600" size={20} />
+          </div>
           <div>
-            <p className="font-medium text-gray-800">E-posta Bildirimleri</p>
-            <p className="text-sm text-gray-500">Önemli güncellemelerden haberdar ol</p>
+            <h2 className="font-bold text-gray-800">Hesap Bilgileri</h2>
+            <p className="text-gray-500 text-sm">Temel hesap bilgileriniz</p>
           </div>
-          <button
-            onClick={() => setNotifications(!notifications)}
-            className={`relative w-14 h-7 rounded-full transition-colors ${notifications ? 'bg-green-500' : 'bg-gray-300'}`}
-          >
-            <div className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${notifications ? 'translate-x-7' : 'translate-x-0.5'}`} />
-          </button>
         </div>
-      </div>
 
-      {/* Güvenlik */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-purple-100 rounded-xl">
-            <Shield className="text-purple-600" size={24} />
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="bg-gray-50 rounded-xl p-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">Ad Soyad</label>
+            <p className="text-gray-800 font-medium">{localStorage.getItem('user') || '-'}</p>
           </div>
-          <h3 className="text-lg font-semibold text-gray-800">Güvenlik</h3>
-        </div>
-        <div className="space-y-3">
-          <button className="w-full text-left px-4 py-3 bg-gray-50 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">
-            Şifre Değiştir
-          </button>
-          <button className="w-full text-left px-4 py-3 bg-gray-50 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">
-            İki Faktörlü Doğrulama
-          </button>
-        </div>
-      </div>
-
-      {/* Tema */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-orange-100 rounded-xl">
-            <Palette className="text-orange-600" size={24} />
+          <div className="bg-gray-50 rounded-xl p-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">Hesap Türü</label>
+            <p className="text-gray-800 font-medium capitalize">
+              {role === 'coach' ? '🎓 Koç' : role === 'student' ? '📚 Öğrenci' : '👨‍👩‍👧 Veli'}
+            </p>
           </div>
-          <h3 className="text-lg font-semibold text-gray-800">Görünüm</h3>
         </div>
-        <div className="flex gap-3">
-          <button className="flex-1 px-4 py-3 bg-white border-2 border-blue-500 text-blue-600 rounded-xl font-medium flex items-center justify-center gap-2">
-            ☀️ Açık Tema
-          </button>
-          <button className="flex-1 px-4 py-3 bg-gray-100 text-gray-600 rounded-xl font-medium hover:bg-gray-200 flex items-center justify-center gap-2">
-            🌙 Koyu Tema
-          </button>
-        </div>
-        <p className="text-xs text-gray-400 mt-2">Koyu tema yakında eklenecek</p>
-      </div>
-
-      {/* Destek */}
-      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 text-white">
-        <h3 className="font-semibold text-lg mb-2">Yardıma mı ihtiyacın var?</h3>
-        <p className="text-blue-100 text-sm mb-4">Sorularını bize ilet, en kısa sürede yardımcı olalım.</p>
-        <button className="px-4 py-2 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-colors">
-          Destek Al
-        </button>
       </div>
     </div>
   );
