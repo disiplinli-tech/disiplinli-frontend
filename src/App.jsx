@@ -5,8 +5,12 @@ import {
   Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu
 } from 'lucide-react';
 
-// Sayfalar
+// Auth Sayfaları
 import Login from './pages/Login';
+import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
+
+// Ana Sayfalar
 import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import StudentDetail from './pages/StudentDetail';
@@ -199,14 +203,26 @@ function Layout({ children }) {
 
 // ==================== PROTECTED ROUTE ====================
 function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
   const user = localStorage.getItem('user');
   const role = localStorage.getItem('role');
   
-  if (!user || !role) {
+  if (!token || !user || !role) {
     return <Navigate to="/login" replace />;
   }
   
   return <Layout>{children}</Layout>;
+}
+
+// ==================== PUBLIC ROUTE (Login ise Dashboard'a yönlendir) ====================
+function PublicRoute({ children }) {
+  const token = localStorage.getItem('token');
+  
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return children;
 }
 
 // ==================== APP ====================
@@ -216,7 +232,9 @@ function App() {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedRole = localStorage.getItem('role');
-    if (storedUser && storedRole) {
+    const storedToken = localStorage.getItem('token');
+    
+    if (storedUser && storedRole && storedToken) {
       setUser({ name: storedUser, role: storedRole });
     }
   }, []);
@@ -224,15 +242,27 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public */}
-        <Route path="/login" element={<Login setUser={setUser} />} />
+        {/* ===== PUBLIC ROUTES ===== */}
+        <Route path="/login" element={
+          <PublicRoute>
+            <Login setUser={setUser} />
+          </PublicRoute>
+        } />
+        <Route path="/register" element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        } />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         
-        {/* Ana sayfa */}
+        {/* ===== ANA SAYFA ===== */}
         <Route path="/" element={
-          localStorage.getItem('user') ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          localStorage.getItem('token') 
+            ? <Navigate to="/dashboard" replace /> 
+            : <Navigate to="/login" replace />
         } />
         
-        {/* Protected Routes */}
+        {/* ===== PROTECTED ROUTES ===== */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
         <Route path="/student/:id" element={<ProtectedRoute><StudentDetail /></ProtectedRoute>} />
@@ -243,7 +273,7 @@ function App() {
         <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         
-        {/* 404 → Login */}
+        {/* ===== 404 ===== */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
