@@ -41,53 +41,52 @@ export default function Register() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+      e.preventDefault();
+      setError("");
 
-    // Validasyonlar
-    if (!formData.fullName.trim()) return setError("Ad Soyad alanı zorunludur.");
-    if (!formData.email.trim()) return setError("E-posta alanı zorunludur.");
-    if (!formData.password || formData.password.length < 6) return setError("Şifre en az 6 karakter olmalıdır.");
-    
-    if (formData.role === "student" && !formData.coachInviteCode.trim()) {
-      return setError("Öğrenci olarak kayıt için Koç Davet Kodu zorunludur.");
-    }
-    if (formData.role === "parent" && !formData.studentCode.trim()) {
-      return setError("Veli olarak kayıt için Öğrenci Kodu zorunludur.");
-    }
-    if (!kvkkAccepted) {
-      return setError("Devam etmek için Kullanıcı Sözleşmesi'ni kabul etmelisiniz.");
-    }
-
-    setLoading(true);
-
-    try {
-      // Backend'in beklediği format
-      const payload = {
-        first_name: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-        ...(formData.role === "student" && { coach_invite_code: formData.coachInviteCode }),
-        ...(formData.role === "parent" && { student_code: formData.studentCode }),
-      };
-
-      const res = await API.post("/api/register/", payload);
-      console.log("Register response:", res.data);
-
-      // Başarılıysa email doğrulamaya git
-      navigate(`/verify-email`, { state: { email: formData.email } });
+      // Validasyonlar
+      if (!formData.fullName.trim()) return setError("Ad Soyad alanı zorunludur.");
+      if (!formData.email.trim()) return setError("E-posta alanı zorunludur.");
+      if (!formData.password || formData.password.length < 6) return setError("Şifre en az 6 karakter olmalıdır.");
       
-    } catch (err) {
-      console.error("Register error:", err.response?.data || err);
-      const errorMsg = err.response?.data?.error || 
-                       err.response?.data?.message || 
-                       "Kayıt sırasında bir hata oluştu. Bilgileri kontrol edin.";
-      setError(errorMsg);
-    } finally {
-      setLoading(false);
-    }
-  };
+      // DİKKAT: Öğrenci için kod zorunluluğunu KALDIRDIK.
+      // Artık kodsuz da kayıt olabilirler.
+      
+      if (formData.role === "parent" && !formData.studentCode.trim()) {
+        return setError("Veli olarak kayıt için Öğrenci Kodu zorunludur.");
+      }
+      if (!kvkkAccepted) {
+        return setError("Devam etmek için Kullanıcı Sözleşmesi'ni kabul etmelisiniz.");
+      }
+
+      setLoading(true);
+
+      try {
+        const payload = {
+          first_name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          // Kod varsa gönder, yoksa boş gönder
+          ...(formData.role === "student" && formData.coachInviteCode.trim() !== "" && { coach_invite_code: formData.coachInviteCode }),
+          ...(formData.role === "parent" && { student_code: formData.studentCode }),
+        };
+
+        const res = await API.post("/api/register/", payload);
+        console.log("Register response:", res.data);
+
+        navigate(`/verify-email`, { state: { email: formData.email } });
+        
+      } catch (err) {
+        console.error("Register error:", err.response?.data || err);
+        const errorMsg = err.response?.data?.error || 
+                        err.response?.data?.message || 
+                        "Kayıt sırasında bir hata oluştu.";
+        setError(errorMsg);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 py-8 px-4">
@@ -217,7 +216,7 @@ export default function Register() {
                 <input
                   type="text"
                   name="coachInviteCode"
-                  placeholder="KODU GİRİN"
+                  placeholder="ZORUNLU DEĞİL"
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 
                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white 
                     outline-none transition-all text-gray-800 uppercase font-semibold tracking-wider"
@@ -357,7 +356,7 @@ export default function Register() {
 
               <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mt-4">
                 <p className="text-xs text-blue-800 font-medium leading-5">
-                  ℹ️ <strong>Yasal Bilgilendirme:</strong> Bu platform üzerinden sunulan hizmetler, GVK Mük. Madde 20/B kapsamında "Sosyal İçerik Üreticiliği ve Mobil Uygulama Geliştiriciliği" kazanç istisnası rejimine tabidir. Hizmet sağlayıcı, bir eğitim kurumu (dershane/okul) değil, dijital içerik ve danışmanlık hizmeti sunan bir girişimdir.
+                  ℹ️ <strong>Yasal Bilgilendirme:</strong> Bu platform Milli Eğitim Bakanlığı'na bağlı bir "Özel Öğretim Kurumu" (dershane/okul/kurs) statüsünde değildir. Hizmet sağlayıcı; sınavlara hazırlık sürecinde bireysel gelişim takibi, dijital içerik sunumu ve akademik mentörlük hizmeti veren bir dijital girişimdir.
                 </p>
               </div>
             </div>
