@@ -9,6 +9,7 @@ import {
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
+import KullaniciSozlesmesi from './pages/KullaniciSozlesmesi';
 
 // Ana Sayfalar
 import Dashboard from './pages/Dashboard';
@@ -289,7 +290,8 @@ function App() {
           </PublicRoute>
         } />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        
+        <Route path="/kullanici-sozlesmesi" element={<KullaniciSozlesmesi />} />
+
         {/* ===== ANA SAYFA ===== */}
         <Route path="/" element={
           localStorage.getItem('token') 

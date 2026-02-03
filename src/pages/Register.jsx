@@ -264,7 +264,7 @@ export default function Register() {
           )}
 
           {/* KVKK Checkbox */}
-          <div 
+          <div
             className="flex items-start gap-3 cursor-pointer select-none"
             onClick={() => !loading && setKvkkAccepted(!kvkkAccepted)}
           >
@@ -276,15 +276,13 @@ export default function Register() {
               )}
             </div>
             <p className="text-sm text-gray-600">
-              <span 
+              <Link
+                to="/kullanici-sozlesmesi"
                 className="text-indigo-600 hover:underline font-medium"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open('/kullanici-sozlesmesi', '_blank');
-                }}
+                onClick={(e) => e.stopPropagation()}
               >
                 Kullanıcı Sözleşmesi
-              </span>
+              </Link>
               'ni ve Aydınlatma Metni'ni okudum, kabul ediyorum.
             </p>
           </div>
