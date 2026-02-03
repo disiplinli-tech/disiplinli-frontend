@@ -76,13 +76,11 @@ export default function Register() {
         payload.student_code = formData.studentCode;
       }
 
-      const res = await API.post("/api/register/", payload);
-      console.log("Register response:", res.data);
+      await API.post("/api/register/", payload);
 
-      // Email doğrulama sayfasına yönlendir
-      navigate(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+      // Email doğrulama sayfasına yönlendir (state ile güvenli geçiş)
+      navigate('/verify-email', { state: { email: formData.email } });
     } catch (err) {
-      console.error("Register error:", err.response?.data || err);
       const errorMsg = err.response?.data?.error || 
                        err.response?.data?.message || 
                        "Kayıt sırasında bir hata oluştu.";

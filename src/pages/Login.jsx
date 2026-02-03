@@ -22,7 +22,7 @@ export default function Login({ setUser }) {
         password 
       });
       
-      console.log("Login response:", res.data);
+      // Login başarılı
       
       // TOKEN'I VE BİLGİLERİ KAYDET
       localStorage.setItem('token', res.data.token);
@@ -39,7 +39,6 @@ export default function Login({ setUser }) {
       
       navigate("/dashboard");
     } catch (err) {
-      console.error("Login error:", err.response?.data || err);
       const errorMsg = err.response?.data?.error || 
                        err.response?.data?.message ||
                        "Giriş başarısız! Bilgilerini kontrol et.";
@@ -76,13 +75,13 @@ export default function Login({ setUser }) {
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input 
-                type="text"
-                placeholder="ornek@mail.com" 
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 
-                  focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white 
+              <input
+                type="email"
+                placeholder="ornek@mail.com"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50
+                  focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white
                   outline-none transition-all text-gray-800"
-                value={inputVal} 
+                value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 required
                 disabled={loading}
@@ -117,15 +116,17 @@ export default function Login({ setUser }) {
             </div>
           </div>
 
-          {/* Şifremi Unuttum */}
+          {/* Şifremi Unuttum - Henüz aktif değil */}
+          {/* TODO: Şifre sıfırlama özelliği eklenecek
           <div className="text-right">
-            <Link 
-              to="/forgot-password" 
+            <Link
+              to="/forgot-password"
               className="text-sm text-indigo-600 hover:text-indigo-700 hover:underline"
             >
               Şifremi Unuttum
             </Link>
           </div>
+          */}
 
           <button 
             type="submit"

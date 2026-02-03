@@ -32,7 +32,9 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const handleLogout = async () => {
     try {
       await API.post('/api/logout/');
-    } catch (e) {}
+    } catch (err) {
+      // Logout API hatası olsa bile localStorage temizlenmeli
+    }
     localStorage.clear();
     navigate('/login');
   };

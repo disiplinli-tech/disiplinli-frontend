@@ -35,7 +35,6 @@ export default function Settings() {
       }
       setError(null);
     } catch (err) {
-      console.error('Settings fetch error:', err);
       setError('Veriler yüklenemedi.');
     } finally {
       setLoading(false);
@@ -59,7 +58,6 @@ export default function Settings() {
       setCoachCode('');
       fetchData(); // Verileri yenile
     } catch (err) {
-      console.error('Connect coach error:', err);
       setConnectError(err.response?.data?.error || 'Bağlantı başarısız.');
     } finally {
       setConnectLoading(false);

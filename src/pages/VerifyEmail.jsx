@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import API from "../api";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { BookOpen, Mail, CheckCircle, AlertCircle, RefreshCw, ArrowLeft } from "lucide-react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Mail, CheckCircle, AlertCircle, RefreshCw, ArrowLeft } from "lucide-react";
 
 export default function VerifyEmail() {
-  const [searchParams] = useSearchParams();
-  const email = searchParams.get("email") || "";
+  const location = useLocation();
+  // State üzerinden veya fallback olarak URL'den email al
+  const email = location.state?.email || new URLSearchParams(location.search).get("email") || "";
   
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
@@ -109,10 +110,8 @@ export default function VerifyEmail() {
         code: codeString,
       });
 
-      console.log("Verify response:", res.data);
       setSuccess(true);
     } catch (err) {
-      console.error("Verify error:", err.response?.data || err);
       const errorMsg = err.response?.data?.error || 
                        err.response?.data?.message || 
                        "Doğrulama başarısız. Kodu kontrol edin.";
@@ -137,7 +136,6 @@ export default function VerifyEmail() {
       setCode(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } catch (err) {
-      console.error("Resend error:", err.response?.data || err);
       const errorMsg = err.response?.data?.error || "Kod gönderilemedi. Tekrar deneyin.";
       setError(errorMsg);
     } finally {
