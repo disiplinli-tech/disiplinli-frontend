@@ -74,7 +74,6 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
       // Sayfayı yenile
       window.location.reload();
     } catch (err) {
-      console.error('Alan değiştirilemedi:', err);
     } finally {
       setSavingField(false);
     }

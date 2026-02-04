@@ -168,7 +168,6 @@ export default function RankingCalculator() {
       if (res.data.tyt?.subject_averages) setTytNets(res.data.tyt.subject_averages);
       if (res.data.ayt?.subject_averages) setAytNets(res.data.ayt.subject_averages);
     } catch (err) {
-      console.log("Ortalamalar yüklenemedi:", err);
     }
   };
 
@@ -191,7 +190,6 @@ export default function RankingCalculator() {
       });
       setResult(res.data);
     } catch (err) {
-      console.error("Hesaplama hatası:", err);
     } finally {
       setLoading(false);
     }

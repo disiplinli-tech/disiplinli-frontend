@@ -47,7 +47,6 @@ export default function Chat() {
         setSelectedName(res.data[0].name);
       }
     } catch (err) {
-      console.error('Sohbet listesi yüklenemedi:', err);
     } finally {
       setLoading(false);
     }
@@ -61,7 +60,6 @@ export default function Chat() {
       // Sohbet listesini de güncelle (okunmamış badge)
       loadConversations();
     } catch (err) {
-      console.error('Mesajlar yüklenemedi:', err);
     }
   };
 
@@ -76,7 +74,6 @@ export default function Chat() {
       setNewMessage('');
       loadMessages();
     } catch (err) {
-      console.error('Mesaj gönderilemedi:', err);
     }
   };
 

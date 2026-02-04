@@ -255,11 +255,9 @@ function StudentDashboard({ user, stats, onRefresh }) {
       };
 
       const res = await API.post('/api/student/profile/update/', data);
-      console.log('Hedef kaydedildi:', res.data);
       setShowTargetModal(false);
       if (onRefresh) await onRefresh();
     } catch (err) {
-      console.error('Hedef güncellenemedi:', err.response?.data || err);
       alert('Kaydetme başarısız: ' + (err.response?.data?.error || err.message));
     } finally {
       setSaving(false);
@@ -277,11 +275,9 @@ function StudentDashboard({ user, stats, onRefresh }) {
       const res = await API.post('/api/student/profile/update/', {
         obp: obpValue
       });
-      console.log('Diploma notu kaydedildi:', res.data);
       setShowOBPModal(false);
       if (onRefresh) await onRefresh();
     } catch (err) {
-      console.error('Diploma notu güncellenemedi:', err.response?.data || err);
       alert('Kaydetme başarısız: ' + (err.response?.data?.error || err.message));
     } finally {
       setSaving(false);
@@ -725,7 +721,6 @@ export default function Dashboard() {
         setUser({ first_name: storedUser, username: storedUser, role: storedRole });
       }
     } catch (err) {
-      console.error("Dashboard verisi yüklenemedi:", err);
     } finally {
       setLoading(false);
     }

@@ -23,7 +23,6 @@ export default function Students() {
       const res = await API.get("/api/dashboard/");
       setStudents(res.data.students || []);
     } catch (err) {
-      console.error("Öğrenciler yüklenemedi:", err);
     } finally {
       setLoading(false);
     }

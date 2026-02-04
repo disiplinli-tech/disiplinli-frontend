@@ -25,7 +25,6 @@ export default function StudentSchedule() {
       setStudentName(res.data.student_name);
       setPlans(res.data.plans);
     } catch (err) {
-      console.error('Program yüklenemedi:', err);
     } finally {
       setLoading(false);
     }
@@ -42,7 +41,6 @@ export default function StudentSchedule() {
       setNewPlan({ title: '', day: 'Pazartesi', hour: '09:00' });
       loadSchedule();
     } catch (err) {
-      console.error('Ekleme hatası:', err);
     }
   };
 
@@ -52,7 +50,6 @@ export default function StudentSchedule() {
       await API.delete(`/api/schedule/${planId}/delete/`);
       loadSchedule();
     } catch (err) {
-      console.error('Silme hatası:', err);
     }
   };
 

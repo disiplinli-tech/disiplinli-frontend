@@ -29,7 +29,6 @@ export default function CoachDashboard({ user }) {
       setStats(statsRes.data);
       setStudents(studentsRes.data || []);
     } catch (err) {
-      console.error("Dashboard verisi yüklenemedi:", err);
     } finally {
       setLoading(false);
     }

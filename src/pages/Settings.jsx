@@ -55,7 +55,6 @@ export default function Settings() {
           if (avgRes.data.field_type) setExamGoalType(avgRes.data.field_type);
           if (avgRes.data.target_ranking) setTargetRanking(avgRes.data.target_ranking.toString());
         } catch (avgErr) {
-          console.log('Ortalamalar yüklenemedi');
         }
       }
       setError(null);

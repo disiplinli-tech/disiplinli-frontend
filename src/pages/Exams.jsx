@@ -280,7 +280,6 @@ export default function Exams() {
       const res = await API.get("/api/exams/");
       setExams(res.data || []);
     } catch (err) {
-      console.error("Denemeler yüklenemedi:", err);
     } finally {
       setLoading(false);
     }
@@ -291,7 +290,6 @@ export default function Exams() {
       const res = await API.get("/api/subject-results/");
       setSubjectResults(res.data || []);
     } catch (err) {
-      console.error("Branş sonuçları yüklenemedi:", err);
     }
   };
 
@@ -384,7 +382,6 @@ export default function Exams() {
         try {
           await API.post("/api/subject-results/add/", { results: subjectScores });
         } catch (e) {
-          console.log("Branş sonuçları kaydedilemedi:", e);
         }
       }
       
@@ -392,7 +389,6 @@ export default function Exams() {
       setShowForm(false);
       resetForm();
     } catch (err) {
-      console.error("Deneme kaydedilemedi:", err);
       alert("Hata: " + (err.response?.data?.error || "Deneme kaydedilemedi"));
     } finally {
       setSaving(false);

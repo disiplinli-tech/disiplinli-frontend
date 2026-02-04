@@ -104,7 +104,6 @@ export default function ExamResults() {
       const res = await API.get("/api/exams/");
       setExams(res.data || []);
     } catch (err) {
-      console.error("Denemeler yüklenemedi:", err);
     } finally {
       setLoading(false);
     }
@@ -198,14 +197,12 @@ export default function ExamResults() {
       try {
         await API.post("/api/subject-results/add/", { results: subjectScores });
       } catch (e) {
-        console.log("Branş sonuçları kaydedilemedi (endpoint yok olabilir):", e);
       }
       
       fetchExams();
       setShowModal(false);
       resetForm();
     } catch (err) {
-      console.error("Deneme kaydedilemedi:", err);
       alert("Hata: " + (err.response?.data?.error || "Deneme kaydedilemedi"));
     } finally {
       setSaving(false);

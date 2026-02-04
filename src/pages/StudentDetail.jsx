@@ -36,11 +36,9 @@ export default function StudentDetail() {
           const examsRes = await API.get(`/api/student/${id}/exams/`);
           setExams(examsRes.data || []);
         } catch (e) {
-          console.log("Exams endpoint yok, boş bırakılıyor");
         }
       }
     } catch (err) {
-      console.error("Veri yüklenemedi:", err);
     } finally {
       setLoading(false);
     }

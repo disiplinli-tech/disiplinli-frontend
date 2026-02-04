@@ -31,7 +31,6 @@ export default function StudentDashboard({ user }) {
       setStats(statsRes.data);
       setExams(examsRes.data || []);
     } catch (err) {
-      console.error("Veri yüklenemedi:", err);
     } finally {
       setLoading(false);
     }

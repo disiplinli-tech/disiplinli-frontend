@@ -82,7 +82,6 @@ export default function Schedule({ user }) {
         setStudents(studentsRes.data || []);
       }
     } catch (err) {
-      console.error("Veri yüklenemedi:", err);
     } finally {
       setLoading(false);
     }
@@ -137,14 +136,12 @@ export default function Schedule({ user }) {
       activity_type: newPlan.activity_type
     };
     
-    console.log("Gönderilen:", payload);
     
     try {
       await API.post("/api/schedule/add/", payload);
       fetchData();
       setShowModal(false);
     } catch (err) {
-      console.error("Plan eklenemedi:", err.response?.data || err);
       alert("Hata: " + (err.response?.data?.error || "Plan eklenemedi"));
     } finally {
       setSaving(false);
@@ -158,7 +155,6 @@ export default function Schedule({ user }) {
       await API.delete(`/api/schedule/${planId}/delete/`);
       fetchData();
     } catch (err) {
-      console.error("Plan silinemedi:", err);
     }
   };
 

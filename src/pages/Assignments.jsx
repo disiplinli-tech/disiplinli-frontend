@@ -31,7 +31,6 @@ export default function Assignments() {
       const res = await API.get('/api/assignments/');
       setAssignments(res.data);
     } catch (err) {
-      console.error('Ödevler yüklenemedi:', err);
     } finally {
       setLoading(false);
     }
@@ -42,7 +41,6 @@ export default function Assignments() {
       const res = await API.get('/api/coach/students/');
       setStudents(res.data);
     } catch (err) {
-      console.error('Öğrenciler yüklenemedi:', err);
     }
   };
 
@@ -58,7 +56,6 @@ export default function Assignments() {
       setNewAssignment({ student_id: '', title: '', description: '', due_date: '' });
       loadAssignments();
     } catch (err) {
-      console.error('Ödev oluşturulamadı:', err);
     } finally {
       setCreating(false);
     }
@@ -69,7 +66,6 @@ export default function Assignments() {
       await API.post(`/api/assignments/${id}/complete/`);
       loadAssignments();
     } catch (err) {
-      console.error('Tamamlanamadı:', err);
     }
   };
 
@@ -79,7 +75,6 @@ export default function Assignments() {
       await API.delete(`/api/assignments/${id}/delete/`);
       loadAssignments();
     } catch (err) {
-      console.error('Silinemedi:', err);
     }
   };
 

@@ -38,7 +38,6 @@ export default function OnlineLessons() {
       const res = await API.get('/api/lessons/');
       setLessons(res.data);
     } catch (err) {
-      console.error('Dersler yüklenemedi:', err);
     } finally {
       setLoading(false);
     }
@@ -49,7 +48,6 @@ export default function OnlineLessons() {
       const res = await API.get('/api/coach/students/');
       setStudents(res.data);
     } catch (err) {
-      console.error('Öğrenciler yüklenemedi:', err);
     }
   };
 
@@ -80,7 +78,6 @@ export default function OnlineLessons() {
       });
       fetchLessons();
     } catch (err) {
-      console.error('Ders kaydedilemedi:', err);
       alert(err.response?.data?.error || 'Ders kaydedilemedi');
     }
   };
@@ -91,7 +88,6 @@ export default function OnlineLessons() {
       await API.post(`/api/lessons/${lessonId}/complete/`, { notes: notes || '' });
       fetchLessons();
     } catch (err) {
-      console.error('Ders tamamlanamadı:', err);
       alert(err.response?.data?.error || 'Ders tamamlanamadı');
     }
   };
@@ -103,7 +99,6 @@ export default function OnlineLessons() {
       await API.post(`/api/lessons/${lessonId}/cancel/`);
       fetchLessons();
     } catch (err) {
-      console.error('Ders iptal edilemedi:', err);
       alert(err.response?.data?.error || 'Ders iptal edilemedi');
     }
   };
@@ -115,7 +110,6 @@ export default function OnlineLessons() {
       await API.delete(`/api/lessons/${lessonId}/delete/`);
       fetchLessons();
     } catch (err) {
-      console.error('Ders silinemedi:', err);
       alert(err.response?.data?.error || 'Ders silinemedi');
     }
   };
