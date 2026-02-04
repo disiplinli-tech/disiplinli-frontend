@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import API from '../api';
-import { 
-  Settings as SettingsIcon, User, Mail, KeyRound, Copy, Check, 
-  UserPlus, Users, GraduationCap, AlertCircle, Loader2
+import {
+  Settings as SettingsIcon, User, Mail, KeyRound, Copy, Check,
+  UserPlus, Users, GraduationCap, AlertCircle, Loader2, Target, Calculator, Save
 } from 'lucide-react';
 
 export default function Settings() {
@@ -20,7 +20,22 @@ export default function Settings() {
   const [copiedStudent, setCopiedStudent] = useState(false);
   const [copiedParent, setCopiedParent] = useState(false);
 
+  // Profil ayarları (OBP, Alan tipi, Hedef sıralama)
+  const [obp, setObp] = useState('');
+  const [examGoalType, setExamGoalType] = useState('SAY');
+  const [targetRanking, setTargetRanking] = useState('');
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileSuccess, setProfileSuccess] = useState('');
+  const [profileError, setProfileError] = useState('');
+
   const role = localStorage.getItem('role');
+
+  const EXAM_GOAL_TYPES = [
+    { value: 'SAY', label: 'Sayısal' },
+    { value: 'EA', label: 'Eşit Ağırlık' },
+    { value: 'SOZ', label: 'Sözel' },
+    { value: 'DIL', label: 'Yabancı Dil' },
+  ];
 
   useEffect(() => {
     fetchData();
@@ -32,6 +47,16 @@ export default function Settings() {
       if (role === 'student') {
         const res = await API.get('/api/student/codes/');
         setUserData(res.data);
+
+        // Profil bilgilerini de yükle
+        try {
+          const avgRes = await API.get('/api/exam-averages/');
+          if (avgRes.data.obp) setObp(avgRes.data.obp.toString());
+          if (avgRes.data.field_type) setExamGoalType(avgRes.data.field_type);
+          if (avgRes.data.target_ranking) setTargetRanking(avgRes.data.target_ranking.toString());
+        } catch (avgErr) {
+          console.log('Ortalamalar yüklenemedi');
+        }
       }
       setError(null);
     } catch (err) {
@@ -75,6 +100,26 @@ export default function Settings() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    setProfileLoading(true);
+    setProfileError('');
+    setProfileSuccess('');
+
+    try {
+      await API.post('/api/student/profile/update/', {
+        obp: obp ? parseFloat(obp) : null,
+        exam_goal_type: examGoalType,
+        target_ranking: targetRanking ? parseInt(targetRanking) : null,
+      });
+      setProfileSuccess('Profil bilgileri kaydedildi!');
+      setTimeout(() => setProfileSuccess(''), 3000);
+    } catch (err) {
+      setProfileError(err.response?.data?.error || 'Kaydetme başarısız.');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -108,7 +153,107 @@ export default function Settings() {
       {/* Öğrenci Ayarları */}
       {role === 'student' && userData && (
         <div className="space-y-6">
-          
+
+          {/* YKS Ayarları - OBP, Alan, Hedef */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                <Calculator className="text-indigo-600" size={20} />
+              </div>
+              <div>
+                <h2 className="font-bold text-gray-800">YKS Ayarları</h2>
+                <p className="text-gray-500 text-sm">Sıralama hesaplama için gerekli bilgiler</p>
+              </div>
+            </div>
+
+            {profileError && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-4">
+                {profileError}
+              </div>
+            )}
+            {profileSuccess && (
+              <div className="bg-green-50 text-green-600 p-3 rounded-xl text-sm mb-4">
+                {profileSuccess}
+              </div>
+            )}
+
+            <div className="grid md:grid-cols-3 gap-4 mb-4">
+              {/* Alan Türü */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Alan Türü
+                </label>
+                <select
+                  value={examGoalType}
+                  onChange={(e) => setExamGoalType(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50
+                    focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white
+                    outline-none transition-all"
+                >
+                  {EXAM_GOAL_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Hedeflediğin puan türü</p>
+              </div>
+
+              {/* OBP */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  OBP (Diploma Puanı)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Örn: 85.50"
+                  value={obp}
+                  onChange={(e) => setObp(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50
+                    focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white
+                    outline-none transition-all"
+                  min="0"
+                  max="100"
+                />
+                <p className="text-xs text-gray-400 mt-1">Ortaöğretim başarı puanın (0-100)</p>
+              </div>
+
+              {/* Hedef Sıralama */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hedef Sıralama
+                </label>
+                <input
+                  type="number"
+                  placeholder="Örn: 10000"
+                  value={targetRanking}
+                  onChange={(e) => setTargetRanking(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50
+                    focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white
+                    outline-none transition-all"
+                  min="1"
+                />
+                <p className="text-xs text-gray-400 mt-1">Hedeflediğin YKS sıralaması</p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSaveProfile}
+              disabled={profileLoading}
+              className="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium
+                hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                flex items-center justify-center gap-2"
+            >
+              {profileLoading ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <Save size={18} />
+              )}
+              Kaydet
+            </button>
+          </div>
+
           {/* Koç Bağlantısı */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center gap-3 mb-4">

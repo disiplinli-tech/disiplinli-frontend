@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
-  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video
+  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator
 } from 'lucide-react';
 
 // Auth Sayfaları
@@ -22,6 +22,7 @@ import Assignments from './pages/Assignments';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 import OnlineLessons from './pages/OnlineLessons';
+import RankingCalculator from './pages/RankingCalculator';
 import API from './api';
 
 // ==================== SIDEBAR ====================
@@ -56,6 +57,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const studentMenuItems = [
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
+    { icon: Calculator, label: 'Sıralama Hesapla', path: '/ranking-calculator' },
     { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
@@ -313,6 +315,7 @@ function App() {
         <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/lessons" element={<ProtectedRoute><OnlineLessons /></ProtectedRoute>} />
+        <Route path="/ranking-calculator" element={<ProtectedRoute><RankingCalculator /></ProtectedRoute>} />
 
         {/* ===== 404 ===== */}
         <Route path="*" element={<Navigate to="/login" replace />} />

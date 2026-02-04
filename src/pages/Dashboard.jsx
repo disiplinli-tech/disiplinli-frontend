@@ -245,7 +245,15 @@ function StudentDashboard({ user, stats }) {
   const rankings = getLatestRankings();
   const chartData = prepareChartData();
   const goalType = stats?.exam_goal_type || 'SAY';
-  const mainAYTType = goalType === 'SAY' ? 'AYT_SAY' : goalType === 'EA' ? 'AYT_EA' : 'AYT_SOZ';
+  const mainAYTType = goalType === 'SAY' ? 'AYT_SAY' : goalType === 'EA' ? 'AYT_EA' : goalType === 'DIL' ? 'YDT' : 'AYT_SOZ';
+
+  const goalTypeLabels = {
+    'SAY': { label: 'Sayısal', color: 'from-blue-500 to-indigo-600', emoji: '🔢' },
+    'EA': { label: 'Eşit Ağırlık', color: 'from-emerald-500 to-teal-600', emoji: '⚖️' },
+    'SOZ': { label: 'Sözel', color: 'from-orange-500 to-amber-600', emoji: '📖' },
+    'DIL': { label: 'Yabancı Dil', color: 'from-purple-500 to-pink-600', emoji: '🌍' },
+  };
+  const goalInfo = goalTypeLabels[goalType] || goalTypeLabels['SAY'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -261,17 +269,28 @@ function StudentDashboard({ user, stats }) {
                   {new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
-              {stats?.coach && (
-                <div className="hidden md:flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
-                    {stats.coach.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="text-white">
-                    <p className="text-xs opacity-80">Koçun</p>
-                    <p className="font-semibold">{stats.coach}</p>
+              <div className="hidden md:flex items-center gap-3">
+                {/* Alan Tipi Badge */}
+                <div className={`bg-gradient-to-r ${goalInfo.color} rounded-xl px-4 py-2`}>
+                  <div className="text-white text-center">
+                    <p className="text-xs opacity-80">Alanın</p>
+                    <p className="font-semibold">{goalInfo.emoji} {goalInfo.label}</p>
                   </div>
                 </div>
-              )}
+
+                {/* Koç Bilgisi */}
+                {stats?.coach && (
+                  <div className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2">
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+                      {stats.coach.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="text-white">
+                      <p className="text-xs opacity-80">Koçun</p>
+                      <p className="font-semibold">{stats.coach}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
