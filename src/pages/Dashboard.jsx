@@ -5,7 +5,7 @@ import { formatRanking } from "../utils/formatters";
 import {
   TrendingUp, Target, Award, Calendar, MessageCircle,
   ChevronRight, Trophy, Zap, BarChart3, CheckCircle, Users,
-  Copy, Check, Eye, Bell, X, Edit2, Save
+  Copy, Check, Eye, Bell, X, Edit2, Save, AlertTriangle, AlertCircle, Mail, Send
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
@@ -14,6 +14,8 @@ import {
 // ==================== KOÇ DASHBOARD ====================
 function CoachDashboard({ user, stats }) {
   const [copied, setCopied] = useState(false);
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [reminderSent, setReminderSent] = useState(false);
   const navigate = useNavigate();
 
   const copyInviteCode = () => {
@@ -24,11 +26,57 @@ function CoachDashboard({ user, stats }) {
 
   const students = stats?.students || [];
   const sortedStudents = [...students].sort((a, b) => (b.last_tyt_net || 0) - (a.last_tyt_net || 0));
+  const inactiveStudents = stats?.inactive_students || [];
+  const criticalCount = stats?.critical_count || 0;
+  const warningCount = stats?.warning_count || 0;
+
+  // İnaktif öğrencilere toplu hatırlatma gönder
+  const handleSendReminders = async () => {
+    if (inactiveStudents.length === 0) return;
+
+    setSendingReminder(true);
+    try {
+      const studentIds = inactiveStudents.map(s => s.id);
+      await API.post('/api/send-reminder/', { student_ids: studentIds });
+      setReminderSent(true);
+      setTimeout(() => setReminderSent(false), 3000);
+    } catch (err) {
+      alert('Hatırlatma gönderilemedi: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setSendingReminder(false);
+    }
+  };
+
+  // Aktivite durumuna göre renk
+  const getActivityColor = (status) => {
+    switch (status?.status) {
+      case 'active': return 'bg-green-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'critical': return 'bg-red-500';
+      default: return 'bg-gray-400';
+    }
+  };
+
+  // Aktivite badge
+  const ActivityBadge = ({ activity_status }) => {
+    if (!activity_status) return null;
+    const colors = {
+      active: 'bg-green-100 text-green-700',
+      warning: 'bg-yellow-100 text-yellow-700',
+      critical: 'bg-red-100 text-red-700',
+      inactive: 'bg-gray-100 text-gray-600'
+    };
+    return (
+      <span className={`text-xs px-2 py-1 rounded-full ${colors[activity_status.status] || colors.inactive}`}>
+        {activity_status.label}
+      </span>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        
+
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Hoş Geldiniz, {user?.first_name || user?.username || 'Hocam'}! 🎓</h1>
@@ -36,6 +84,69 @@ function CoachDashboard({ user, stats }) {
             {new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
+
+        {/* 🚨 İNAKTİF ÖĞRENCİ UYARISI - En üstte göster */}
+        {(criticalCount > 0 || warningCount > 0) && (
+          <div className={`rounded-2xl p-5 ${criticalCount > 0 ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-yellow-500 to-amber-500'} text-white`}>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={24} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg">
+                  {criticalCount > 0 ? '⚠️ Dikkat! İnaktif Öğrenciler' : '📢 Takip Gerektiren Öğrenciler'}
+                </h3>
+                <p className="text-sm opacity-90 mt-1">
+                  {criticalCount > 0 && <span className="font-semibold">{criticalCount} öğrenci 2+ gündür giriş yapmadı. </span>}
+                  {warningCount > 0 && <span>{warningCount} öğrenci dün giriş yapmadı.</span>}
+                </p>
+
+                {/* İnaktif öğrenci listesi */}
+                {inactiveStudents.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2 items-center">
+                    {inactiveStudents.slice(0, 5).map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => navigate(`/student/${s.id}`)}
+                        className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                      >
+                        <span>{s.name}</span>
+                        <span className="opacity-75">({s.activity_status?.days_inactive}g)</span>
+                      </button>
+                    ))}
+                    {inactiveStudents.length > 5 && (
+                      <span className="px-3 py-1.5 text-sm opacity-75">+{inactiveStudents.length - 5} daha</span>
+                    )}
+
+                    {/* Hatırlatma Gönder Butonu */}
+                    <button
+                      onClick={handleSendReminders}
+                      disabled={sendingReminder || reminderSent}
+                      className="ml-auto bg-white text-red-600 hover:bg-white/90 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 disabled:opacity-70"
+                    >
+                      {sendingReminder ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          Gönderiliyor...
+                        </>
+                      ) : reminderSent ? (
+                        <>
+                          <Check size={16} />
+                          Gönderildi!
+                        </>
+                      ) : (
+                        <>
+                          <Send size={16} />
+                          Hatırlatma Gönder
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Davet Kodu */}
         {stats?.invite_code && (
@@ -69,7 +180,7 @@ function CoachDashboard({ user, stats }) {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
@@ -77,11 +188,26 @@ function CoachDashboard({ user, stats }) {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Aktif Bugün</p>
-                <p className="text-2xl font-bold text-gray-800">{stats?.active_today || 0}</p>
+                <p className="text-2xl font-bold text-green-600">{stats?.active_today || 0}</p>
               </div>
             </div>
           </div>
-          
+
+          {/* Uyarı Kartı - Kritik varsa kırmızı */}
+          <div className={`rounded-2xl p-5 border shadow-sm ${criticalCount > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${criticalCount > 0 ? 'bg-red-100' : 'bg-yellow-100'}`}>
+                <AlertCircle className={criticalCount > 0 ? 'text-red-600' : 'text-yellow-600'} size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">İnaktif</p>
+                <p className={`text-2xl font-bold ${criticalCount > 0 ? 'text-red-600' : 'text-yellow-600'}`}>
+                  {criticalCount + warningCount}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
@@ -93,41 +219,29 @@ function CoachDashboard({ user, stats }) {
               </div>
             </div>
           </div>
-          
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                <Bell className="text-orange-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Bekleyen Ödev</p>
-                <p className="text-2xl font-bold text-gray-800">{stats?.pending_assignments || 0}</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Öğrencilerim */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-5 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-800">Öğrencilerim</h2>
-            <button 
+            <button
               onClick={() => navigate('/students')}
               className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
             >
               Tümünü Gör <ChevronRight size={16} />
             </button>
           </div>
-          
+
           {/* Tablo Header */}
           <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 text-sm font-medium text-gray-500">
             <div className="col-span-4">ÖĞRENCİ</div>
             <div className="col-span-2 text-center">SON TYT</div>
             <div className="col-span-2 text-center">SIRALAMA</div>
-            <div className="col-span-2 text-center">SON AKTİVİTE</div>
+            <div className="col-span-2 text-center">DURUM</div>
             <div className="col-span-2 text-right">İŞLEMLER</div>
           </div>
-          
+
           {/* Öğrenci Listesi */}
           <div className="divide-y divide-gray-50">
             {sortedStudents.length === 0 ? (
@@ -139,47 +253,57 @@ function CoachDashboard({ user, stats }) {
             ) : (
               sortedStudents.map((student, idx) => {
                 const lastNet = student.last_tyt_net;
-                const ranking = student.estimated_ranking;  // Backend'den geliyor
-                const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
-                
+                const ranking = student.estimated_ranking;
+                const activityStatus = student.activity_status;
+                const isCritical = activityStatus?.status === 'critical' || activityStatus?.status === 'inactive';
+                const isWarning = activityStatus?.status === 'warning';
+
                 return (
-                  <div 
-                    key={student.id} 
-                    className="grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 cursor-pointer"
+                  <div
+                    key={student.id}
+                    className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 cursor-pointer transition-colors ${isCritical ? 'bg-red-50/50' : isWarning ? 'bg-yellow-50/50' : ''}`}
                     onClick={() => navigate(`/student/${student.id}`)}
                   >
                     <div className="col-span-12 md:col-span-4 flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full ${colors[idx % colors.length]} flex items-center justify-center text-white font-bold`}>
-                        {student.name?.charAt(0).toUpperCase() || 'Ö'}
+                      {/* Avatar with activity indicator */}
+                      <div className="relative">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
+                          {student.name?.charAt(0).toUpperCase() || 'Ö'}
+                        </div>
+                        {/* Aktivite noktası */}
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
                       </div>
                       <div>
                         <p className="font-medium text-gray-800">{student.name}</p>
                         <p className="text-xs text-gray-400 truncate">{student.email}</p>
                       </div>
                     </div>
-                    
+
                     <div className="hidden md:block col-span-2 text-center">
                       {lastNet ? <span className="text-lg font-bold text-gray-800">{lastNet}</span> : <span className="text-gray-400">-</span>}
                     </div>
-                    
+
                     <div className="hidden md:block col-span-2 text-center">
                       {ranking ? <span className="text-indigo-600 font-semibold">~{formatRanking(ranking)}</span> : <span className="text-gray-400">-</span>}
                     </div>
-                    
-                    <div className="hidden md:block col-span-2 text-center text-sm text-gray-500">
-                      {student.last_activity ? new Date(student.last_activity).toLocaleDateString('tr-TR') : '-'}
+
+                    {/* Aktivite Durumu */}
+                    <div className="hidden md:flex col-span-2 justify-center">
+                      <ActivityBadge activity_status={activityStatus} />
                     </div>
-                    
+
                     <div className="hidden md:flex col-span-2 justify-end gap-2">
                       <button onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}`); }} className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"><Eye size={18} /></button>
                       <button onClick={(e) => { e.stopPropagation(); navigate('/schedule'); }} className="p-2 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"><Calendar size={18} /></button>
                       <button onClick={(e) => { e.stopPropagation(); navigate('/messages'); }} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"><MessageCircle size={18} /></button>
                     </div>
 
+                    {/* Mobil görünüm */}
                     <div className="col-span-12 md:hidden flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         {lastNet && <span className="text-sm"><strong>{lastNet}</strong> net</span>}
                         {ranking && <span className="text-sm text-indigo-600">~{formatRanking(ranking)}</span>}
+                        <ActivityBadge activity_status={activityStatus} />
                       </div>
                       <ChevronRight size={18} className="text-gray-400" />
                     </div>
@@ -207,6 +331,20 @@ function StudentDashboard({ user, stats, onRefresh }) {
   const [targetDepartment, setTargetDepartment] = useState(stats?.target_department || '');
   const [obpInput, setObpInput] = useState(stats?.obp?.toString() || '');
   const [saving, setSaving] = useState(false);
+  const [weeklyGoals, setWeeklyGoals] = useState([]);
+
+  // Haftalık hedefleri yükle
+  useEffect(() => {
+    const fetchGoals = async () => {
+      try {
+        const res = await API.get('/api/goals/');
+        setWeeklyGoals(res.data.goals || []);
+      } catch (err) {
+        console.log('Hedefler yüklenemedi');
+      }
+    };
+    fetchGoals();
+  }, []);
 
   // Tüm denemelerin ORTALAMASINA göre sıralama hesapla
   const getAverageRankings = () => {
@@ -720,6 +858,53 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 </div>
               </button>
             </div>
+
+            {/* 📋 Haftalık Hedefler */}
+            {weeklyGoals.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  <Target size={18} className="text-indigo-500" />
+                  Bu Hafta Hedeflerin
+                </h3>
+                <div className="space-y-3">
+                  {weeklyGoals.map((goal) => (
+                    <div key={goal.id} className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">{goal.goal_type_display}</span>
+                        <span className={`font-semibold ${goal.is_completed ? 'text-green-600' : 'text-gray-800'}`}>
+                          {goal.current_value}/{goal.target_value}
+                          {goal.is_completed && ' ✓'}
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${goal.is_completed ? 'bg-green-500' : 'bg-indigo-500'}`}
+                          style={{ width: `${goal.progress_percentage}%` }}
+                        />
+                      </div>
+                      {goal.note && (
+                        <p className="text-xs text-gray-500 italic">📝 {goal.note}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 👀 Koçum İzliyor Göstergesi */}
+            {stats?.coach && (
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <Eye size={24} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-emerald-800 font-medium">Koçun seni takip ediyor 👀</p>
+                    <p className="text-emerald-600 text-xs mt-0.5">{stats.coach} • İlerlemeni görüyor</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">
               <div className="flex items-start gap-3">

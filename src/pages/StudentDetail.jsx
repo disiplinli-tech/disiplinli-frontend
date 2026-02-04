@@ -4,7 +4,7 @@ import API from "../api";
 import { formatRanking } from "../utils/formatters";
 import {
   ArrowLeft, Mail, Target, TrendingUp, TrendingDown, Minus,
-  Calendar, Award, BarChart3, Trophy, MessageCircle
+  Calendar, Award, BarChart3, Trophy, MessageCircle, Plus, X, Save
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -19,15 +19,26 @@ export default function StudentDetail() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Haftalık hedef state'leri
+  const [weeklyGoals, setWeeklyGoals] = useState([]);
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [goalForm, setGoalForm] = useState({
+    goal_type: 'DENEME_TYT',
+    target_value: '',
+    note: ''
+  });
+  const [savingGoal, setSavingGoal] = useState(false);
+
   useEffect(() => {
     fetchData();
+    fetchGoals();
   }, [id]);
 
   const fetchData = async () => {
     try {
       const studentRes = await API.get(`/api/student/${id}/`);
       setStudent(studentRes.data);
-      
+
       // Exams varsa al
       if (studentRes.data.exams) {
         setExams(studentRes.data.exams);
@@ -41,6 +52,50 @@ export default function StudentDetail() {
     } catch (err) {
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGoals = async () => {
+    try {
+      const res = await API.get(`/api/goals/?student_id=${id}`);
+      setWeeklyGoals(res.data.goals || []);
+    } catch (err) {
+      console.log('Hedefler yüklenemedi');
+    }
+  };
+
+  const handleCreateGoal = async () => {
+    if (!goalForm.target_value) {
+      alert('Hedef değeri giriniz');
+      return;
+    }
+
+    setSavingGoal(true);
+    try {
+      await API.post('/api/goals/create/', {
+        student_id: id,
+        goal_type: goalForm.goal_type,
+        target_value: parseInt(goalForm.target_value),
+        note: goalForm.note
+      });
+      setShowGoalModal(false);
+      setGoalForm({ goal_type: 'DENEME_TYT', target_value: '', note: '' });
+      fetchGoals();
+    } catch (err) {
+      alert('Hedef oluşturulamadı: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setSavingGoal(false);
+    }
+  };
+
+  const handleDeleteGoal = async (goalId) => {
+    if (!window.confirm('Bu hedefi silmek istediğinize emin misiniz?')) return;
+
+    try {
+      await API.delete(`/api/goals/${goalId}/delete/`);
+      fetchGoals();
+    } catch (err) {
+      alert('Hedef silinemedi');
     }
   };
 
@@ -216,6 +271,7 @@ export default function StudentDetail() {
             {[
               { key: 'overview', label: 'Genel Bakış', icon: BarChart3 },
               { key: 'exams', label: 'Denemeler', icon: Award },
+              { key: 'goals', label: 'Hedefler', icon: Target },
               { key: 'schedule', label: 'Program', icon: Calendar },
             ].map(tab => (
               <button
@@ -378,6 +434,76 @@ export default function StudentDetail() {
               </div>
             )}
 
+            {/* Goals - Haftalık Hedefler */}
+            {activeTab === 'goals' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800">Bu Hafta Hedefler</h3>
+                  <button
+                    onClick={() => setShowGoalModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+                  >
+                    <Plus size={18} />
+                    Hedef Ekle
+                  </button>
+                </div>
+
+                {weeklyGoals.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <Target size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Bu hafta için hedef belirlenmemiş</p>
+                    <button
+                      onClick={() => setShowGoalModal(true)}
+                      className="mt-4 text-indigo-600 hover:underline font-medium"
+                    >
+                      İlk hedefi oluştur →
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {weeklyGoals.map((goal) => (
+                      <div
+                        key={goal.id}
+                        className={`bg-gray-50 rounded-xl p-4 border-l-4 ${goal.is_completed ? 'border-green-500' : 'border-indigo-500'}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="font-semibold text-gray-800">{goal.goal_type_display}</span>
+                              {goal.is_completed && (
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Tamamlandı ✓</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                              <span>Hedef: <strong>{goal.target_value}</strong></span>
+                              <span>Mevcut: <strong className={goal.is_completed ? 'text-green-600' : 'text-indigo-600'}>{goal.current_value}</strong></span>
+                            </div>
+                            {goal.note && (
+                              <p className="text-sm text-gray-500 italic">📝 {goal.note}</p>
+                            )}
+                            {/* Progress bar */}
+                            <div className="mt-3 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-500 ${goal.is_completed ? 'bg-green-500' : 'bg-indigo-500'}`}
+                                style={{ width: `${goal.progress_percentage}%` }}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-400 mt-1">{goal.progress_percentage}% tamamlandı</p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteGoal(goal.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Schedule */}
             {activeTab === 'schedule' && (
               <div className="text-center py-12 text-gray-400">
@@ -388,6 +514,88 @@ export default function StudentDetail() {
           </div>
         </div>
       </div>
+
+      {/* Hedef Oluşturma Modal */}
+      {showGoalModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800">🎯 Haftalık Hedef Oluştur</h3>
+              <button onClick={() => setShowGoalModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hedef Tipi
+                </label>
+                <select
+                  value={goalForm.goal_type}
+                  onChange={(e) => setGoalForm({ ...goalForm, goal_type: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                >
+                  <option value="DENEME_TYT">TYT Denemesi</option>
+                  <option value="DENEME_AYT">AYT Denemesi</option>
+                  <option value="SORU">Soru Çözümü</option>
+                  <option value="KONU">Konu Tamamlama</option>
+                  <option value="CALISMA">Çalışma Süresi (dk)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hedef Değer
+                </label>
+                <input
+                  type="number"
+                  value={goalForm.target_value}
+                  onChange={(e) => setGoalForm({ ...goalForm, target_value: e.target.value })}
+                  placeholder={goalForm.goal_type === 'CALISMA' ? 'Örn: 300 (dakika)' : goalForm.goal_type === 'SORU' ? 'Örn: 500' : 'Örn: 3'}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Not (Opsiyonel)
+                </label>
+                <input
+                  type="text"
+                  value={goalForm.note}
+                  onChange={(e) => setGoalForm({ ...goalForm, note: e.target.value })}
+                  placeholder="Örn: Her gün 1 deneme çöz"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowGoalModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleCreateGoal}
+                disabled={savingGoal}
+                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {savingGoal ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Oluştur
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
