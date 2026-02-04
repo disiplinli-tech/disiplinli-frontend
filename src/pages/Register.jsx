@@ -403,24 +403,24 @@ export default function Register() {
           {formData.role === "parent" && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Öğrenci Kodu <span className="text-red-500">*</span>
+                Veli Davet Kodu <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
                   name="studentCode"
-                  placeholder="Öğrencinizin Veli Davet Kodu"
+                  placeholder="Örn: ABC123"
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50
                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white
                     outline-none transition-all text-gray-800 uppercase"
                   value={formData.studentCode}
                   onChange={(e) => setFormData(prev => ({ ...prev, studentCode: e.target.value.toUpperCase() }))}
                   disabled={loading}
-                  maxLength={15}
+                  maxLength={10}
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">Öğrencinizin size verdiği Veli Davet Kodunu girin</p>
+              <p className="text-xs text-gray-400 mt-1">Öğrencinizin Ayarlar sayfasından aldığı Veli Davet Kodunu girin</p>
             </div>
           )}
 
