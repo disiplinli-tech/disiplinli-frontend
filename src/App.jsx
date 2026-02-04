@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
-  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator
+  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator, Target
 } from 'lucide-react';
 
 // Auth Sayfaları
@@ -23,6 +23,7 @@ import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 import OnlineLessons from './pages/OnlineLessons';
 import RankingCalculator from './pages/RankingCalculator';
+import TopicTracker from './pages/TopicTracker';
 import API from './api';
 
 // Alan Tipleri
@@ -104,6 +105,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const studentMenuItems = [
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
+    { icon: Target, label: 'Konu Takibi', path: '/topics' },
     { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
@@ -421,6 +423,7 @@ function App() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/lessons" element={<ProtectedRoute><OnlineLessons /></ProtectedRoute>} />
         <Route path="/ranking-calculator" element={<ProtectedRoute><RankingCalculator /></ProtectedRoute>} />
+        <Route path="/topics" element={<ProtectedRoute><TopicTracker /></ProtectedRoute>} />
 
         {/* ===== 404 ===== */}
         <Route path="*" element={<Navigate to="/login" replace />} />
