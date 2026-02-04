@@ -1,30 +1,113 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
-import { 
+import {
   TrendingUp, Target, Award, Calendar, MessageCircle,
   ChevronRight, Trophy, Zap, BarChart3, CheckCircle, Users,
-  Copy, Check, Eye, Bell
+  Copy, Check, Eye, Bell, X, Edit2, Save
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
 
-// YKS Sıralama Tahmini
+// YKS 2024 Sıralama Tahmini - Gerçek verilerle
 const estimateRanking = (net, type) => {
+  // 2024 YKS gerçek verileri (kaynak: unirehberi.com)
+  const TYT_TABLE = [
+    { net: 110, rank: 5000 },
+    { net: 105, rank: 12000 },
+    { net: 100, rank: 24521 },
+    { net: 95, rank: 40000 },
+    { net: 90, rank: 57962 },
+    { net: 85, rank: 85000 },
+    { net: 80, rank: 115486 },
+    { net: 75, rank: 155000 },
+    { net: 70, rank: 198012 },
+    { net: 65, rank: 250000 },
+    { net: 60, rank: 310004 },
+    { net: 55, rank: 400000 },
+    { net: 50, rank: 516088 },
+    { net: 45, rank: 650000 },
+    { net: 40, rank: 850000 },
+    { net: 35, rank: 1100000 },
+    { net: 30, rank: 1400000 },
+    { net: 25, rank: 1750000 },
+    { net: 20, rank: 2100000 },
+  ];
+
+  const AYT_SAY_TABLE = [
+    { net: 75, rank: 500 },
+    { net: 70, rank: 1500 },
+    { net: 65, rank: 4000 },
+    { net: 60, rank: 8500 },
+    { net: 55, rank: 16000 },
+    { net: 50, rank: 28000 },
+    { net: 45, rank: 45000 },
+    { net: 40, rank: 70000 },
+    { net: 35, rank: 105000 },
+    { net: 30, rank: 150000 },
+    { net: 25, rank: 210000 },
+    { net: 20, rank: 290000 },
+  ];
+
+  const AYT_EA_TABLE = [
+    { net: 75, rank: 400 },
+    { net: 70, rank: 1200 },
+    { net: 65, rank: 3000 },
+    { net: 60, rank: 6500 },
+    { net: 55, rank: 12000 },
+    { net: 50, rank: 22000 },
+    { net: 45, rank: 38000 },
+    { net: 40, rank: 60000 },
+    { net: 35, rank: 90000 },
+    { net: 30, rank: 130000 },
+    { net: 25, rank: 180000 },
+    { net: 20, rank: 240000 },
+  ];
+
+  const AYT_SOZ_TABLE = [
+    { net: 75, rank: 300 },
+    { net: 70, rank: 1000 },
+    { net: 65, rank: 2500 },
+    { net: 60, rank: 5500 },
+    { net: 55, rank: 10000 },
+    { net: 50, rank: 18000 },
+    { net: 45, rank: 30000 },
+    { net: 40, rank: 48000 },
+    { net: 35, rank: 72000 },
+    { net: 30, rank: 105000 },
+    { net: 25, rank: 145000 },
+    { net: 20, rank: 195000 },
+  ];
+
   const tables = {
-    'TYT': { maxNet: 120, base: 3000000 },
-    'AYT_SAY': { maxNet: 80, base: 500000 },
-    'AYT_EA': { maxNet: 80, base: 400000 },
-    'AYT_SOZ': { maxNet: 80, base: 300000 },
+    'TYT': TYT_TABLE,
+    'AYT_SAY': AYT_SAY_TABLE,
+    'AYT_EA': AYT_EA_TABLE,
+    'AYT_SOZ': AYT_SOZ_TABLE,
+    'AYT': AYT_SAY_TABLE,
   };
-  
-  const table = tables[type] || tables['TYT'];
+
+  const table = tables[type] || TYT_TABLE;
   if (!net || net <= 0) return null;
-  
-  const ratio = 1 - (net / table.maxNet);
-  const ranking = Math.max(1, Math.round(ratio * ratio * table.base));
-  return ranking;
+
+  // Tabloda interpolasyon yap
+  for (let i = 0; i < table.length; i++) {
+    if (net >= table[i].net) {
+      if (i === 0) return table[0].rank;
+      // Linear interpolation
+      const higher = table[i - 1];
+      const lower = table[i];
+      const ratio = (net - lower.net) / (higher.net - lower.net);
+      return Math.round(lower.rank - (lower.rank - higher.rank) * ratio);
+    }
+  }
+
+  // Tablonun altındaysa extrapolate et
+  const last = table[table.length - 1];
+  const secondLast = table[table.length - 2];
+  const slope = (last.rank - secondLast.rank) / (secondLast.net - last.net);
+  return Math.round(last.rank + slope * (last.net - net));
 };
 
 const formatRanking = (rank) => {
@@ -216,9 +299,16 @@ function CoachDashboard({ user, stats }) {
 }
 
 // ==================== ÖĞRENCİ DASHBOARD ====================
-function StudentDashboard({ user, stats }) {
+function StudentDashboard({ user, stats, onRefresh }) {
   const navigate = useNavigate();
   const exams = stats?.exams || [];
+
+  // State'ler
+  const [showFieldModal, setShowFieldModal] = useState(false);
+  const [showTargetModal, setShowTargetModal] = useState(false);
+  const [selectedField, setSelectedField] = useState(stats?.exam_goal_type || 'SAY');
+  const [targetInput, setTargetInput] = useState(stats?.target_ranking?.toString() || '');
+  const [saving, setSaving] = useState(false);
 
   const getLatestRankings = () => {
     const types = ['TYT', 'AYT_SAY', 'AYT_EA', 'AYT_SOZ'];
@@ -248,20 +338,174 @@ function StudentDashboard({ user, stats }) {
   const mainAYTType = goalType === 'SAY' ? 'AYT_SAY' : goalType === 'EA' ? 'AYT_EA' : goalType === 'DIL' ? 'YDT' : 'AYT_SOZ';
 
   const goalTypeLabels = {
-    'SAY': { label: 'Sayısal', color: 'from-blue-500 to-indigo-600', emoji: '🔢' },
-    'EA': { label: 'Eşit Ağırlık', color: 'from-emerald-500 to-teal-600', emoji: '⚖️' },
-    'SOZ': { label: 'Sözel', color: 'from-orange-500 to-amber-600', emoji: '📖' },
-    'DIL': { label: 'Yabancı Dil', color: 'from-purple-500 to-pink-600', emoji: '🌍' },
+    'SAY': { label: 'Sayısal', color: 'bg-blue-600', emoji: '🔢' },
+    'EA': { label: 'Eşit Ağırlık', color: 'bg-emerald-600', emoji: '⚖️' },
+    'SOZ': { label: 'Sözel', color: 'bg-rose-600', emoji: '📖' },
+    'DIL': { label: 'Yabancı Dil', color: 'bg-violet-600', emoji: '🌍' },
   };
   const goalInfo = goalTypeLabels[goalType] || goalTypeLabels['SAY'];
 
+  // Alan değiştirme
+  const handleSaveField = async () => {
+    setSaving(true);
+    try {
+      await API.post('/api/student/profile/update/', { exam_goal_type: selectedField });
+      setShowFieldModal(false);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error('Alan güncellenemedi:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Hedef sıralama kaydetme
+  const handleSaveTarget = async () => {
+    setSaving(true);
+    try {
+      await API.post('/api/student/profile/update/', {
+        target_ranking: targetInput ? parseInt(targetInput) : null
+      });
+      setShowTargetModal(false);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error('Hedef güncellenemedi:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Yerleşme sıralaması hesaplama (OBP dahil)
+  const calculatePlacementRanking = () => {
+    if (!rankings.TYT && !rankings[mainAYTType]) return null;
+
+    const tytRank = rankings.TYT?.ranking || 9999999;
+    const aytRank = rankings[mainAYTType]?.ranking || 9999999;
+
+    // OBP etkisi: 100 OBP = %5 iyileştirme, 0 OBP = değişiklik yok
+    const obp = stats?.obp || 0;
+    const obpFactor = 1 - (obp / 100) * 0.05;
+
+    const baseRank = Math.min(tytRank, aytRank);
+    return Math.round(baseRank * obpFactor);
+  };
+
+  const placementRanking = calculatePlacementRanking();
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Alan Değiştirme Modal */}
+      {showFieldModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800">Alan Seçimi</h3>
+              <button onClick={() => setShowFieldModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {Object.entries(goalTypeLabels).map(([key, info]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedField(key)}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    selectedField === key
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <span className="text-2xl block mb-1">{info.emoji}</span>
+                  <span className="font-medium text-gray-800">{info.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowFieldModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleSaveField}
+                disabled={saving}
+                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Kaydet
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hedef Sıralama Modal */}
+      {showTargetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800">Hedef Sıralama</h3>
+              <button onClick={() => setShowTargetModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Hedeflediğin sıralama kaç?
+              </label>
+              <input
+                type="number"
+                value={targetInput}
+                onChange={(e) => setTargetInput(e.target.value)}
+                placeholder="Örn: 10000"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Bu hedef, ilerleme durumunu takip etmene yardımcı olacak
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowTargetModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleSaveTarget}
+                disabled={saving}
+                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Kaydet
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        
+
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
+          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-white">Merhaba, {stats?.name || user?.first_name || 'Öğrenci'}! 📚</h1>
@@ -270,13 +514,18 @@ function StudentDashboard({ user, stats }) {
                 </p>
               </div>
               <div className="hidden md:flex items-center gap-3">
-                {/* Alan Tipi Badge */}
-                <div className={`bg-gradient-to-r ${goalInfo.color} rounded-xl px-4 py-2`}>
+                {/* Alan Tipi Badge - Tıklanabilir */}
+                <button
+                  onClick={() => setShowFieldModal(true)}
+                  className={`${goalInfo.color} rounded-xl px-4 py-2 hover:opacity-90 transition-opacity group`}
+                >
                   <div className="text-white text-center">
-                    <p className="text-xs opacity-80">Alanın</p>
+                    <p className="text-xs opacity-80 flex items-center gap-1 justify-center">
+                      Alanın <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </p>
                     <p className="font-semibold">{goalInfo.emoji} {goalInfo.label}</p>
                   </div>
-                </div>
+                </button>
 
                 {/* Koç Bilgisi */}
                 {stats?.coach && (
@@ -293,10 +542,10 @@ function StudentDashboard({ user, stats }) {
               </div>
             </div>
           </div>
-          
-          {/* Sıralama Kartları */}
+
+          {/* Sıralama Kartları - Uyumlu Renkler */}
           <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+            <div className="bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Trophy size={18} className="opacity-80" />
                 <span className="text-sm font-medium opacity-90">TYT Sıralama</span>
@@ -304,8 +553,8 @@ function StudentDashboard({ user, stats }) {
               <p className="text-2xl font-bold">{rankings.TYT ? formatRanking(rankings.TYT.ranking) : '-'}</p>
               {rankings.TYT && <p className="text-xs opacity-70 mt-1">{rankings.TYT.net} net</p>}
             </div>
-            
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+
+            <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Trophy size={18} className="opacity-80" />
                 <span className="text-sm font-medium opacity-90">AYT Sıralama</span>
@@ -313,21 +562,21 @@ function StudentDashboard({ user, stats }) {
               <p className="text-2xl font-bold">{rankings[mainAYTType] ? formatRanking(rankings[mainAYTType].ranking) : '-'}</p>
               {rankings[mainAYTType] && <p className="text-xs opacity-70 mt-1">{rankings[mainAYTType].net} net</p>}
             </div>
-            
-            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 text-white">
+
+            <div className="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Target size={18} className="opacity-80" />
                 <span className="text-sm font-medium opacity-90">Yerleşme</span>
               </div>
               <p className="text-2xl font-bold">
-                {rankings.TYT && rankings[mainAYTType] 
-                  ? formatRanking(Math.min(rankings.TYT.ranking, rankings[mainAYTType].ranking))
-                  : rankings.TYT ? formatRanking(rankings.TYT.ranking) : '-'}
+                {placementRanking ? formatRanking(placementRanking) : '-'}
               </p>
-              <p className="text-xs opacity-70 mt-1">Tahmini</p>
+              <p className="text-xs opacity-70 mt-1">
+                {stats?.obp ? `OBP: ${stats.obp}` : 'OBP girilmedi'}
+              </p>
             </div>
-            
-            <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl p-4 text-white">
+
+            <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <BarChart3 size={18} className="opacity-80" />
                 <span className="text-sm font-medium opacity-90">Deneme</span>
@@ -447,20 +696,38 @@ function StudentDashboard({ user, stats }) {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 text-white">
+            <div className="bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl p-5 text-white">
               <h3 className="font-semibold flex items-center gap-2 mb-3">
                 <Target size={18} />
                 Hedefin
               </h3>
               <div className="space-y-3">
-                <div className="bg-white/10 rounded-xl p-3">
-                  <p className="text-xs opacity-80">Hedef Sıralama</p>
-                  <p className="text-xl font-bold">{stats?.target_ranking ? formatRanking(stats.target_ranking) : 'Belirtilmedi'}</p>
-                </div>
+                <button
+                  onClick={() => {
+                    setTargetInput(stats?.target_ranking?.toString() || '');
+                    setShowTargetModal(true);
+                  }}
+                  className="w-full bg-white/10 hover:bg-white/20 rounded-xl p-3 text-left transition-colors group"
+                >
+                  <p className="text-xs opacity-80 flex items-center gap-1">
+                    Hedef Sıralama <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </p>
+                  <p className="text-xl font-bold">{stats?.target_ranking ? formatRanking(stats.target_ranking) : 'Düzenle →'}</p>
+                </button>
                 <div className="bg-white/10 rounded-xl p-3">
                   <p className="text-xs opacity-80">Mevcut Durumun</p>
-                  <p className="text-xl font-bold">{rankings.TYT ? formatRanking(rankings.TYT.ranking) : '-'}</p>
+                  <p className="text-xl font-bold">{placementRanking ? formatRanking(placementRanking) : '-'}</p>
                 </div>
+                {stats?.target_ranking && placementRanking && (
+                  <div className="bg-white/10 rounded-xl p-3">
+                    <p className="text-xs opacity-80">Hedefe Uzaklık</p>
+                    <p className={`text-xl font-bold ${placementRanking <= stats.target_ranking ? 'text-green-300' : 'text-amber-300'}`}>
+                      {placementRanking <= stats.target_ranking
+                        ? `🎉 Hedeftesin!`
+                        : `${formatRanking(placementRanking - stats.target_ranking)} sıra`}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -515,5 +782,5 @@ export default function Dashboard() {
   }
 
   const isCoach = stats?.role === 'coach' || localStorage.getItem('role') === 'coach';
-  return isCoach ? <CoachDashboard user={user} stats={stats} /> : <StudentDashboard user={user} stats={stats} />;
+  return isCoach ? <CoachDashboard user={user} stats={stats} /> : <StudentDashboard user={user} stats={stats} onRefresh={fetchData} />;
 }

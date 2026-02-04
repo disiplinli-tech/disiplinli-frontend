@@ -56,29 +56,215 @@ const EXAM_TYPES = [
   { key: 'AYT_SOZ', name: 'AYT Sözel', subjects: AYT_SOZ_SUBJECTS, color: 'orange', maxNet: 80 },
 ];
 
-// Sıralama tahmini
-const estimateRanking = (totalNet, examType) => {
+// YKS 2024 Sıralama Tahmini - Gerçek verilerle
+const estimateRanking = (net, type) => {
+  // 2024 YKS gerçek verileri (kaynak: unirehberi.com)
+  const TYT_TABLE = [
+    { net: 110, rank: 5000 },
+    { net: 105, rank: 12000 },
+    { net: 100, rank: 24521 },
+    { net: 95, rank: 40000 },
+    { net: 90, rank: 57962 },
+    { net: 85, rank: 85000 },
+    { net: 80, rank: 115486 },
+    { net: 75, rank: 155000 },
+    { net: 70, rank: 198012 },
+    { net: 65, rank: 250000 },
+    { net: 60, rank: 310004 },
+    { net: 55, rank: 400000 },
+    { net: 50, rank: 516088 },
+    { net: 45, rank: 650000 },
+    { net: 40, rank: 850000 },
+    { net: 35, rank: 1100000 },
+    { net: 30, rank: 1400000 },
+    { net: 25, rank: 1750000 },
+    { net: 20, rank: 2100000 },
+  ];
+
+  const AYT_SAY_TABLE = [
+    { net: 75, rank: 500 },
+    { net: 70, rank: 1500 },
+    { net: 65, rank: 4000 },
+    { net: 60, rank: 8500 },
+    { net: 55, rank: 16000 },
+    { net: 50, rank: 28000 },
+    { net: 45, rank: 45000 },
+    { net: 40, rank: 70000 },
+    { net: 35, rank: 105000 },
+    { net: 30, rank: 150000 },
+    { net: 25, rank: 210000 },
+    { net: 20, rank: 290000 },
+  ];
+
+  const AYT_EA_TABLE = [
+    { net: 75, rank: 400 },
+    { net: 70, rank: 1200 },
+    { net: 65, rank: 3000 },
+    { net: 60, rank: 6500 },
+    { net: 55, rank: 12000 },
+    { net: 50, rank: 22000 },
+    { net: 45, rank: 38000 },
+    { net: 40, rank: 60000 },
+    { net: 35, rank: 90000 },
+    { net: 30, rank: 130000 },
+    { net: 25, rank: 180000 },
+    { net: 20, rank: 240000 },
+  ];
+
+  const AYT_SOZ_TABLE = [
+    { net: 75, rank: 300 },
+    { net: 70, rank: 1000 },
+    { net: 65, rank: 2500 },
+    { net: 60, rank: 5500 },
+    { net: 55, rank: 10000 },
+    { net: 50, rank: 18000 },
+    { net: 45, rank: 30000 },
+    { net: 40, rank: 48000 },
+    { net: 35, rank: 72000 },
+    { net: 30, rank: 105000 },
+    { net: 25, rank: 145000 },
+    { net: 20, rank: 195000 },
+  ];
+
   const tables = {
-    'TYT': { maxNet: 120, base: 3000000 },
-    'AYT_SAY': { maxNet: 80, base: 500000 },
-    'AYT_EA': { maxNet: 80, base: 400000 },
-    'AYT_SOZ': { maxNet: 80, base: 300000 },
+    'TYT': TYT_TABLE,
+    'AYT_SAY': AYT_SAY_TABLE,
+    'AYT_EA': AYT_EA_TABLE,
+    'AYT_SOZ': AYT_SOZ_TABLE,
+    'AYT': AYT_SAY_TABLE,
   };
-  const table = tables[examType] || tables['TYT'];
-  if (!totalNet || totalNet <= 0) return null;
-  const ratio = 1 - (totalNet / table.maxNet);
-  return Math.max(1, Math.round(ratio * ratio * table.base));
+
+  const table = tables[type] || TYT_TABLE;
+  if (!net || net <= 0) return null;
+
+  // Tabloda interpolasyon yap
+  for (let i = 0; i < table.length; i++) {
+    if (net >= table[i].net) {
+      if (i === 0) return table[0].rank;
+      // Linear interpolation
+      const higher = table[i - 1];
+      const lower = table[i];
+      const ratio = (net - lower.net) / (higher.net - lower.net);
+      return Math.round(lower.rank - (lower.rank - higher.rank) * ratio);
+    }
+  }
+
+  // Tablonun altındaysa extrapolate et
+  const last = table[table.length - 1];
+  const secondLast = table[table.length - 2];
+  const slope = (last.rank - secondLast.rank) / (secondLast.net - last.net);
+  return Math.round(last.rank + slope * (last.net - net));
 };
 
 const formatRanking = (rank) => rank ? rank.toLocaleString('tr-TR') : '-';
 
+// Branş Detayları Component
+function SubjectDetails({ examType, examDate, subjectResults }) {
+  const examInfo = EXAM_TYPES.find(e => e.key === examType);
+  const subjects = examInfo?.subjects || [];
+
+  if (subjectResults.length === 0) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <p className="text-sm text-amber-700 flex items-center gap-2">
+          <span>⚠️</span>
+          Bu deneme için branş detayı kaydedilmemiş. Yeni denemelerde branş bazlı sonuçlar otomatik kaydedilir.
+        </p>
+      </div>
+    );
+  }
+
+  // Branş sonuçlarını subject key'e göre eşleştir
+  const getSubjectResult = (subjectKey) => {
+    return subjectResults.find(r => r.subject === subjectKey);
+  };
+
+  return (
+    <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+      <p className="text-sm font-medium text-gray-700 mb-3">Branş Detayları</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {subjects.map(subject => {
+          const result = getSubjectResult(subject.key);
+          const Icon = subject.icon;
+
+          if (!result) return null;
+
+          const colorClasses = {
+            blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'bg-blue-100 text-blue-600' },
+            green: { bg: 'bg-green-50', border: 'border-green-200', icon: 'bg-green-100 text-green-600' },
+            purple: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'bg-purple-100 text-purple-600' },
+            orange: { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'bg-orange-100 text-orange-600' },
+            pink: { bg: 'bg-pink-50', border: 'border-pink-200', icon: 'bg-pink-100 text-pink-600' },
+            red: { bg: 'bg-red-50', border: 'border-red-200', icon: 'bg-red-100 text-red-600' },
+            teal: { bg: 'bg-teal-50', border: 'border-teal-200', icon: 'bg-teal-100 text-teal-600' },
+            amber: { bg: 'bg-amber-50', border: 'border-amber-200', icon: 'bg-amber-100 text-amber-600' },
+          };
+
+          const colors = colorClasses[subject.color] || colorClasses.blue;
+          const net = result.net || (result.correct - (result.wrong / 4));
+
+          return (
+            <div key={subject.key} className={`${colors.bg} border ${colors.border} rounded-lg p-3`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-lg ${colors.icon} flex items-center justify-center`}>
+                    <Icon size={16} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-800 text-sm">{subject.name}</p>
+                    <p className="text-xs text-gray-500">
+                      <span className="text-green-600">{result.correct}D</span>
+                      {' / '}
+                      <span className="text-red-500">{result.wrong}Y</span>
+                      {result.blank > 0 && <span className="text-gray-400"> / {result.blank}B</span>}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`text-lg font-bold ${net >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                    {net.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-400">net</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bulunamayan branşlar için de sonuçları göster */}
+      {subjectResults
+        .filter(r => !subjects.find(s => s.key === r.subject))
+        .map(result => (
+          <div key={result.id} className="bg-gray-100 border border-gray-200 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-800 text-sm">{result.subject_display || result.subject}</p>
+                <p className="text-xs text-gray-500">
+                  <span className="text-green-600">{result.correct}D</span>
+                  {' / '}
+                  <span className="text-red-500">{result.wrong}Y</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-green-600">{result.net?.toFixed(2) || '-'}</p>
+                <p className="text-xs text-gray-400">net</p>
+              </div>
+            </div>
+          </div>
+        ))}
+    </div>
+  );
+}
+
 export default function Exams() {
   const [exams, setExams] = useState([]);
+  const [subjectResults, setSubjectResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [expandedExam, setExpandedExam] = useState(null);
-  
+
   // Form state
   const [examType, setExamType] = useState('TYT');
   const [examDate, setExamDate] = useState(new Date().toISOString().split('T')[0]);
@@ -86,6 +272,7 @@ export default function Exams() {
 
   useEffect(() => {
     fetchExams();
+    fetchSubjectResults();
   }, []);
 
   const fetchExams = async () => {
@@ -97,6 +284,20 @@ export default function Exams() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchSubjectResults = async () => {
+    try {
+      const res = await API.get("/api/subject-results/");
+      setSubjectResults(res.data || []);
+    } catch (err) {
+      console.error("Branş sonuçları yüklenemedi:", err);
+    }
+  };
+
+  // Bir denemenin branş sonuçlarını getir (tarihe göre)
+  const getExamSubjectResults = (examDate) => {
+    return subjectResults.filter(r => r.date === examDate);
   };
 
   const resetForm = () => {
@@ -553,12 +754,14 @@ export default function Exams() {
                       </div>
                     </div>
                     
-                    {/* Expanded Content - Branş detayları için placeholder */}
+                    {/* Expanded Content - Branş Detayları */}
                     {isExpanded && (
                       <div className="px-5 pb-5">
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <p className="text-sm text-gray-500">Branş detayları yakında eklenecek...</p>
-                        </div>
+                        <SubjectDetails
+                          examType={exam.exam_type}
+                          examDate={exam.date}
+                          subjectResults={getExamSubjectResults(exam.date)}
+                        />
                       </div>
                     )}
                   </div>
