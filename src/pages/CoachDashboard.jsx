@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
-import { 
-  Users, TrendingUp, Calendar, MessageCircle, Award, Eye, 
+import { formatRanking } from "../utils/formatters";
+import {
+  Users, TrendingUp, Calendar, MessageCircle, Award, Eye,
   ChevronRight, Copy, Check, Target, BarChart3, Bell
 } from "lucide-react";
-
-// Sıralama formatla (hesaplama backend'de yapılıyor)
-const formatRanking = (rank) => rank ? rank.toLocaleString('tr-TR') : '-';
 
 export default function CoachDashboard({ user }) {
   const [stats, setStats] = useState(null);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../api";
-import { 
+import { formatRanking } from "../utils/formatters";
+import {
   Plus, X, TrendingUp, Target, Award, ChevronDown, ChevronRight,
   BookOpen, Calculator, FlaskConical, Globe, History, Brain, Check
 } from "lucide-react";
@@ -81,8 +82,6 @@ const estimateRanking = (totalNet, examType) => {
   const ratio = 1 - (totalNet / table.maxNet);
   return Math.max(1, Math.round(ratio * ratio * table.base));
 };
-
-const formatRanking = (rank) => rank ? rank.toLocaleString('tr-TR') : '-';
 
 export default function ExamResults() {
   const [exams, setExams] = useState([]);

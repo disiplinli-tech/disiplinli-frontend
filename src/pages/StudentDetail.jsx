@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api";
-import { 
+import { formatRanking } from "../utils/formatters";
+import {
   ArrowLeft, Mail, Target, TrendingUp, TrendingDown, Minus,
   Calendar, Award, BarChart3, Trophy, MessageCircle
 } from "lucide-react";
-import { 
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, AreaChart, Area
 } from 'recharts';
-
-// Sıralama formatla (backend'den geliyor artık)
-const formatRanking = (rank) => rank ? rank.toLocaleString('tr-TR') : '-';
 
 export default function StudentDetail() {
   const { id } = useParams();

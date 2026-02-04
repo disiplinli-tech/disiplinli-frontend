@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../api";
-import { 
+import { formatRanking } from "../utils/formatters";
+import {
   Plus, X, TrendingUp, Target, Award, ChevronDown, ChevronUp,
   BookOpen, Calculator, FlaskConical, Globe, History, Brain, Check,
   Trophy, Calendar
@@ -156,7 +157,6 @@ const estimateRanking = (net, type) => {
   return Math.round(last.rank + slope * (last.net - net));
 };
 
-const formatRanking = (rank) => rank ? rank.toLocaleString('tr-TR') : '-';
 
 // Branş Detayları Component
 function SubjectDetails({ examType, examDate, subjectResults }) {

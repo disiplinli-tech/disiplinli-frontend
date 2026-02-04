@@ -1,37 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
-import { 
+import { formatRanking } from "../utils/formatters";
+import {
   TrendingUp, Target, Award, BookOpen, Calendar, MessageCircle,
   ChevronRight, Trophy, Zap, BarChart3, Clock, CheckCircle
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart
 } from 'recharts';
-
-// YKS Sıralama Tahmini (2024 verileri baz alınarak)
-const estimateRanking = (net, type) => {
-  // Basit tahmin formülü - gerçek verilerle güncellenecek
-  const tables = {
-    'TYT': { maxNet: 120, base: 3000000 },      // ~3M kişi giriyor
-    'AYT_SAY': { maxNet: 80, base: 500000 },    // ~500K sayısal
-    'AYT_EA': { maxNet: 80, base: 400000 },     // ~400K EA
-    'AYT_SOZ': { maxNet: 80, base: 300000 },    // ~300K Sözel
-  };
-  
-  const table = tables[type] || tables['TYT'];
-  if (!net || net <= 0) return null;
-  
-  const ratio = 1 - (net / table.maxNet);
-  const ranking = Math.max(1, Math.round(ratio * ratio * table.base));
-  return ranking;
-};
-
-// Sıralama formatı
-const formatRanking = (rank) => {
-  if (!rank) return '-';
-  return rank.toLocaleString('tr-TR');
-};
 
 export default function StudentDashboard({ user }) {
   const [stats, setStats] = useState(null);

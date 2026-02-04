@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
+import { formatRanking } from "../utils/formatters";
 import {
   TrendingUp, Target, Award, Calendar, MessageCircle,
   ChevronRight, Trophy, Zap, BarChart3, CheckCircle, Users,
@@ -9,12 +10,6 @@ import {
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
-
-// Sıralama formatla (hesaplama backend'de yapılıyor)
-const formatRanking = (rank) => {
-  if (!rank) return '-';
-  return rank.toLocaleString('tr-TR');
-};
 
 // ==================== KOÇ DASHBOARD ====================
 function CoachDashboard({ user, stats }) {

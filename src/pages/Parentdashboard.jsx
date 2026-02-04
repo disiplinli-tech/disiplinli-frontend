@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import API from '../api';
-import { 
-  Trophy, Target, TrendingUp, Calendar, BookOpen, User, 
+import { formatRanking, formatDate } from '../utils/formatters';
+import {
+  Trophy, Target, TrendingUp, Calendar, BookOpen, User,
   GraduationCap, Clock, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -22,19 +23,13 @@ export default function ParentDashboard() {
       setData(res.data);
       setError(null);
     } catch (err) {
-      console.error('Parent dashboard error:', err);
       setError(err.response?.data?.error || 'Veriler yüklenemedi.');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatRanking = (ranking) => {
-    if (!ranking) return '-';
-    return ranking.toLocaleString('tr-TR');
-  };
-
-  const formatDate = (dateStr) => {
+  const formatDateLocal = (dateStr) => {
     if (!dateStr) return '-';
     const date = new Date(dateStr);
     return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
