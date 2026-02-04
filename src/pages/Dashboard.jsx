@@ -305,9 +305,11 @@ function StudentDashboard({ user, stats, onRefresh }) {
 
   // State'ler
   const [showTargetModal, setShowTargetModal] = useState(false);
+  const [showOBPModal, setShowOBPModal] = useState(false);
   const [targetInput, setTargetInput] = useState(stats?.target_ranking?.toString() || '');
   const [targetUniversity, setTargetUniversity] = useState(stats?.target_university || '');
   const [targetDepartment, setTargetDepartment] = useState(stats?.target_department || '');
+  const [obpInput, setObpInput] = useState(stats?.obp?.toString() || '');
   const [saving, setSaving] = useState(false);
 
   // Tüm denemelerin ORTALAMASINA göre sıralama hesapla
@@ -358,6 +360,22 @@ function StudentDashboard({ user, stats, onRefresh }) {
       if (onRefresh) onRefresh();
     } catch (err) {
       console.error('Hedef güncellenemedi:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // OBP kaydetme
+  const handleSaveOBP = async () => {
+    setSaving(true);
+    try {
+      await API.post('/api/student/profile/update/', {
+        obp: obpInput ? parseFloat(obpInput) : null
+      });
+      setShowOBPModal(false);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error('OBP güncellenemedi:', err);
     } finally {
       setSaving(false);
     }
@@ -460,6 +478,62 @@ function StudentDashboard({ user, stats, onRefresh }) {
         </div>
       )}
 
+      {/* OBP Modal */}
+      {showOBPModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800">📊 OBP Gir</h3>
+              <button onClick={() => setShowOBPModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ortaöğretim Başarı Puanı
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={obpInput}
+                onChange={(e) => setObpInput(e.target.value)}
+                placeholder="Örn: 85.50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg"
+                min="0"
+                max="100"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Diploma notunuzu 5 ile çarparak bulabilirsiniz. (Örn: 85 × 5 = 425 değil, 85.00 girin)
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowOBPModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleSaveOBP}
+                disabled={saving}
+                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Kaydet
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
         {/* Header */}
@@ -473,6 +547,20 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 </p>
               </div>
               <div className="hidden md:flex items-center gap-3">
+                {/* OBP Girişi */}
+                <button
+                  onClick={() => {
+                    setObpInput(stats?.obp?.toString() || '');
+                    setShowOBPModal(true);
+                  }}
+                  className="bg-white/10 hover:bg-white/20 rounded-xl px-4 py-2 text-white transition-colors group"
+                >
+                  <p className="text-xs opacity-80 flex items-center gap-1">
+                    OBP <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </p>
+                  <p className="font-semibold">{stats?.obp ? stats.obp.toFixed(2) : 'Gir →'}</p>
+                </button>
+
                 {/* Koç Bilgisi */}
                 {stats?.coach && (
                   <div className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2">
@@ -517,7 +605,9 @@ function StudentDashboard({ user, stats, onRefresh }) {
               <p className="text-2xl font-bold">
                 {placementRanking ? formatRanking(placementRanking) : '-'}
               </p>
-              <p className="text-xs opacity-70 mt-1">Ortalama netlere göre</p>
+              <p className="text-xs opacity-70 mt-1">
+                {stats?.obp ? `OBP: ${stats.obp}` : 'OBP girilmedi'}
+              </p>
             </div>
 
             <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl p-4 text-white">
