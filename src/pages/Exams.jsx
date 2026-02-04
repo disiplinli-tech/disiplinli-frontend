@@ -468,8 +468,8 @@ export default function Exams() {
                 <Target size={18} className="opacity-80" />
                 <span className="text-sm opacity-90">Tahmini Sıralama</span>
               </div>
-              <p className="text-2xl font-bold">{stats.tytMax ? formatRanking(estimateRanking(stats.tytMax, 'TYT')) : '-'}</p>
-              <p className="text-xs opacity-70 mt-1">En iyi TYT'ye göre</p>
+              <p className="text-2xl font-bold">{stats.tytAvg ? formatRanking(estimateRanking(parseFloat(stats.tytAvg), 'TYT')) : '-'}</p>
+              <p className="text-xs opacity-70 mt-1">TYT ortalamasına göre</p>
             </div>
             
             <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl p-4 text-white">
