@@ -10,106 +10,7 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
 
-// YKS 2024 Sıralama Tahmini - Gerçek verilerle
-const estimateRanking = (net, type) => {
-  // 2024 YKS gerçek verileri (kaynak: unirehberi.com)
-  const TYT_TABLE = [
-    { net: 110, rank: 5000 },
-    { net: 105, rank: 12000 },
-    { net: 100, rank: 24521 },
-    { net: 95, rank: 40000 },
-    { net: 90, rank: 57962 },
-    { net: 85, rank: 85000 },
-    { net: 80, rank: 115486 },
-    { net: 75, rank: 155000 },
-    { net: 70, rank: 198012 },
-    { net: 65, rank: 250000 },
-    { net: 60, rank: 310004 },
-    { net: 55, rank: 400000 },
-    { net: 50, rank: 516088 },
-    { net: 45, rank: 650000 },
-    { net: 40, rank: 850000 },
-    { net: 35, rank: 1100000 },
-    { net: 30, rank: 1400000 },
-    { net: 25, rank: 1750000 },
-    { net: 20, rank: 2100000 },
-  ];
-
-  const AYT_SAY_TABLE = [
-    { net: 75, rank: 500 },
-    { net: 70, rank: 1500 },
-    { net: 65, rank: 4000 },
-    { net: 60, rank: 8500 },
-    { net: 55, rank: 16000 },
-    { net: 50, rank: 28000 },
-    { net: 45, rank: 45000 },
-    { net: 40, rank: 70000 },
-    { net: 35, rank: 105000 },
-    { net: 30, rank: 150000 },
-    { net: 25, rank: 210000 },
-    { net: 20, rank: 290000 },
-  ];
-
-  const AYT_EA_TABLE = [
-    { net: 75, rank: 400 },
-    { net: 70, rank: 1200 },
-    { net: 65, rank: 3000 },
-    { net: 60, rank: 6500 },
-    { net: 55, rank: 12000 },
-    { net: 50, rank: 22000 },
-    { net: 45, rank: 38000 },
-    { net: 40, rank: 60000 },
-    { net: 35, rank: 90000 },
-    { net: 30, rank: 130000 },
-    { net: 25, rank: 180000 },
-    { net: 20, rank: 240000 },
-  ];
-
-  const AYT_SOZ_TABLE = [
-    { net: 75, rank: 300 },
-    { net: 70, rank: 1000 },
-    { net: 65, rank: 2500 },
-    { net: 60, rank: 5500 },
-    { net: 55, rank: 10000 },
-    { net: 50, rank: 18000 },
-    { net: 45, rank: 30000 },
-    { net: 40, rank: 48000 },
-    { net: 35, rank: 72000 },
-    { net: 30, rank: 105000 },
-    { net: 25, rank: 145000 },
-    { net: 20, rank: 195000 },
-  ];
-
-  const tables = {
-    'TYT': TYT_TABLE,
-    'AYT_SAY': AYT_SAY_TABLE,
-    'AYT_EA': AYT_EA_TABLE,
-    'AYT_SOZ': AYT_SOZ_TABLE,
-    'AYT': AYT_SAY_TABLE,
-  };
-
-  const table = tables[type] || TYT_TABLE;
-  if (!net || net <= 0) return null;
-
-  // Tabloda interpolasyon yap
-  for (let i = 0; i < table.length; i++) {
-    if (net >= table[i].net) {
-      if (i === 0) return table[0].rank;
-      // Linear interpolation
-      const higher = table[i - 1];
-      const lower = table[i];
-      const ratio = (net - lower.net) / (higher.net - lower.net);
-      return Math.round(lower.rank - (lower.rank - higher.rank) * ratio);
-    }
-  }
-
-  // Tablonun altındaysa extrapolate et
-  const last = table[table.length - 1];
-  const secondLast = table[table.length - 2];
-  const slope = (last.rank - secondLast.rank) / (secondLast.net - last.net);
-  return Math.round(last.rank + slope * (last.net - net));
-};
-
+// Sıralama formatla (hesaplama backend'de yapılıyor)
 const formatRanking = (rank) => {
   if (!rank) return '-';
   return rank.toLocaleString('tr-TR');
@@ -243,7 +144,7 @@ function CoachDashboard({ user, stats }) {
             ) : (
               sortedStudents.map((student, idx) => {
                 const lastNet = student.last_tyt_net;
-                const ranking = estimateRanking(lastNet, 'TYT');
+                const ranking = student.estimated_ranking;  // Backend'den geliyor
                 const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
                 
                 return (
@@ -322,9 +223,11 @@ function StudentDashboard({ user, stats, onRefresh }) {
         // Ortalama net hesapla
         const avgNet = typeExams.reduce((sum, e) => sum + e.net_score, 0) / typeExams.length;
         const roundedNet = Math.round(avgNet * 10) / 10;
+        // Ortalama sıralama hesapla (backend'den gelen sıralamaların ortalaması)
+        const avgRanking = Math.round(typeExams.reduce((sum, e) => sum + (e.estimated_ranking || 0), 0) / typeExams.length);
         rankings[type] = {
           net: roundedNet,
-          ranking: estimateRanking(roundedNet, type),
+          ranking: avgRanking || null,
           count: typeExams.length
         };
       }
@@ -337,7 +240,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
     return tytExams.map(e => ({
       date: new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
       net: e.net_score,
-      ranking: estimateRanking(e.net_score, 'TYT')
+      ranking: e.estimated_ranking  // Backend'den geliyor
     }));
   };
 
@@ -683,8 +586,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
                   {exams.slice(0, 5).map((exam, idx) => {
                     const typeLabels = { 'TYT': { name: 'TYT', color: 'blue' }, 'AYT_SAY': { name: 'AYT Sayısal', color: 'purple' }, 'AYT_EA': { name: 'AYT EA', color: 'green' }, 'AYT_SOZ': { name: 'AYT Sözel', color: 'orange' } };
                     const info = typeLabels[exam.exam_type] || { name: exam.exam_type, color: 'gray' };
-                    const ranking = estimateRanking(exam.net_score, exam.exam_type);
-                    
+
                     return (
                       <div key={idx} className="p-4 flex items-center justify-between hover:bg-gray-50">
                         <div className="flex items-center gap-3">
@@ -698,7 +600,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-gray-800">{exam.net_score} net</p>
-                          {ranking && <p className="text-xs text-indigo-600">~{formatRanking(ranking)}</p>}
+                          {exam.estimated_ranking && <p className="text-xs text-indigo-600">~{formatRanking(exam.estimated_ranking)}</p>}
                         </div>
                       </div>
                     );
