@@ -551,10 +551,10 @@ function StudentDashboard({ user, stats, onRefresh }) {
             <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-1">
                 <Award size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">AYT Deneme</span>
+                <span className="text-sm opacity-90">Deneme</span>
               </div>
-              <p className="text-3xl font-bold">{examStats.aytCount}</p>
-              <p className="text-xs opacity-70 mt-1">Toplam AYT</p>
+              <p className="text-3xl font-bold">{exams.length}</p>
+              <p className="text-xs opacity-70 mt-1">Toplam deneme</p>
             </div>
           </div>
         </div>
