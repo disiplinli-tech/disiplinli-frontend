@@ -192,24 +192,34 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
 
             {/* Alan Seçim Menüsü */}
             {showFieldMenu && !collapsed && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
-                {Object.entries(goalTypeLabels).map(([key, info]) => (
-                  <button
-                    key={key}
-                    onClick={() => handleFieldChange(key)}
-                    disabled={savingField}
-                    className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${studentField === key ? 'bg-green-50 text-green-700' : 'text-gray-700'}`}
-                  >
-                    <span>{info.emoji}</span>
-                    <span className="text-sm font-medium">{info.label}</span>
-                    {studentField === key && (
-                      <svg className="w-4 h-4 ml-auto text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-              </div>
+              <>
+                {/* Backdrop - dışarı tıklayınca kapat */}
+                <div
+                  className="fixed inset-0 z-[100]"
+                  onClick={() => setShowFieldMenu(false)}
+                />
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-[101]">
+                  {Object.entries(goalTypeLabels).map(([key, info]) => (
+                    <button
+                      key={key}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFieldChange(key);
+                      }}
+                      disabled={savingField}
+                      className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${studentField === key ? 'bg-green-50 text-green-700' : 'text-gray-700'}`}
+                    >
+                      <span>{info.emoji}</span>
+                      <span className="text-sm font-medium">{info.label}</span>
+                      {studentField === key && (
+                        <svg className="w-4 h-4 ml-auto text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
