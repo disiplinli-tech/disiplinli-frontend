@@ -304,20 +304,27 @@ function StudentDashboard({ user, stats, onRefresh }) {
   const exams = stats?.exams || [];
 
   // State'ler
-  const [showFieldModal, setShowFieldModal] = useState(false);
   const [showTargetModal, setShowTargetModal] = useState(false);
-  const [selectedField, setSelectedField] = useState(stats?.exam_goal_type || 'SAY');
   const [targetInput, setTargetInput] = useState(stats?.target_ranking?.toString() || '');
+  const [targetUniversity, setTargetUniversity] = useState(stats?.target_university || '');
+  const [targetDepartment, setTargetDepartment] = useState(stats?.target_department || '');
   const [saving, setSaving] = useState(false);
 
-  const getLatestRankings = () => {
+  // Tüm denemelerin ORTALAMASINA göre sıralama hesapla
+  const getAverageRankings = () => {
     const types = ['TYT', 'AYT_SAY', 'AYT_EA', 'AYT_SOZ'];
     const rankings = {};
     types.forEach(type => {
       const typeExams = exams.filter(e => e.exam_type === type);
       if (typeExams.length > 0) {
-        const latest = typeExams[0];
-        rankings[type] = { net: latest.net_score, ranking: estimateRanking(latest.net_score, type), date: latest.date };
+        // Ortalama net hesapla
+        const avgNet = typeExams.reduce((sum, e) => sum + e.net_score, 0) / typeExams.length;
+        const roundedNet = Math.round(avgNet * 10) / 10;
+        rankings[type] = {
+          net: roundedNet,
+          ranking: estimateRanking(roundedNet, type),
+          count: typeExams.length
+        };
       }
     });
     return rankings;
@@ -332,40 +339,21 @@ function StudentDashboard({ user, stats, onRefresh }) {
     }));
   };
 
-  const rankings = getLatestRankings();
+  const rankings = getAverageRankings();
   const chartData = prepareChartData();
   const goalType = stats?.exam_goal_type || 'SAY';
   const mainAYTType = goalType === 'SAY' ? 'AYT_SAY' : goalType === 'EA' ? 'AYT_EA' : goalType === 'DIL' ? 'YDT' : 'AYT_SOZ';
 
-  const goalTypeLabels = {
-    'SAY': { label: 'Sayısal', color: 'bg-blue-600', emoji: '🔢' },
-    'EA': { label: 'Eşit Ağırlık', color: 'bg-emerald-600', emoji: '⚖️' },
-    'SOZ': { label: 'Sözel', color: 'bg-rose-600', emoji: '📖' },
-    'DIL': { label: 'Yabancı Dil', color: 'bg-violet-600', emoji: '🌍' },
-  };
-  const goalInfo = goalTypeLabels[goalType] || goalTypeLabels['SAY'];
-
-  // Alan değiştirme
-  const handleSaveField = async () => {
-    setSaving(true);
-    try {
-      await API.post('/api/student/profile/update/', { exam_goal_type: selectedField });
-      setShowFieldModal(false);
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      console.error('Alan güncellenemedi:', err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Hedef sıralama kaydetme
+  // Hedef kaydetme (sıralama + üniversite + bölüm)
   const handleSaveTarget = async () => {
     setSaving(true);
     try {
-      await API.post('/api/student/profile/update/', {
-        target_ranking: targetInput ? parseInt(targetInput) : null
-      });
+      const data = {};
+      if (targetInput) data.target_ranking = parseInt(targetInput);
+      if (targetUniversity) data.target_university = targetUniversity;
+      if (targetDepartment) data.target_department = targetDepartment;
+
+      await API.post('/api/student/profile/update/', data);
       setShowTargetModal(false);
       if (onRefresh) onRefresh();
     } catch (err) {
@@ -394,85 +382,56 @@ function StudentDashboard({ user, stats, onRefresh }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Alan Değiştirme Modal */}
-      {showFieldModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-800">Alan Seçimi</h3>
-              <button onClick={() => setShowFieldModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X size={20} className="text-gray-500" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              {Object.entries(goalTypeLabels).map(([key, info]) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedField(key)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    selectedField === key
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <span className="text-2xl block mb-1">{info.emoji}</span>
-                  <span className="font-medium text-gray-800">{info.label}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowFieldModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
-              >
-                İptal
-              </button>
-              <button
-                onClick={handleSaveField}
-                disabled={saving}
-                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {saving ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Save size={18} />
-                    Kaydet
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hedef Sıralama Modal */}
+      {/* Hedef Modal - Sıralama + Üniversite + Bölüm */}
       {showTargetModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-800">Hedef Sıralama</h3>
+              <h3 className="text-xl font-bold text-gray-800">🎯 Hedefini Belirle</h3>
               <button onClick={() => setShowTargetModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hedeflediğin sıralama kaç?
-              </label>
-              <input
-                type="number"
-                value={targetInput}
-                onChange={(e) => setTargetInput(e.target.value)}
-                placeholder="Örn: 10000"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Bu hedef, ilerleme durumunu takip etmene yardımcı olacak
-              </p>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hedef Sıralama
+                </label>
+                <input
+                  type="number"
+                  value={targetInput}
+                  onChange={(e) => setTargetInput(e.target.value)}
+                  placeholder="Örn: 10000"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hedef Üniversite
+                </label>
+                <input
+                  type="text"
+                  value={targetUniversity}
+                  onChange={(e) => setTargetUniversity(e.target.value)}
+                  placeholder="Örn: İstanbul Teknik Üniversitesi"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hedef Bölüm
+                </label>
+                <input
+                  type="text"
+                  value={targetDepartment}
+                  onChange={(e) => setTargetDepartment(e.target.value)}
+                  placeholder="Örn: Bilgisayar Mühendisliği"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -514,19 +473,6 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 </p>
               </div>
               <div className="hidden md:flex items-center gap-3">
-                {/* Alan Tipi Badge - Tıklanabilir */}
-                <button
-                  onClick={() => setShowFieldModal(true)}
-                  className={`${goalInfo.color} rounded-xl px-4 py-2 hover:opacity-90 transition-opacity group`}
-                >
-                  <div className="text-white text-center">
-                    <p className="text-xs opacity-80 flex items-center gap-1 justify-center">
-                      Alanın <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </p>
-                    <p className="font-semibold">{goalInfo.emoji} {goalInfo.label}</p>
-                  </div>
-                </button>
-
                 {/* Koç Bilgisi */}
                 {stats?.coach && (
                   <div className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2">
@@ -543,7 +489,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
             </div>
           </div>
 
-          {/* Sıralama Kartları - Uyumlu Renkler */}
+          {/* Sıralama Kartları */}
           <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-2">
@@ -551,7 +497,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 <span className="text-sm font-medium opacity-90">TYT Sıralama</span>
               </div>
               <p className="text-2xl font-bold">{rankings.TYT ? formatRanking(rankings.TYT.ranking) : '-'}</p>
-              {rankings.TYT && <p className="text-xs opacity-70 mt-1">{rankings.TYT.net} net</p>}
+              {rankings.TYT && <p className="text-xs opacity-70 mt-1">Ort: {rankings.TYT.net} net ({rankings.TYT.count} deneme)</p>}
             </div>
 
             <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-4 text-white">
@@ -560,20 +506,18 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 <span className="text-sm font-medium opacity-90">AYT Sıralama</span>
               </div>
               <p className="text-2xl font-bold">{rankings[mainAYTType] ? formatRanking(rankings[mainAYTType].ranking) : '-'}</p>
-              {rankings[mainAYTType] && <p className="text-xs opacity-70 mt-1">{rankings[mainAYTType].net} net</p>}
+              {rankings[mainAYTType] && <p className="text-xs opacity-70 mt-1">Ort: {rankings[mainAYTType].net} net ({rankings[mainAYTType].count} deneme)</p>}
             </div>
 
-            <div className="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl p-4 text-white">
+            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Target size={18} className="opacity-80" />
-                <span className="text-sm font-medium opacity-90">Yerleşme</span>
+                <span className="text-sm font-medium opacity-90">Tahmini Yerleşme</span>
               </div>
               <p className="text-2xl font-bold">
                 {placementRanking ? formatRanking(placementRanking) : '-'}
               </p>
-              <p className="text-xs opacity-70 mt-1">
-                {stats?.obp ? `OBP: ${stats.obp}` : 'OBP girilmedi'}
-              </p>
+              <p className="text-xs opacity-70 mt-1">Ortalama netlere göre</p>
             </div>
 
             <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl p-4 text-white">
@@ -701,34 +645,53 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 <Target size={18} />
                 Hedefin
               </h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    setTargetInput(stats?.target_ranking?.toString() || '');
-                    setShowTargetModal(true);
-                  }}
-                  className="w-full bg-white/10 hover:bg-white/20 rounded-xl p-3 text-left transition-colors group"
-                >
-                  <p className="text-xs opacity-80 flex items-center gap-1">
-                    Hedef Sıralama <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </p>
-                  <p className="text-xl font-bold">{stats?.target_ranking ? formatRanking(stats.target_ranking) : 'Düzenle →'}</p>
-                </button>
-                <div className="bg-white/10 rounded-xl p-3">
-                  <p className="text-xs opacity-80">Mevcut Durumun</p>
-                  <p className="text-xl font-bold">{placementRanking ? formatRanking(placementRanking) : '-'}</p>
-                </div>
-                {stats?.target_ranking && placementRanking && (
+              <button
+                onClick={() => {
+                  setTargetInput(stats?.target_ranking?.toString() || '');
+                  setTargetUniversity(stats?.target_university || '');
+                  setTargetDepartment(stats?.target_department || '');
+                  setShowTargetModal(true);
+                }}
+                className="w-full text-left hover:bg-white/5 rounded-xl p-1 -m-1 transition-colors group"
+              >
+                <div className="space-y-3">
+                  {/* Üniversite */}
                   <div className="bg-white/10 rounded-xl p-3">
-                    <p className="text-xs opacity-80">Hedefe Uzaklık</p>
-                    <p className={`text-xl font-bold ${placementRanking <= stats.target_ranking ? 'text-green-300' : 'text-amber-300'}`}>
-                      {placementRanking <= stats.target_ranking
-                        ? `🎉 Hedeftesin!`
-                        : `${formatRanking(placementRanking - stats.target_ranking)} sıra`}
+                    <p className="text-xs opacity-80 flex items-center gap-1">
+                      🏛️ Üniversite <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                     </p>
+                    <p className="font-semibold truncate">{stats?.target_university || 'Belirle →'}</p>
                   </div>
-                )}
-              </div>
+
+                  {/* Bölüm */}
+                  <div className="bg-white/10 rounded-xl p-3">
+                    <p className="text-xs opacity-80 flex items-center gap-1">
+                      📚 Bölüm <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </p>
+                    <p className="font-semibold truncate">{stats?.target_department || 'Belirle →'}</p>
+                  </div>
+
+                  {/* Hedef Sıralama */}
+                  <div className="bg-white/10 rounded-xl p-3">
+                    <p className="text-xs opacity-80 flex items-center gap-1">
+                      🎯 Hedef Sıralama <Edit2 size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </p>
+                    <p className="text-xl font-bold">{stats?.target_ranking ? formatRanking(stats.target_ranking) : 'Belirle →'}</p>
+                  </div>
+
+                  {/* Hedefe Uzaklık */}
+                  {stats?.target_ranking && placementRanking && (
+                    <div className="bg-white/10 rounded-xl p-3">
+                      <p className="text-xs opacity-80">Hedefe Uzaklık</p>
+                      <p className={`text-xl font-bold ${placementRanking <= stats.target_ranking ? 'text-green-300' : 'text-amber-300'}`}>
+                        {placementRanking <= stats.target_ranking
+                          ? `🎉 Hedeftesin!`
+                          : `${formatRanking(placementRanking - stats.target_ranking)} sıra`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </button>
             </div>
 
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">

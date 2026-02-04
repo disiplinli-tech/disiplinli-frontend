@@ -50,7 +50,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     if (role === 'student') {
       const loadStudentField = async () => {
         try {
-          const res = await API.get('/api/student/dashboard/');
+          const res = await API.get('/api/dashboard/');
           if (res.data?.exam_goal_type) {
             setStudentField(res.data.exam_goal_type);
             localStorage.setItem('exam_goal_type', res.data.exam_goal_type);
@@ -105,11 +105,11 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const studentMenuItems = [
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
-    { icon: Calculator, label: 'Sıralama Hesapla', path: '/ranking-calculator' },
     { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
     { icon: Calendar, label: 'Programım', path: '/schedule' },
+    { icon: Calculator, label: 'Sıralama Hesapla', path: '/ranking-calculator' },
     { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
   ];
 
@@ -173,7 +173,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
           <div className="relative">
             <button
               onClick={() => setShowFieldMenu(!showFieldMenu)}
-              className={`w-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-2.5 text-white hover:from-emerald-600 hover:to-teal-600 transition-all ${collapsed ? 'p-2' : ''}`}
+              className={`w-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-2.5 text-white hover:from-green-600 hover:to-emerald-700 transition-all ${collapsed ? 'p-2' : ''}`}
             >
               <div className="flex items-center justify-center gap-2">
                 {collapsed ? (
@@ -198,12 +198,12 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
                     key={key}
                     onClick={() => handleFieldChange(key)}
                     disabled={savingField}
-                    className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${studentField === key ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700'}`}
+                    className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${studentField === key ? 'bg-green-50 text-green-700' : 'text-gray-700'}`}
                   >
                     <span>{info.emoji}</span>
                     <span className="text-sm font-medium">{info.label}</span>
                     {studentField === key && (
-                      <svg className="w-4 h-4 ml-auto text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 ml-auto text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
