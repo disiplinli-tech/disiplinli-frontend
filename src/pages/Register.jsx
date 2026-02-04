@@ -64,7 +64,7 @@ function KvkkModal({ isOpen, onClose }) {
             {/* Kritik Uyarı - GİB için önemli */}
             <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 mt-4">
               <p className="text-sm text-amber-800">
-                📌 <strong>Not:</strong> KoçumNet bir "eşleştirme sitesi" değil. Koçluk hizmetini doğrudan biz sunuyoruz.
+                📌 <strong>Not:</strong> KoçumNet bir aracı kurum değildir.
               </p>
             </div>
           </section>
@@ -196,7 +196,7 @@ export default function Register() {
       return;
     }
     if (!kvkkAccepted) {
-      setError("Devam etmek için Kullanıcı Sözleşmesi'ni kabul etmelisiniz.");
+      setError("Devam etmek için Gizlilik ve Kullanım Koşullarını kabul etmelisiniz.");
       return;
     }
 
@@ -422,9 +422,9 @@ export default function Register() {
                   setShowKvkkModal(true);
                 }}
               >
-                Kullanıcı Sözleşmesi
+                Gizlilik ve Kullanım Koşulları
               </button>
-              'ni ve Aydınlatma Metni'ni okudum, kabul ediyorum.
+              'nı okudum, kabul ediyorum. 18 yaşından küçüksem velimin onayıyla kayıt oluyorum.
             </p>
           </div>
 
