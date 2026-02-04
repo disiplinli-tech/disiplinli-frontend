@@ -436,7 +436,7 @@ function StudentDashboard({ user, stats }) {
               <div className="space-y-3">
                 <div className="bg-white/10 rounded-xl p-3">
                   <p className="text-xs opacity-80">Hedef Sıralama</p>
-                  <p className="text-xl font-bold">{stats?.target_ranking ? formatRanking(stats.target_ranking) : '50.000'}</p>
+                  <p className="text-xl font-bold">{stats?.target_ranking ? formatRanking(stats.target_ranking) : 'Belirtilmedi'}</p>
                 </div>
                 <div className="bg-white/10 rounded-xl p-3">
                   <p className="text-xs opacity-80">Mevcut Durumun</p>

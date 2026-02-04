@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList, 
-  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu
+import {
+  LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
+  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video
 } from 'lucide-react';
 
 // Auth Sayfaları
@@ -21,6 +21,7 @@ import Exams from './pages/Exams';
 import Assignments from './pages/Assignments';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
+import OnlineLessons from './pages/OnlineLessons';
 import API from './api';
 
 // ==================== SIDEBAR ====================
@@ -44,6 +45,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const coachMenuItems = [
     { icon: LayoutDashboard, label: 'Koç Paneli', path: '/dashboard' },
     { icon: Users, label: 'Öğrenciler', path: '/students' },
+    { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
     { icon: Calendar, label: 'Takvim', path: '/schedule' },
@@ -54,6 +56,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const studentMenuItems = [
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
+    { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
     { icon: Calendar, label: 'Programım', path: '/schedule' },
@@ -309,7 +312,8 @@ function App() {
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        
+        <Route path="/lessons" element={<ProtectedRoute><OnlineLessons /></ProtectedRoute>} />
+
         {/* ===== 404 ===== */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
