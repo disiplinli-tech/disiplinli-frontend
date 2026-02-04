@@ -25,12 +25,60 @@ import OnlineLessons from './pages/OnlineLessons';
 import RankingCalculator from './pages/RankingCalculator';
 import API from './api';
 
+// Alan Tipleri
+const goalTypeLabels = {
+  'SAY': { label: 'Sayısal', emoji: '🔢' },
+  'EA': { label: 'Eşit Ağırlık', emoji: '⚖️' },
+  'SOZ': { label: 'Sözel', emoji: '📖' },
+  'DIL': { label: 'Yabancı Dil', emoji: '🌍' },
+};
+
 // ==================== SIDEBAR ====================
 function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
   const role = localStorage.getItem('role') || 'student';
   const userName = localStorage.getItem('user') || 'Kullanıcı';
+
+  // Öğrenci için alan bilgisi
+  const [studentField, setStudentField] = useState(localStorage.getItem('exam_goal_type') || 'SAY');
+  const [showFieldMenu, setShowFieldMenu] = useState(false);
+  const [savingField, setSavingField] = useState(false);
+
+  // Öğrenci alanını yükle
+  useEffect(() => {
+    if (role === 'student') {
+      const loadStudentField = async () => {
+        try {
+          const res = await API.get('/api/student/dashboard/');
+          if (res.data?.exam_goal_type) {
+            setStudentField(res.data.exam_goal_type);
+            localStorage.setItem('exam_goal_type', res.data.exam_goal_type);
+          }
+        } catch (err) {
+          // Hata olsa da devam et
+        }
+      };
+      loadStudentField();
+    }
+  }, [role]);
+
+  // Alan değiştir
+  const handleFieldChange = async (newField) => {
+    setSavingField(true);
+    try {
+      await API.post('/api/student/profile/update/', { exam_goal_type: newField });
+      setStudentField(newField);
+      localStorage.setItem('exam_goal_type', newField);
+      setShowFieldMenu(false);
+      // Sayfayı yenile
+      window.location.reload();
+    } catch (err) {
+      console.error('Alan değiştirilemedi:', err);
+    } finally {
+      setSavingField(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -118,6 +166,54 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
           </div>
         </div>
       </div>
+
+      {/* Alan Seçimi - Sadece Öğrenciler İçin */}
+      {role === 'student' && (
+        <div className={`px-4 pb-3 ${collapsed ? 'px-2' : ''}`}>
+          <div className="relative">
+            <button
+              onClick={() => setShowFieldMenu(!showFieldMenu)}
+              className={`w-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-2.5 text-white hover:from-emerald-600 hover:to-teal-600 transition-all ${collapsed ? 'p-2' : ''}`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                {collapsed ? (
+                  <span className="text-lg">{goalTypeLabels[studentField]?.emoji || '🔢'}</span>
+                ) : (
+                  <>
+                    <span className="text-base">{goalTypeLabels[studentField]?.emoji || '🔢'}</span>
+                    <span className="font-medium text-sm">{goalTypeLabels[studentField]?.label || 'Sayısal'}</span>
+                    <svg className={`w-4 h-4 transition-transform ${showFieldMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </>
+                )}
+              </div>
+            </button>
+
+            {/* Alan Seçim Menüsü */}
+            {showFieldMenu && !collapsed && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                {Object.entries(goalTypeLabels).map(([key, info]) => (
+                  <button
+                    key={key}
+                    onClick={() => handleFieldChange(key)}
+                    disabled={savingField}
+                    className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${studentField === key ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700'}`}
+                  >
+                    <span>{info.emoji}</span>
+                    <span className="text-sm font-medium">{info.label}</span>
+                    {studentField === key && (
+                      <svg className="w-4 h-4 ml-auto text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Menu Items */}
       <nav className="flex-1 px-3 space-y-1">
