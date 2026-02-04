@@ -44,7 +44,21 @@ function KvkkModal({ isOpen, onClose }) {
               Bu Kullanıcı Sözleşmesi, KoçumNet platformunu kullanan tüm kullanıcılar ile Platform sahibi arasındaki
               hak ve yükümlülükleri düzenlemektedir. Platformu kullanarak bu sözleşmeyi kabul etmiş sayılırsınız.
             </p>
-            <p className="text-gray-400 text-xs mt-2">Son güncelleme: 3 Şubat 2026</p>
+            <p className="text-gray-400 text-xs mt-2">Son güncelleme: 4 Şubat 2025</p>
+          </section>
+
+          {/* Veri Sorumlusu */}
+          <section>
+            <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
+              <h3 className="font-semibold text-indigo-800 mb-3">Veri Sorumlusu</h3>
+              <div className="text-sm text-indigo-700 space-y-1">
+                <p><strong>Ad Soyad:</strong> [İSİM SOYISIM]</p>
+                <p><strong>E-posta:</strong> destek@kocumnet.com</p>
+              </div>
+              <p className="text-xs text-indigo-600 mt-3">
+                6698 sayılı KVKK kapsamında veri sorumlusu sıfatıyla bilgilendirme yapılmaktadır.
+              </p>
+            </div>
           </section>
 
           {/* 1. Tanımlar */}
@@ -55,7 +69,7 @@ function KvkkModal({ isOpen, onClose }) {
             </div>
             <div className="text-sm text-gray-600 space-y-2 pl-4 border-l-2 border-indigo-100">
               <p><strong>Platform:</strong> KoçumNet web uygulaması ve ilgili tüm hizmetler.</p>
-              <p><strong>Koç:</strong> Öğrencilere YKS hazırlık sürecinde rehberlik eden eğitimciler.</p>
+              <p><strong>Hizmet Sağlayıcı:</strong> Platform üzerinden doğrudan online eğitim ve koçluk hizmeti sunan gerçek kişi.</p>
               <p><strong>Öğrenci:</strong> YKS'ye hazırlanan ve koçluk hizmeti alan kullanıcılar.</p>
               <p><strong>Veli:</strong> Öğrencinin durumunu takip eden ebeveyn kullanıcılar.</p>
             </div>
@@ -64,8 +78,17 @@ function KvkkModal({ isOpen, onClose }) {
           {/* 2. Hizmet Kapsamı */}
           <section>
             <h3 className="font-semibold text-gray-800 mb-3">2. Hizmet Kapsamı</h3>
+
+            {/* Önemli Uyarı */}
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 mb-4">
+              <p className="text-sm text-amber-800">
+                <span className="font-bold">⚠️ Önemli:</span> KoçumNet, bir aracılık veya eşleştirme platformu değildir.
+                Platform, Hizmet Sağlayıcı tarafından doğrudan sunulan online eğitim ve koçluk hizmetlerinin yönetimi için kullanılan bir araçtır.
+              </p>
+            </div>
+
             <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
-              <li>Koç-öğrenci eşleştirme ve iletişim platformu</li>
+              <li>İnternet üzerinden canlı/online eğitim ve koçluk seansları</li>
               <li>Deneme sınavı sonuçları takibi ve analizi</li>
               <li>Haftalık çalışma programı oluşturma</li>
               <li>Ödev atama ve takip sistemi</li>
@@ -73,9 +96,19 @@ function KvkkModal({ isOpen, onClose }) {
             </ul>
           </section>
 
-          {/* 3. Kullanıcı Yükümlülükleri */}
+          {/* 3. 18 Yaş Altı Kullanıcılar */}
           <section>
-            <h3 className="font-semibold text-gray-800 mb-3">3. Kullanıcı Yükümlülükleri</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">3. 18 Yaş Altı Kullanıcılar</h3>
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+              <p className="text-sm text-blue-700">
+                18 yaşından küçük kullanıcıların platforma kaydolabilmesi için velisinin onayı zorunludur.
+              </p>
+            </div>
+          </section>
+
+          {/* 4. Kullanıcı Yükümlülükleri */}
+          <section>
+            <h3 className="font-semibold text-gray-800 mb-3">4. Kullanıcı Yükümlülükleri</h3>
             <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
               <li>Doğru ve güncel bilgiler sağlamak</li>
               <li>Hesap bilgilerini gizli tutmak</li>
@@ -85,11 +118,11 @@ function KvkkModal({ isOpen, onClose }) {
             </ul>
           </section>
 
-          {/* 4. KVKK */}
+          {/* 5. KVKK */}
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Shield className="text-green-500" size={18} />
-              <h3 className="font-semibold text-gray-800">4. Kişisel Verilerin Korunması (KVKK)</h3>
+              <h3 className="font-semibold text-gray-800">5. Kişisel Verilerin Korunması (KVKK)</h3>
             </div>
 
             <div className="space-y-4">
@@ -113,11 +146,29 @@ function KvkkModal({ isOpen, onClose }) {
                 </ul>
               </div>
 
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h4 className="font-medium text-gray-700 text-sm mb-2">Hukuki Sebepler (KVKK Madde 5)</h4>
+                <ul className="text-xs text-gray-600 space-y-1 list-disc pl-4">
+                  <li>Açık rıza</li>
+                  <li>Sözleşmenin kurulması veya ifası</li>
+                  <li>Hukuki yükümlülüğün yerine getirilmesi</li>
+                  <li>Meşru menfaat</li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h4 className="font-medium text-gray-700 text-sm mb-2">Saklama Süresi</h4>
+                <p className="text-xs text-gray-600">
+                  Kişisel verileriniz, işleme amaçlarının gerektirdiği süre boyunca ve yasal yükümlülükler
+                  çerçevesinde <strong>10 yıl</strong> süreyle saklanır.
+                </p>
+              </div>
+
               <div className="bg-green-50 rounded-xl p-4 border border-green-100">
                 <h4 className="font-medium text-green-700 text-sm mb-2">Veri Güvenliği</h4>
                 <p className="text-xs text-green-600">
                   Kişisel verileriniz SSL şifreleme ve güvenli sunucularla korunmaktadır.
-                  Verileriniz üçüncü taraflarla paylaşılmaz, satılmaz veya kiralanmaz.
+                  <strong> Verileriniz üçüncü taraflarla paylaşılmaz, satılmaz veya kiralanmaz.</strong>
                 </p>
               </div>
 
@@ -133,21 +184,63 @@ function KvkkModal({ isOpen, onClose }) {
             </div>
           </section>
 
-          {/* 5. Sorumluluk Reddi */}
+          {/* 6. Fikri Mülkiyet Hakları */}
           <section>
-            <h3 className="font-semibold text-gray-800 mb-3">5. Sorumluluk Reddi</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">6. Fikri Mülkiyet Hakları</h3>
+            <p className="text-sm text-gray-600">
+              Platform üzerindeki tüm içerik, tasarım, logo, yazılım ve diğer materyaller KoçumNet'e aittir ve
+              telif hakkı ile korunmaktadır. İzinsiz kullanım, kopyalama veya dağıtım yasaktır.
+            </p>
+          </section>
+
+          {/* 7. Hesap Feshi ve Veri Silme */}
+          <section>
+            <h3 className="font-semibold text-gray-800 mb-3">7. Hesap Feshi ve Veri Silme</h3>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-sm text-gray-600">
+                Kullanıcılar hesaplarını istedikleri zaman kapatabilir. Hesap kapatma talebinden itibaren
+                kişisel verileriniz <strong>30 gün içinde</strong> sistemlerimizden kalıcı olarak silinir.
+                Yasal yükümlülükler nedeniyle saklanması gereken veriler bu sürenin dışındadır.
+              </p>
+            </div>
+          </section>
+
+          {/* 8. Sorumluluk Reddi */}
+          <section>
+            <h3 className="font-semibold text-gray-800 mb-3">8. Sorumluluk Reddi</h3>
             <p className="text-sm text-gray-600">
               KoçumNet, sunulan hizmetlerin kesintisiz veya hatasız olacağını garanti etmez.
               Sıralama tahminleri yalnızca bilgilendirme amaçlıdır ve kesin sonuç garantisi içermez.
             </p>
           </section>
 
-          {/* 6. İletişim */}
+          {/* 9. Uygulanacak Hukuk */}
           <section>
-            <h3 className="font-semibold text-gray-800 mb-3">6. İletişim</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">9. Uygulanacak Hukuk ve Yetkili Mahkeme</h3>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-sm text-gray-600">
+                Bu sözleşme Türkiye Cumhuriyeti kanunlarına tabidir. Sözleşmeden doğan uyuşmazlıklarda
+                <strong> Ankara Mahkemeleri ve İcra Daireleri</strong> yetkilidir.
+              </p>
+            </div>
+          </section>
+
+          {/* 10. İletişim */}
+          <section>
+            <h3 className="font-semibold text-gray-800 mb-3">10. İletişim</h3>
             <div className="bg-indigo-50 rounded-xl p-4">
               <p className="text-sm text-indigo-700">
                 <strong>E-posta:</strong> destek@kocumnet.com
+              </p>
+            </div>
+          </section>
+
+          {/* Açık Rıza Beyanı */}
+          <section>
+            <div className="bg-purple-50 rounded-xl p-4 border-2 border-purple-200">
+              <h3 className="font-semibold text-purple-800 mb-2">Açık Rıza Beyanı</h3>
+              <p className="text-sm text-purple-700">
+                Yukarıda belirtilen amaçlar doğrultusunda kişisel verilerimin işlenmesine açık rızam ile onay veriyorum.
               </p>
             </div>
           </section>
@@ -160,7 +253,7 @@ function KvkkModal({ isOpen, onClose }) {
             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl
               font-bold hover:from-indigo-700 hover:to-purple-700 transition-all"
           >
-            Anladım, Kapat
+            Okudum, Anladım
           </button>
         </div>
       </div>
