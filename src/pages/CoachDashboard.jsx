@@ -6,18 +6,7 @@ import {
   ChevronRight, Copy, Check, Target, BarChart3, Bell
 } from "lucide-react";
 
-// Sıralama tahmini
-const estimateRanking = (net, type = 'TYT') => {
-  const tables = {
-    'TYT': { maxNet: 120, base: 3000000 },
-    'AYT_SAY': { maxNet: 80, base: 500000 },
-  };
-  const table = tables[type] || tables['TYT'];
-  if (!net || net <= 0) return null;
-  const ratio = 1 - (net / table.maxNet);
-  return Math.max(1, Math.round(ratio * ratio * table.base));
-};
-
+// Sıralama formatla (hesaplama backend'de yapılıyor)
 const formatRanking = (rank) => rank ? rank.toLocaleString('tr-TR') : '-';
 
 export default function CoachDashboard({ user }) {
@@ -185,7 +174,7 @@ export default function CoachDashboard({ user }) {
             ) : (
               sortedStudents.map((student, idx) => {
                 const lastNet = student.last_tyt_net || student.last_net;
-                const ranking = estimateRanking(lastNet, 'TYT');
+                const ranking = student.estimated_ranking;  // Backend'den geliyor
                 const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
                 
                 return (

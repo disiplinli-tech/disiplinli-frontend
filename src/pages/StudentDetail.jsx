@@ -10,20 +10,7 @@ import {
   CartesianGrid, AreaChart, Area
 } from 'recharts';
 
-// Sıralama tahmini
-const estimateRanking = (net, type) => {
-  const tables = {
-    'TYT': { maxNet: 120, base: 3000000 },
-    'AYT_SAY': { maxNet: 80, base: 500000 },
-    'AYT_EA': { maxNet: 80, base: 400000 },
-    'AYT_SOZ': { maxNet: 80, base: 300000 },
-  };
-  const table = tables[type] || tables['TYT'];
-  if (!net || net <= 0) return null;
-  const ratio = 1 - (net / table.maxNet);
-  return Math.max(1, Math.round(ratio * ratio * table.base));
-};
-
+// Sıralama formatla (backend'den geliyor artık)
 const formatRanking = (rank) => rank ? rank.toLocaleString('tr-TR') : '-';
 
 export default function StudentDetail() {
@@ -61,11 +48,11 @@ export default function StudentDetail() {
     }
   };
 
-  // Sıralamalar
+  // Sıralamalar - backend'den gelen estimated_ranking kullanılıyor
   const getLatestRankings = () => {
     const types = ['TYT', 'AYT_SAY', 'AYT_EA', 'AYT_SOZ'];
     const rankings = {};
-    
+
     types.forEach(type => {
       const typeExams = exams.filter(e => e.exam_type === type);
       if (typeExams.length > 0) {
@@ -73,17 +60,17 @@ export default function StudentDetail() {
         const previous = typeExams[1];
         rankings[type] = {
           net: latest.net_score,
-          ranking: estimateRanking(latest.net_score, type),
+          ranking: latest.estimated_ranking,  // Backend'den geliyor
           change: previous ? latest.net_score - previous.net_score : null,
           date: latest.date
         };
       }
     });
-    
+
     return rankings;
   };
 
-  // Grafik verisi
+  // Grafik verisi - backend'den gelen estimated_ranking kullanılıyor
   const getTYTChartData = () => {
     return exams
       .filter(e => e.exam_type === 'TYT')
@@ -92,7 +79,7 @@ export default function StudentDetail() {
       .map(e => ({
         date: new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
         net: e.net_score,
-        ranking: estimateRanking(e.net_score, 'TYT')
+        ranking: e.estimated_ranking  // Backend'den geliyor
       }));
   };
 
@@ -372,10 +359,9 @@ export default function StudentDetail() {
                       </thead>
                       <tbody className="divide-y divide-gray-50">
                         {exams.map((exam, idx) => {
-                          const ranking = estimateRanking(exam.net_score, exam.exam_type);
                           const typeColors = { 'TYT': 'blue', 'AYT_SAY': 'purple', 'AYT_EA': 'green', 'AYT_SOZ': 'orange' };
                           const typeNames = { 'TYT': 'TYT', 'AYT_SAY': 'AYT Sayısal', 'AYT_EA': 'AYT EA', 'AYT_SOZ': 'AYT Sözel' };
-                          
+
                           return (
                             <tr key={idx} className="hover:bg-gray-50">
                               <td className="py-3">{new Date(exam.date).toLocaleDateString('tr-TR')}</td>
@@ -385,7 +371,7 @@ export default function StudentDetail() {
                                 </span>
                               </td>
                               <td className="py-3 text-right font-bold">{exam.net_score}</td>
-                              <td className="py-3 text-right text-indigo-600 font-medium">~{formatRanking(ranking)}</td>
+                              <td className="py-3 text-right text-indigo-600 font-medium">~{formatRanking(exam.estimated_ranking)}</td>
                             </tr>
                           );
                         })}
