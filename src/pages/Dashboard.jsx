@@ -392,6 +392,8 @@ function StudentDashboard({ user, stats, onRefresh }) {
       tytAvg: tytExams.length > 0 ? (tytExams.reduce((a, e) => a + e.net_score, 0) / tytExams.length).toFixed(1) : null,
       tytMax: tytExams.length > 0 ? Math.max(...tytExams.map(e => e.net_score)) : null,
       aytCount: aytExams.length,
+      aytAvg: aytExams.length > 0 ? (aytExams.reduce((a, e) => a + e.net_score, 0) / aytExams.length).toFixed(1) : null,
+      aytMax: aytExams.length > 0 ? Math.max(...aytExams.map(e => e.net_score)) : null,
     };
   };
   const examStats = getExamStats();
@@ -657,7 +659,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
             </div>
           </div>
 
-          {/* Özet Kartları - Exams.jsx ile aynı stil */}
+          {/* Özet Kartları - TYT ve AYT */}
           <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-1">
@@ -668,31 +670,31 @@ function StudentDashboard({ user, stats, onRefresh }) {
               <p className="text-xs opacity-70 mt-1">{examStats.tytCount} deneme</p>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">TYT En Yüksek</span>
-              </div>
-              <p className="text-3xl font-bold">{examStats.tytMax || '-'}</p>
-              <p className="text-xs opacity-70 mt-1">En iyi sonuç</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 text-white">
+            <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-1">
                 <Target size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">Tahmini Sıralama</span>
+                <span className="text-sm opacity-90">TYT Sıralama</span>
               </div>
               <p className="text-2xl font-bold">{examStats.tytAvg ? formatRanking(estimateRanking(parseFloat(examStats.tytAvg), 'TYT')) : '-'}</p>
-              <p className="text-xs opacity-70 mt-1">TYT ortalamasına göre</p>
+              <p className="text-xs opacity-70 mt-1">Ortalamaya göre</p>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl p-4 text-white">
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
               <div className="flex items-center gap-2 mb-1">
-                <Award size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">Deneme</span>
+                <Trophy size={18} className="opacity-80" />
+                <span className="text-sm opacity-90">AYT Ortalama</span>
               </div>
-              <p className="text-3xl font-bold">{exams.length}</p>
-              <p className="text-xs opacity-70 mt-1">Toplam deneme</p>
+              <p className="text-3xl font-bold">{examStats.aytAvg || '-'}</p>
+              <p className="text-xs opacity-70 mt-1">{examStats.aytCount} deneme</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 rounded-xl p-4 text-white">
+              <div className="flex items-center gap-2 mb-1">
+                <Target size={18} className="opacity-80" />
+                <span className="text-sm opacity-90">AYT Sıralama</span>
+              </div>
+              <p className="text-2xl font-bold">{examStats.aytAvg ? formatRanking(estimateRanking(parseFloat(examStats.aytAvg), 'AYT')) : '-'}</p>
+              <p className="text-xs opacity-70 mt-1">Ortalamaya göre</p>
             </div>
           </div>
         </div>
