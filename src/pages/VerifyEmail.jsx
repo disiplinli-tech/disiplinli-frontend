@@ -183,18 +183,11 @@ export default function VerifyEmail() {
           </p>
         </div>
 
-        {/* Brevo Uyarısı */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="text-amber-500 flex-shrink-0 mt-0.5" size={20} />
-            <div className="text-sm">
-              <p className="text-amber-800 font-medium">Mail kutunu kontrol et!</p>
-              <p className="text-amber-700 mt-1">
-                Kod <strong>Brevo</strong> üzerinden gönderildi. Gelen kutunda bulamazsan 
-                <strong> Spam</strong> veya <strong>Gereksiz</strong> klasörünü de kontrol et.
-              </p>
-            </div>
-          </div>
+        {/* Bilgi Kutusu */}
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+          <p className="text-green-700 text-sm text-center">
+            📬 Kod gelmezse <strong>spam klasörünü</strong> kontrol et
+          </p>
         </div>
 
         {/* Error */}
