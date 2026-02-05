@@ -178,16 +178,13 @@ export default function VerifyEmail() {
             <Mail className="text-white" size={32} />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">E-posta Doğrulama</h1>
-          <p className="text-gray-500 mt-2 text-sm">
-            6 haneli doğrulama kodunu gir
-          </p>
         </div>
 
         {/* Bilgi Kutusu */}
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
           <p className="text-green-700 text-sm text-center">
             <span className="font-medium">{email}</span> adresine doğrulama kodu gönderildi.<br />
-            <span className="text-green-600 text-xs">Bulamazsan spam klasörüne göz at.</span>
+            <span className="text-green-600 text-xs mt-1 block">Bulamazsan spam klasörüne göz at.</span>
           </p>
         </div>
 
