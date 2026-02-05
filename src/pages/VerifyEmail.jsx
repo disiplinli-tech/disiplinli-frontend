@@ -179,15 +179,15 @@ export default function VerifyEmail() {
           </div>
           <h1 className="text-2xl font-bold text-gray-800">E-posta Doğrulama</h1>
           <p className="text-gray-500 mt-2 text-sm">
-            <span className="font-medium text-gray-700">{email}</span> adresine gönderilen 6 haneli kodu gir
+            6 haneli doğrulama kodunu gir
           </p>
         </div>
 
         {/* Bilgi Kutusu */}
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-6">
-          <p className="text-gray-600 text-sm text-center">
-            Doğrulama kodun gönderildi.<br />
-            <span className="text-gray-400 text-xs">Bulamazsan spam klasörüne göz at.</span>
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+          <p className="text-green-700 text-sm text-center">
+            <span className="font-medium">{email}</span> adresine doğrulama kodu gönderildi.<br />
+            <span className="text-green-600 text-xs">Bulamazsan spam klasörüne göz at.</span>
           </p>
         </div>
 
