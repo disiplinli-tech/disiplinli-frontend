@@ -178,10 +178,10 @@ export default function VerifyEmail() {
             <Mail className="text-white" size={32} />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">E-posta Doğrulama</h1>
-          <p className="text-gray-600 mt-3 text-sm">
+          <p className="text-gray-600 mt-3">
             <span className="font-semibold text-gray-800">{email}</span> adresine doğrulama kodu gönderildi.
           </p>
-          <p className="text-gray-400 text-xs mt-1">Bulamazsan spam klasörüne göz at.</p>
+          <p className="text-gray-400 text-sm mt-2">Bulamazsan spam klasörüne göz at.</p>
         </div>
 
         {/* Error */}
