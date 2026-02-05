@@ -184,9 +184,9 @@ export default function VerifyEmail() {
         </div>
 
         {/* Bilgi Kutusu */}
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-          <p className="text-green-700 text-sm text-center">
-            📬 Kod gelmezse <strong>spam klasörünü</strong> kontrol et
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-6">
+          <p className="text-gray-500 text-xs text-center">
+            Kodu göremiyorsan spam klasörünü kontrol et
           </p>
         </div>
 
