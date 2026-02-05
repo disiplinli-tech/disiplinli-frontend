@@ -922,6 +922,214 @@ function StudentDashboard({ user, stats, onRefresh }) {
   );
 }
 
+// ==================== VELİ DASHBOARD ====================
+function ParentDashboard({ user, stats }) {
+  const navigate = useNavigate();
+  const student = stats?.student || {};
+  const exams = stats?.exams || [];
+  const weeklyGoals = stats?.weekly_goals || [];
+  const coach = stats?.coach || null;
+
+  // Aktivite durumu
+  const getActivityStatus = () => {
+    if (!student.last_activity) return { text: 'Henüz giriş yapmadı', color: 'gray', icon: '⏳' };
+    const hours = student.hours_since_activity || 0;
+    if (hours < 24) return { text: 'Bugün aktif', color: 'green', icon: '✅' };
+    if (hours < 48) return { text: 'Dün aktifti', color: 'yellow', icon: '⚠️' };
+    return { text: `${Math.floor(hours / 24)} gündür giriş yapmadı`, color: 'red', icon: '🔴' };
+  };
+
+  const activityStatus = getActivityStatus();
+
+  // Grafik verisi
+  const chartData = exams.slice(0, 10).reverse().map((exam, index) => ({
+    name: `#${index + 1}`,
+    net: exam.net_score || 0,
+    date: exam.date
+  }));
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 text-white">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-200 text-sm">Veli Paneli</p>
+              <h1 className="text-2xl font-bold mt-1">Hoş geldin, {user?.first_name || 'Veli'} 👋</h1>
+            </div>
+            <button
+              onClick={() => { localStorage.clear(); navigate('/login'); }}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-medium transition-all"
+            >
+              Çıkış
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Öğrenci Bilgi Kartı */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+              {student.name?.charAt(0) || '?'}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-gray-800">{student.name || 'Öğrenci'}</h2>
+              <p className="text-gray-500 text-sm">{student.exam_goal_type || 'SAY'} • {student.target_university || 'Hedef belirtilmemiş'}</p>
+              <div className="flex items-center gap-4 mt-2">
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
+                  activityStatus.color === 'green' ? 'bg-green-100 text-green-700' :
+                  activityStatus.color === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
+                  activityStatus.color === 'red' ? 'bg-red-100 text-red-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {activityStatus.icon} {activityStatus.text}
+                </span>
+                {student.streak > 0 && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                    🔥 {student.streak} gün seri
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Sol Kolon */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* İstatistik Kartları */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                <p className="text-gray-500 text-xs">Son TYT Net</p>
+                <p className="text-2xl font-bold text-indigo-600 mt-1">{student.last_tyt_net?.toFixed(1) || '-'}</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                <p className="text-gray-500 text-xs">Son AYT Net</p>
+                <p className="text-2xl font-bold text-purple-600 mt-1">{student.last_ayt_net?.toFixed(1) || '-'}</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                <p className="text-gray-500 text-xs">Toplam Deneme</p>
+                <p className="text-2xl font-bold text-emerald-600 mt-1">{exams.length}</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                <p className="text-gray-500 text-xs">Hedef Sıralama</p>
+                <p className="text-2xl font-bold text-amber-600 mt-1">{student.target_ranking ? formatRanking(student.target_ranking) : '-'}</p>
+              </div>
+            </div>
+
+            {/* Grafik */}
+            {chartData.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 className="font-bold text-gray-800 mb-4">📈 Deneme Performansı</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="parentGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} />
+                      <YAxis stroke="#9ca3af" fontSize={12} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                        formatter={(value) => [`${value} net`, 'Net']}
+                      />
+                      <Area type="monotone" dataKey="net" stroke="#8b5cf6" fill="url(#parentGradient)" strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* Son Denemeler */}
+            {exams.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 className="font-bold text-gray-800 mb-4">📝 Son Denemeler</h3>
+                <div className="space-y-3">
+                  {exams.slice(0, 5).map((exam, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                      <div>
+                        <p className="font-medium text-gray-800">{exam.exam_type}</p>
+                        <p className="text-gray-500 text-xs">{exam.date}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-indigo-600">{exam.net_score} net</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sağ Kolon */}
+          <div className="space-y-6">
+            {/* Koç Bilgisi */}
+            {coach && (
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-5 border border-indigo-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">
+                    👨‍🏫
+                  </div>
+                  <div>
+                    <p className="text-sm text-indigo-800 font-medium">Öğrencinin Koçu</p>
+                    <p className="text-indigo-600 font-semibold">{coach}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Haftalık Hedefler */}
+            {weeklyGoals.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 className="font-bold text-gray-800 mb-4">🎯 Haftalık Hedefler</h3>
+                <div className="space-y-3">
+                  {weeklyGoals.map((goal, index) => {
+                    const progress = Math.min(100, Math.round((goal.current_value / goal.target_value) * 100));
+                    return (
+                      <div key={index} className="p-3 bg-gray-50 rounded-xl">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-sm font-medium text-gray-700">{goal.goal_type_display}</p>
+                          <span className={`text-xs font-medium ${goal.is_completed ? 'text-green-600' : 'text-gray-500'}`}>
+                            {goal.current_value}/{goal.target_value}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all ${goal.is_completed ? 'bg-green-500' : 'bg-indigo-500'}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Bilgi Kutusu */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">💡</span>
+                <div>
+                  <p className="text-sm text-amber-800 font-medium">Veli İpucu</p>
+                  <p className="text-amber-700 mt-1 text-sm">Öğrencinizin düzenli çalışmasını destekleyin. Motivasyonu yüksek tutmak başarının anahtarıdır!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ==================== ANA DASHBOARD ====================
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -955,6 +1163,13 @@ export default function Dashboard() {
     );
   }
 
-  const isCoach = stats?.role === 'coach' || localStorage.getItem('role') === 'coach';
-  return isCoach ? <CoachDashboard user={user} stats={stats} /> : <StudentDashboard user={user} stats={stats} onRefresh={fetchData} />;
+  const role = stats?.role || localStorage.getItem('role');
+
+  if (role === 'coach') {
+    return <CoachDashboard user={user} stats={stats} />;
+  } else if (role === 'parent') {
+    return <ParentDashboard user={user} stats={stats} />;
+  } else {
+    return <StudentDashboard user={user} stats={stats} onRefresh={fetchData} />;
+  }
 }
