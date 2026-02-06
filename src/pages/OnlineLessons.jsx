@@ -162,8 +162,8 @@ export default function OnlineLessons() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6 overflow-hidden">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -197,43 +197,43 @@ export default function OnlineLessons() {
         </div>
 
         {/* İstatistik Kartları */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Video size={18} className="opacity-80" />
-              <span className="text-sm opacity-90">Toplam</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Video size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+              <span className="text-xs md:text-sm opacity-90">Toplam</span>
             </div>
-            <p className="text-3xl font-bold">{lessons.length}</p>
-            <p className="text-xs opacity-70 mt-1">ders</p>
+            <p className="text-2xl md:text-3xl font-bold">{lessons.length}</p>
+            <p className="text-[10px] md:text-xs opacity-70 mt-0.5">ders</p>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-4 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock size={18} className="opacity-80" />
-              <span className="text-sm opacity-90">Planlanan</span>
+          <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Clock size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+              <span className="text-xs md:text-sm opacity-90">Planlanan</span>
             </div>
-            <p className="text-3xl font-bold">{upcomingLessons.length}</p>
-            <p className="text-xs opacity-70 mt-1">bekleyen</p>
+            <p className="text-2xl md:text-3xl font-bold">{upcomingLessons.length}</p>
+            <p className="text-[10px] md:text-xs opacity-70 mt-0.5">bekleyen</p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-4 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Check size={18} className="opacity-80" />
-              <span className="text-sm opacity-90">Tamamlanan</span>
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Check size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+              <span className="text-xs md:text-sm opacity-90">Tamamlanan</span>
             </div>
-            <p className="text-3xl font-bold">{completedLessons.length}</p>
-            <p className="text-xs opacity-70 mt-1">ders</p>
+            <p className="text-2xl md:text-3xl font-bold">{completedLessons.length}</p>
+            <p className="text-[10px] md:text-xs opacity-70 mt-0.5">ders</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar size={18} className="opacity-80" />
-              <span className="text-sm opacity-90">Toplam Saat</span>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Calendar size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+              <span className="text-xs md:text-sm opacity-90">Toplam Saat</span>
             </div>
-            <p className="text-3xl font-bold">
+            <p className="text-2xl md:text-3xl font-bold">
               {Math.round(completedLessons.reduce((acc, l) => acc + l.duration_minutes, 0) / 60)}
             </p>
-            <p className="text-xs opacity-70 mt-1">saat</p>
+            <p className="text-[10px] md:text-xs opacity-70 mt-0.5">saat</p>
           </div>
         </div>
 
