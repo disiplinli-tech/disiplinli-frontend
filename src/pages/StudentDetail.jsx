@@ -4,7 +4,8 @@ import API from "../api";
 import { formatRanking } from "../utils/formatters";
 import {
   ArrowLeft, Mail, Target, TrendingUp, TrendingDown, Minus,
-  Calendar, Award, BarChart3, Trophy, MessageCircle, Plus, X, Save
+  Calendar, Award, BarChart3, Trophy, MessageCircle, Plus, X, Save,
+  BookOpen, CheckCircle2, Circle, ChevronDown, ChevronUp
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -22,6 +23,12 @@ export default function StudentDetail() {
   // Haftalık hedef state'leri
   const [weeklyGoals, setWeeklyGoals] = useState([]);
   const [showGoalModal, setShowGoalModal] = useState(false);
+
+  // Konu takip state'leri
+  const [topicsData, setTopicsData] = useState(null);
+  const [topicsLoading, setTopicsLoading] = useState(false);
+  const [topicsTab, setTopicsTab] = useState('TYT');
+  const [expandedSubjects, setExpandedSubjects] = useState({});
   const [goalForm, setGoalForm] = useState({
     goal_type: 'DENEME_TYT',
     target_value: '',
@@ -32,6 +39,7 @@ export default function StudentDetail() {
   useEffect(() => {
     fetchData();
     fetchGoals();
+    fetchTopics();
   }, [id]);
 
   const fetchData = async () => {
@@ -62,6 +70,22 @@ export default function StudentDetail() {
     } catch (err) {
       console.log('Hedefler yüklenemedi');
     }
+  };
+
+  const fetchTopics = async () => {
+    setTopicsLoading(true);
+    try {
+      const res = await API.get(`/api/topics/?student_id=${id}`);
+      setTopicsData(res.data);
+    } catch (err) {
+      console.log('Konu verileri yüklenemedi');
+    } finally {
+      setTopicsLoading(false);
+    }
+  };
+
+  const toggleSubjectExpand = (key) => {
+    setExpandedSubjects(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleCreateGoal = async () => {
@@ -271,6 +295,7 @@ export default function StudentDetail() {
             {[
               { key: 'overview', label: 'Genel Bakış', icon: BarChart3 },
               { key: 'exams', label: 'Denemeler', icon: Award },
+              { key: 'topics', label: 'Konu Takibi', icon: BookOpen },
               { key: 'goals', label: 'Hedefler', icon: Target },
               { key: 'schedule', label: 'Program', icon: Calendar },
             ].map(tab => (
@@ -429,6 +454,178 @@ export default function StudentDetail() {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Topics - Konu Takibi */}
+            {activeTab === 'topics' && (
+              <div>
+                {topicsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : !topicsData ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <BookOpen size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Konu verileri yüklenemedi</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Genel İlerleme */}
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-5 py-3 rounded-2xl shadow-lg">
+                        <Trophy size={28} />
+                        <div>
+                          <p className="text-sm opacity-80">Genel İlerleme</p>
+                          <p className="text-2xl font-bold">%{topicsData.overall?.progress || 0}</p>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Alan: <span className="font-semibold text-gray-700">{topicsData.field_type}</span>
+                      </div>
+                    </div>
+
+                    {/* TYT / AYT Tabs */}
+                    <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
+                      <button
+                        onClick={() => setTopicsTab('TYT')}
+                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${
+                          topicsTab === 'TYT'
+                            ? 'bg-blue-500 text-white shadow'
+                            : 'text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        TYT <span className="text-xs ml-1 opacity-80">%{topicsData.tyt?.progress || 0}</span>
+                      </button>
+                      <button
+                        onClick={() => setTopicsTab('AYT')}
+                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${
+                          topicsTab === 'AYT'
+                            ? 'bg-purple-500 text-white shadow'
+                            : 'text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        AYT <span className="text-xs ml-1 opacity-80">%{topicsData.ayt?.progress || 0}</span>
+                      </button>
+                    </div>
+
+                    {/* İstatistik Kartları */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <p className="text-xs text-gray-500 mb-1">Toplam Konu</p>
+                        <p className="text-xl font-bold text-gray-800">
+                          {topicsTab === 'TYT' ? topicsData.tyt?.total : topicsData.ayt?.total}
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-xl p-4">
+                        <p className="text-xs text-green-600 mb-1">Tamamlanan</p>
+                        <p className="text-xl font-bold text-green-700">
+                          {topicsTab === 'TYT' ? topicsData.tyt?.completed : topicsData.ayt?.completed}
+                        </p>
+                      </div>
+                      <div className="bg-orange-50 rounded-xl p-4">
+                        <p className="text-xs text-orange-600 mb-1">Kalan</p>
+                        <p className="text-xl font-bold text-orange-700">
+                          {topicsTab === 'TYT'
+                            ? (topicsData.tyt?.total - topicsData.tyt?.completed)
+                            : (topicsData.ayt?.total - topicsData.ayt?.completed)}
+                        </p>
+                      </div>
+                      <div className="bg-indigo-50 rounded-xl p-4">
+                        <p className="text-xs text-indigo-600 mb-1">İlerleme</p>
+                        <p className="text-xl font-bold text-indigo-700">
+                          %{topicsTab === 'TYT' ? topicsData.tyt?.progress : topicsData.ayt?.progress}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Ders Kartları */}
+                    <div className="space-y-3">
+                      {Object.entries((topicsTab === 'TYT' ? topicsData.tyt?.topics : topicsData.ayt?.topics) || {}).map(([key, subject]) => {
+                        const isExpanded = expandedSubjects[key];
+                        const colorMap = {
+                          blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600', progress: 'bg-blue-500' },
+                          purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-600', progress: 'bg-purple-500' },
+                          green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-600', progress: 'bg-green-500' },
+                          orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-600', progress: 'bg-orange-500' },
+                          pink: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-600', progress: 'bg-pink-500' },
+                          red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-600', progress: 'bg-red-500' },
+                          teal: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-600', progress: 'bg-teal-500' },
+                          amber: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600', progress: 'bg-amber-500' },
+                        };
+                        const colors = colorMap[subject.color] || colorMap.blue;
+
+                        return (
+                          <div key={key} className={`rounded-xl border ${colors.border} ${colors.bg} overflow-hidden`}>
+                            {/* Ders Header */}
+                            <div
+                              className="p-4 flex items-center justify-between cursor-pointer hover:opacity-80"
+                              onClick={() => toggleSubjectExpand(key)}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg bg-white/60 flex items-center justify-center ${colors.text}`}>
+                                  <BookOpen size={20} />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-800">{subject.name}</h4>
+                                  <p className="text-xs text-gray-500">
+                                    {subject.completed_count} / {subject.total_count} konu
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className={`text-lg font-bold ${colors.text}`}>%{subject.progress}</span>
+                                {isExpanded ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                              </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="px-4 pb-3">
+                              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div className={`h-full ${colors.progress} rounded-full transition-all`} style={{ width: `${subject.progress}%` }} />
+                              </div>
+                            </div>
+
+                            {/* Konular */}
+                            {isExpanded && (
+                              <div className="border-t border-gray-200 bg-white p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                  {subject.subtopics?.map((topic) => (
+                                    <div
+                                      key={topic.id}
+                                      className={`flex items-center gap-2 p-2.5 rounded-lg ${
+                                        topic.is_completed
+                                          ? 'bg-green-50 border border-green-200'
+                                          : 'bg-gray-50 border border-gray-200'
+                                      }`}
+                                    >
+                                      {topic.is_completed ? (
+                                        <CheckCircle2 size={18} className="text-green-500 flex-shrink-0" />
+                                      ) : (
+                                        <Circle size={18} className="text-gray-300 flex-shrink-0" />
+                                      )}
+                                      <span className={`text-sm ${topic.is_completed ? 'text-green-700' : 'text-gray-600'}`}>
+                                        {topic.name}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Boş durum */}
+                    {Object.keys((topicsTab === 'TYT' ? topicsData.tyt?.topics : topicsData.ayt?.topics) || {}).length === 0 && (
+                      <div className="text-center py-8 text-gray-400">
+                        <BookOpen size={40} className="mx-auto mb-3 opacity-50" />
+                        <p>{topicsTab} konuları bulunamadı</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
