@@ -204,10 +204,10 @@ export default function Schedule({ user }) {
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 md:py-5">
         <div className="max-w-[1800px] mx-auto space-y-4">
           {/* Başlık ve Butonlar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Programım</h1>
-              <p className="text-gray-500 text-sm mt-1">
+              <p className="text-gray-500 text-sm mt-1 hidden sm:block">
                 {currentTime.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
             </div>
@@ -228,7 +228,7 @@ export default function Schedule({ user }) {
                 <select
                   value={selectedStudent}
                   onChange={(e) => setSelectedStudent(e.target.value)}
-                  className="px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="hidden sm:block px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
                   <option value="all">Tüm Öğrenciler</option>
                   {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -246,7 +246,7 @@ export default function Schedule({ user }) {
                   });
                   setShowModal(true);
                 }}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium text-sm"
               >
                 <Plus size={18} />
                 <span>Ders Ekle</span>
