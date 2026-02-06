@@ -240,7 +240,7 @@ export default function StudentDetail() {
             <div className="bg-blue-50 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-blue-600">TYT Sıralama</span>
-                {rankings.TYT?.change !== null && (
+                {rankings.TYT && rankings.TYT.change !== null && (
                   <span className={`text-xs font-bold flex items-center gap-0.5
                     ${rankings.TYT.change > 0 ? 'text-green-600' : rankings.TYT.change < 0 ? 'text-red-500' : 'text-gray-400'}`}>
                     {rankings.TYT.change > 0 ? <TrendingUp size={12} /> : rankings.TYT.change < 0 ? <TrendingDown size={12} /> : <Minus size={12} />}
