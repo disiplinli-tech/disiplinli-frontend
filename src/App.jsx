@@ -302,33 +302,46 @@ function Layout({ children }) {
   const userName = localStorage.getItem('user') || 'Kullanıcı';
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar 
-        collapsed={collapsed} 
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9fafb', maxWidth: '100vw', overflowX: 'hidden' }}>
+      <Sidebar
+        collapsed={collapsed}
         setCollapsed={setCollapsed}
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
       />
-      
-      <div className="flex-1 flex flex-col min-h-screen">
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '100%', overflowX: 'hidden' }}>
         {/* Mobile Header */}
-        <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-          <button onClick={() => setMobileOpen(true)} className="p-2 text-gray-600">
+        <header className="md:hidden" style={{
+          backgroundColor: 'white',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box'
+        }}>
+          <button onClick={() => setMobileOpen(true)} style={{ padding: '8px', color: '#4b5563', background: 'none', border: 'none', cursor: 'pointer' }}>
             <Menu size={24} />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <BookOpen className="text-white" size={16} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(to bottom right, #6366f1, #9333ea)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BookOpen color="white" size={16} />
             </div>
-            <span className="font-bold text-gray-800">KoçumNet</span>
+            <span style={{ fontWeight: 'bold', color: '#1f2937' }}>KoçumNet</span>
           </div>
-          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">
+          <div style={{ width: '32px', height: '32px', backgroundColor: '#e0e7ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5', fontWeight: 'bold', fontSize: '14px' }}>
             {userName.charAt(0).toUpperCase()}
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-x-hidden">
+        <main style={{ flex: 1, width: '100%', maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
           {children}
         </main>
       </div>

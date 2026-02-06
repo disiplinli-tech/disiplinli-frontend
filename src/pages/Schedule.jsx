@@ -272,130 +272,97 @@ export default function Schedule({ user }) {
         </div>
       </div>
 
-      {/* Mobile List View */}
-      <div className="md:hidden flex-1 overflow-y-auto bg-gray-50">
-        {/* Gün Seçici */}
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-2 py-3">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={() => setSelectedDayIndex(prev => prev === 0 ? 6 : prev - 1)}
-              className="p-2 rounded-lg hover:bg-gray-100"
-            >
-              <ChevronLeft size={20} className="text-gray-600" />
-            </button>
+      {/* Mobile List View - Google Calendar Style */}
+      <div className="md:hidden flex-1 flex flex-col bg-white">
+        {/* Gün Seçici - Haftalık Şerit */}
+        <div className="flex-shrink-0 border-b border-gray-200">
+          <div className="flex">
+            {DAYS.map((day, i) => {
+              const dayDate = new Date(currentTime.getTime() + (i - todayIndex) * 86400000);
+              const isSelected = selectedDayIndex === i;
+              const isToday = i === todayIndex;
 
-            <div className="flex-1 flex justify-center gap-1 overflow-x-auto">
-              {DAYS.map((day, i) => {
-                const dayDate = new Date(currentTime.getTime() + (i - todayIndex) * 86400000);
-                const dayPlansCount = getPlansForDay(day).length;
-                return (
-                  <button
-                    key={day}
-                    onClick={() => setSelectedDayIndex(i)}
-                    className={`flex flex-col items-center px-2.5 py-1.5 rounded-xl transition-all min-w-[44px]
-                      ${selectedDayIndex === i
-                        ? 'bg-indigo-600 text-white'
-                        : i === todayIndex
-                          ? 'bg-indigo-50 text-indigo-600'
-                          : 'text-gray-600 hover:bg-gray-100'}`}
-                  >
-                    <span className="text-[10px] font-medium">{day.slice(0, 2)}</span>
-                    <span className="text-sm font-bold">{dayDate.getDate()}</span>
-                    {dayPlansCount > 0 && (
-                      <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${selectedDayIndex === i ? 'bg-white' : 'bg-indigo-500'}`}></div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => setSelectedDayIndex(prev => prev === 6 ? 0 : prev + 1)}
-              className="p-2 rounded-lg hover:bg-gray-100"
-            >
-              <ChevronRight size={20} className="text-gray-600" />
-            </button>
+              return (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDayIndex(i)}
+                  className="flex-1 py-3 flex flex-col items-center"
+                >
+                  <span className={`text-[10px] font-medium ${isToday ? 'text-indigo-600' : 'text-gray-500'}`}>
+                    {day.slice(0, 3)}
+                  </span>
+                  <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold mt-1
+                    ${isSelected ? 'bg-indigo-600 text-white' : isToday ? 'text-indigo-600' : 'text-gray-800'}`}>
+                    {dayDate.getDate()}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Mobil Ders Listesi */}
-        <div className="p-4 space-y-3">
-          {(() => {
-            const dayPlans = getPlansForDay(DAYS[selectedDayIndex])
-              .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
-
-            if (dayPlans.length === 0) {
-              return (
-                <div className="text-center py-12">
-                  <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500 text-sm">{DAYS[selectedDayIndex]} günü için ders yok</p>
-                  <button
-                    onClick={() => {
-                      setNewPlan({
-                        ...newPlan,
-                        day: DAYS[selectedDayIndex],
-                        category: '',
-                        subject: '',
-                        student_id: selectedStudent !== 'all' ? selectedStudent : ''
-                      });
-                      setShowModal(true);
-                    }}
-                    className="mt-4 text-indigo-600 font-medium text-sm"
-                  >
-                    + Ders Ekle
-                  </button>
-                </div>
-              );
-            }
-
-            return dayPlans.map(plan => {
-              const color = isCoach && plan.student_id
-                ? getStudentColor(plan.student_id)
-                : (plan.category === 'AYT' ? COLORS.AYT : COLORS.TYT);
+        {/* Saat Bazlı Timeline */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="relative">
+            {HOURS.map(hour => {
+              const hourPlans = getPlansForDay(DAYS[selectedDayIndex]).filter(plan => {
+                const startHour = parseInt(plan.start_time?.split(':')[0] || 0);
+                return startHour === hour;
+              });
 
               return (
-                <div
-                  key={plan.id}
-                  className={`bg-white rounded-xl border-l-4 ${color.border} shadow-sm p-4`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm font-bold ${color.text}`}>
-                          {plan.category} {plan.subject}
-                        </span>
-                        {plan.activity_type && (
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                            {ACTIVITY_TYPES.find(a => a.value === plan.activity_type)?.emoji}
-                          </span>
-                        )}
-                      </div>
+                <div key={hour} className="flex border-b border-gray-100 min-h-[60px]">
+                  {/* Saat Kolonu */}
+                  <div className="w-14 flex-shrink-0 py-2 pr-2 text-right">
+                    <span className="text-xs text-gray-400">{hour.toString().padStart(2, '0')}:00</span>
+                  </div>
 
-                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {plan.start_time?.slice(0,5)} - {plan.end_time?.slice(0,5)}
-                        </span>
-                        {isCoach && plan.student_name && (
-                          <span className="flex items-center gap-1">
-                            <User size={12} />
-                            {plan.student_name}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  {/* Ders Kolonu */}
+                  <div className="flex-1 py-1 pr-2">
+                    {hourPlans.map(plan => {
+                      const color = isCoach && plan.student_id
+                        ? getStudentColor(plan.student_id)
+                        : (plan.category === 'AYT' ? COLORS.AYT : COLORS.TYT);
 
-                    <button
-                      onClick={(e) => deletePlan(plan.id, e)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                      // Süreyi hesapla
+                      const startMin = parseInt(plan.start_time?.split(':')[0] || 0) * 60 + parseInt(plan.start_time?.split(':')[1] || 0);
+                      const endMin = parseInt(plan.end_time?.split(':')[0] || 0) * 60 + parseInt(plan.end_time?.split(':')[1] || 0);
+                      const durationMins = endMin - startMin;
+                      const heightPx = Math.max(50, (durationMins / 60) * 60 - 4);
+
+                      return (
+                        <div
+                          key={plan.id}
+                          style={{ minHeight: `${heightPx}px` }}
+                          className={`${color.light} ${color.border} border-l-4 rounded-lg p-2 mb-1`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="min-w-0 flex-1">
+                              <p className={`text-sm font-semibold ${color.text} truncate`}>
+                                {plan.category} {plan.subject}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {plan.start_time?.slice(0,5)} - {plan.end_time?.slice(0,5)}
+                              </p>
+                              {isCoach && plan.student_name && (
+                                <p className="text-xs text-gray-400 mt-0.5 truncate">{plan.student_name}</p>
+                              )}
+                            </div>
+                            <button
+                              onClick={(e) => deletePlan(plan.id, e)}
+                              className="p-1 text-gray-400 hover:text-red-500 flex-shrink-0"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
-            });
-          })()}
+            })}
+          </div>
         </div>
       </div>
 

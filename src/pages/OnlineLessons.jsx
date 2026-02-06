@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import {
   Video, Plus, Calendar, Clock, User, ExternalLink, Check, X,
-  ChevronRight, Edit2, Trash2, AlertCircle, Filter
+  Edit2, Trash2
 } from 'lucide-react';
 
 export default function OnlineLessons() {
@@ -12,7 +11,7 @@ export default function OnlineLessons() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, scheduled, completed, cancelled
+  const [filter, setFilter] = useState('all');
   const [formData, setFormData] = useState({
     student_id: '',
     title: '',
@@ -22,7 +21,6 @@ export default function OnlineLessons() {
     meeting_url: ''
   });
 
-  const navigate = useNavigate();
   const role = localStorage.getItem('role');
   const isCoach = role === 'coach';
 
@@ -53,19 +51,16 @@ export default function OnlineLessons() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.student_id || !formData.title || !formData.scheduled_at) {
       alert('Lütfen tüm zorunlu alanları doldurun.');
       return;
     }
-
     try {
       if (editingLesson) {
         await API.put(`/api/lessons/${editingLesson.id}/update/`, formData);
       } else {
         await API.post('/api/lessons/create/', formData);
       }
-
       setShowModal(false);
       setEditingLesson(null);
       setFormData({
@@ -94,7 +89,6 @@ export default function OnlineLessons() {
 
   const handleCancel = async (lessonId) => {
     if (!confirm('Bu dersi iptal etmek istediğinize emin misiniz?')) return;
-
     try {
       await API.post(`/api/lessons/${lessonId}/cancel/`);
       fetchLessons();
@@ -105,7 +99,6 @@ export default function OnlineLessons() {
 
   const handleDelete = async (lessonId) => {
     if (!confirm('Bu dersi silmek istediğinize emin misiniz?')) return;
-
     try {
       await API.delete(`/api/lessons/${lessonId}/delete/`);
       fetchLessons();
@@ -120,7 +113,7 @@ export default function OnlineLessons() {
       student_id: lesson.student_id,
       title: lesson.title,
       description: lesson.description || '',
-      scheduled_at: lesson.scheduled_at.slice(0, 16), // datetime-local formatı
+      scheduled_at: lesson.scheduled_at.slice(0, 16),
       duration_minutes: lesson.duration_minutes,
       meeting_url: lesson.meeting_url || ''
     });
@@ -136,20 +129,7 @@ export default function OnlineLessons() {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'scheduled': return <Clock size={14} />;
-      case 'completed': return <Check size={14} />;
-      case 'cancelled': return <X size={14} />;
-      default: return null;
-    }
-  };
-
-  const filteredLessons = lessons.filter(l => {
-    if (filter === 'all') return true;
-    return l.status === filter;
-  });
-
+  const filteredLessons = lessons.filter(l => filter === 'all' ? true : l.status === filter);
   const upcomingLessons = lessons.filter(l => l.status === 'scheduled');
   const completedLessons = lessons.filter(l => l.status === 'completed');
 
@@ -162,86 +142,91 @@ export default function OnlineLessons() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
+      <div style={{ padding: '24px 16px', maxWidth: '1280px', margin: '0 auto' }}>
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Online Dersler</h1>
-            <p className="text-gray-500 text-sm mt-1">
-              {isCoach ? 'Öğrencilerinizle online ders planlayın' : 'Planlanan ve tamamlanan dersleriniz'}
-            </p>
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>Online Dersler</h1>
+              <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                {isCoach ? 'Öğrencilerinizle online ders planlayın' : 'Planlanan ve tamamlanan dersleriniz'}
+              </p>
+            </div>
+            {isCoach && (
+              <button
+                onClick={() => {
+                  setEditingLesson(null);
+                  setFormData({ student_id: '', title: '', description: '', scheduled_at: '', duration_minutes: 60, meeting_url: '' });
+                  setShowModal(true);
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  backgroundColor: '#4f46e5', color: 'white', padding: '12px 20px',
+                  borderRadius: '12px', fontWeight: '500', border: 'none', cursor: 'pointer',
+                  width: '100%'
+                }}
+              >
+                <Plus size={20} />
+                Yeni Ders
+              </button>
+            )}
           </div>
-
-          {isCoach && (
-            <button
-              onClick={() => {
-                setEditingLesson(null);
-                setFormData({
-                  student_id: '',
-                  title: '',
-                  description: '',
-                  scheduled_at: '',
-                  duration_minutes: 60,
-                  meeting_url: ''
-                });
-                setShowModal(true);
-              }}
-              className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 font-medium w-full sm:w-auto"
-            >
-              <Plus size={20} />
-              Yeni Ders
-            </button>
-          )}
         </div>
 
         {/* İstatistik Kartları */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                <Video className="text-blue-600" size={20} />
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '12px',
+          marginBottom: '24px',
+          width: '100%'
+        }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #f3f4f6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Video size={20} color="#2563eb" />
               </div>
               <div>
-                <p className="text-xs md:text-sm text-gray-500">Toplam</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-800">{lessons.length}</p>
+                <p style={{ fontSize: '12px', color: '#6b7280' }}>Toplam</p>
+                <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>{lessons.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                <Clock className="text-amber-600" size={20} />
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #f3f4f6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Clock size={20} color="#d97706" />
               </div>
               <div>
-                <p className="text-xs md:text-sm text-gray-500">Planlanan</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-800">{upcomingLessons.length}</p>
+                <p style={{ fontSize: '12px', color: '#6b7280' }}>Planlanan</p>
+                <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>{upcomingLessons.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                <Check className="text-green-600" size={20} />
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #f3f4f6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Check size={20} color="#059669" />
               </div>
               <div>
-                <p className="text-xs md:text-sm text-gray-500">Tamamlanan</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-800">{completedLessons.length}</p>
+                <p style={{ fontSize: '12px', color: '#6b7280' }}>Tamamlanan</p>
+                <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>{completedLessons.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                <Calendar className="text-purple-600" size={20} />
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #f3f4f6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', backgroundColor: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Calendar size={20} color="#7c3aed" />
               </div>
               <div>
-                <p className="text-xs md:text-sm text-gray-500">Toplam Saat</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-800">
+                <p style={{ fontSize: '12px', color: '#6b7280' }}>Toplam Saat</p>
+                <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
                   {Math.round(completedLessons.reduce((acc, l) => acc + l.duration_minutes, 0) / 60)}
                 </p>
               </div>
@@ -249,243 +234,126 @@ export default function OnlineLessons() {
           </div>
         </div>
 
-        {/* Filtre */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap
-              ${filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-          >
-            Tümü ({lessons.length})
-          </button>
-          <button
-            onClick={() => setFilter('scheduled')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap
-              ${filter === 'scheduled' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-          >
-            Planlanan ({upcomingLessons.length})
-          </button>
-          <button
-            onClick={() => setFilter('completed')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap
-              ${filter === 'completed' ? 'bg-green-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-          >
-            Tamamlanan ({completedLessons.length})
-          </button>
-          <button
-            onClick={() => setFilter('cancelled')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap
-              ${filter === 'cancelled' ? 'bg-red-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-          >
-            İptal ({lessons.filter(l => l.status === 'cancelled').length})
-          </button>
+        {/* Filtre Butonları */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '24px' }}>
+          {[
+            { key: 'all', label: `Tümü (${lessons.length})`, active: filter === 'all' },
+            { key: 'scheduled', label: `Planlanan (${upcomingLessons.length})`, active: filter === 'scheduled' },
+            { key: 'completed', label: `Tamamlanan (${completedLessons.length})`, active: filter === 'completed' },
+            { key: 'cancelled', label: `İptal (${lessons.filter(l => l.status === 'cancelled').length})`, active: filter === 'cancelled' },
+          ].map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              style={{
+                padding: '8px 16px', borderRadius: '12px', fontSize: '14px', fontWeight: '500',
+                whiteSpace: 'nowrap', border: f.active ? 'none' : '1px solid #e5e7eb',
+                backgroundColor: f.active ? '#4f46e5' : 'white',
+                color: f.active ? 'white' : '#4b5563',
+                cursor: 'pointer'
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
 
         {/* Ders Listesi */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #f3f4f6', overflow: 'hidden' }}>
           {filteredLessons.length === 0 ? (
-            <div className="p-8 md:p-12 text-center">
-              <Video size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">
-                {filter === 'all' ? 'Henüz ders bulunmuyor' : `${filter === 'scheduled' ? 'Planlanan' : filter === 'completed' ? 'Tamamlanan' : 'İptal edilen'} ders bulunmuyor`}
+            <div style={{ padding: '48px', textAlign: 'center' }}>
+              <Video size={48} color="#d1d5db" style={{ margin: '0 auto 16px' }} />
+              <p style={{ color: '#6b7280' }}>
+                {filter === 'all' ? 'Henüz ders bulunmuyor' : 'Bu kategoride ders bulunmuyor'}
               </p>
-              {isCoach && filter === 'all' && (
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="mt-4 text-indigo-600 font-medium hover:underline"
-                >
-                  İlk dersinizi oluşturun
-                </button>
-              )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
-              {filteredLessons.map((lesson) => (
-                <div key={lesson.id} className="p-4 md:p-5 hover:bg-gray-50 transition-colors">
-                  {/* Mobil Layout */}
-                  <div className="md:hidden space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
-                          ${lesson.status === 'scheduled' ? 'bg-blue-100' : lesson.status === 'completed' ? 'bg-green-100' : 'bg-red-100'}`}>
-                          <Video className={`${lesson.status === 'scheduled' ? 'text-blue-600' : lesson.status === 'completed' ? 'text-green-600' : 'text-red-600'}`} size={20} />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-gray-800 text-sm truncate">{lesson.title}</h3>
-                          <p className="text-xs text-gray-500">{isCoach ? lesson.student_name : lesson.coach_name}</p>
-                        </div>
-                      </div>
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${getStatusColor(lesson.status)}`}>
-                        {getStatusIcon(lesson.status)}
-                        {lesson.status_display}
-                      </span>
+            <div>
+              {filteredLessons.map((lesson, index) => (
+                <div
+                  key={lesson.id}
+                  style={{
+                    padding: '16px',
+                    borderBottom: index < filteredLessons.length - 1 ? '1px solid #f3f4f6' : 'none'
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{
+                      width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: lesson.status === 'scheduled' ? '#dbeafe' : lesson.status === 'completed' ? '#d1fae5' : '#fee2e2'
+                    }}>
+                      <Video size={20} color={lesson.status === 'scheduled' ? '#2563eb' : lesson.status === 'completed' ? '#059669' : '#dc2626'} />
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={12} />
-                        {lesson.scheduled_at_formatted}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
-                        {lesson.duration_minutes} dk
-                      </span>
-                    </div>
-
-                    {lesson.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2">{lesson.description}</p>
-                    )}
-
-                    {lesson.notes && lesson.status === 'completed' && (
-                      <div className="p-2 bg-green-50 rounded-lg text-xs text-green-700">
-                        <strong>Notlar:</strong> {lesson.notes}
-                      </div>
-                    )}
-
-                    {/* Mobil Aksiyon Butonları */}
-                    <div className="flex items-center gap-2 pt-1">
-                      {lesson.meeting_url && lesson.status === 'scheduled' && (
-                        <a
-                          href={lesson.meeting_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors"
-                        >
-                          <ExternalLink size={14} />
-                          Derse Katıl
-                        </a>
-                      )}
-
-                      {isCoach && lesson.status === 'scheduled' && (
-                        <>
-                          <button
-                            onClick={() => handleComplete(lesson.id)}
-                            className="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
-                            title="Tamamla"
-                          >
-                            <Check size={16} />
-                          </button>
-                          <button
-                            onClick={() => openEditModal(lesson)}
-                            className="p-2 text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                            title="Düzenle"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleCancel(lesson.id)}
-                            className="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                            title="İptal Et"
-                          >
-                            <X size={16} />
-                          </button>
-                        </>
-                      )}
-
-                      {isCoach && lesson.status !== 'scheduled' && (
-                        <button
-                          onClick={() => handleDelete(lesson.id)}
-                          className="p-2 text-gray-400 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                          title="Sil"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Desktop Layout */}
-                  <div className="hidden md:flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                        ${lesson.status === 'scheduled' ? 'bg-blue-100' : lesson.status === 'completed' ? 'bg-green-100' : 'bg-red-100'}`}>
-                        <Video className={`${lesson.status === 'scheduled' ? 'text-blue-600' : lesson.status === 'completed' ? 'text-green-600' : 'text-red-600'}`} size={24} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                        <h3 style={{ fontWeight: '600', color: '#1f2937', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {lesson.title}
+                        </h3>
+                        <span style={{
+                          padding: '2px 8px', borderRadius: '9999px', fontSize: '12px', fontWeight: '500', flexShrink: 0,
+                          backgroundColor: lesson.status === 'scheduled' ? '#dbeafe' : lesson.status === 'completed' ? '#d1fae5' : '#fee2e2',
+                          color: lesson.status === 'scheduled' ? '#1d4ed8' : lesson.status === 'completed' ? '#047857' : '#dc2626'
+                        }}>
+                          {lesson.status_display}
+                        </span>
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-gray-800">{lesson.title}</h3>
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(lesson.status)}`}>
-                            {getStatusIcon(lesson.status)}
-                            {lesson.status_display}
-                          </span>
-                        </div>
+                      <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
+                        {isCoach ? lesson.student_name : lesson.coach_name}
+                      </p>
 
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 flex-wrap">
-                          <span className="flex items-center gap-1">
-                            <User size={14} />
-                            {isCoach ? lesson.student_name : lesson.coach_name}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Calendar size={14} />
-                            {lesson.scheduled_at_formatted}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock size={14} />
-                            {lesson.duration_minutes} dk
-                          </span>
-                        </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Calendar size={12} />
+                          {lesson.scheduled_at_formatted}
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Clock size={12} />
+                          {lesson.duration_minutes}dk
+                        </span>
+                      </div>
 
-                        {lesson.description && (
-                          <p className="text-sm text-gray-500 mt-2 line-clamp-2">{lesson.description}</p>
+                      {/* Aksiyon Butonları */}
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                        {lesson.meeting_url && lesson.status === 'scheduled' && (
+                          <a
+                            href={lesson.meeting_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '4px',
+                              padding: '8px 12px', backgroundColor: '#4f46e5', color: 'white',
+                              borderRadius: '8px', fontSize: '12px', fontWeight: '500',
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <ExternalLink size={14} />
+                            Katıl
+                          </a>
                         )}
 
-                        {lesson.notes && lesson.status === 'completed' && (
-                          <div className="mt-2 p-2 bg-green-50 rounded-lg text-sm text-green-700">
-                            <strong>Notlar:</strong> {lesson.notes}
-                          </div>
+                        {isCoach && lesson.status === 'scheduled' && (
+                          <>
+                            <button onClick={() => handleComplete(lesson.id)} style={{ padding: '8px', backgroundColor: '#d1fae5', color: '#059669', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                              <Check size={16} />
+                            </button>
+                            <button onClick={() => openEditModal(lesson)} style={{ padding: '8px', backgroundColor: '#f3f4f6', color: '#6b7280', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                              <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => handleCancel(lesson.id)} style={{ padding: '8px', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                              <X size={16} />
+                            </button>
+                          </>
+                        )}
+
+                        {isCoach && lesson.status !== 'scheduled' && (
+                          <button onClick={() => handleDelete(lesson.id)} style={{ padding: '8px', backgroundColor: '#f3f4f6', color: '#9ca3af', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                            <Trash2 size={16} />
+                          </button>
                         )}
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {lesson.meeting_url && lesson.status === 'scheduled' && (
-                        <a
-                          href={lesson.meeting_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
-                        >
-                          <ExternalLink size={16} />
-                          Katıl
-                        </a>
-                      )}
-
-                      {isCoach && lesson.status === 'scheduled' && (
-                        <>
-                          <button
-                            onClick={() => handleComplete(lesson.id)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Tamamla"
-                          >
-                            <Check size={18} />
-                          </button>
-                          <button
-                            onClick={() => openEditModal(lesson)}
-                            className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors"
-                            title="Düzenle"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleCancel(lesson.id)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="İptal Et"
-                          >
-                            <X size={18} />
-                          </button>
-                        </>
-                      )}
-
-                      {isCoach && lesson.status !== 'scheduled' && (
-                        <button
-                          onClick={() => handleDelete(lesson.id)}
-                          className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors"
-                          title="Sil"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -497,22 +365,22 @@ export default function OnlineLessons() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-800">
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '16px' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ padding: '24px', borderBottom: '1px solid #f3f4f6' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
                 {editingLesson ? 'Dersi Düzenle' : 'Yeni Ders Oluştur'}
               </h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Öğrenci *</label>
+            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Öğrenci *</label>
                 <select
                   value={formData.student_id}
                   onChange={(e) => setFormData({ ...formData, student_id: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   required
+                  style={{ width: '100%', padding: '8px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
                 >
                   <option value="">Öğrenci seçin</option>
                   {students.map((s) => (
@@ -521,83 +389,76 @@ export default function OnlineLessons() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ders Başlığı *</label>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Ders Başlığı *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Örn: TYT Matematik - Fonksiyonlar"
+                  placeholder="Örn: TYT Matematik"
                   required
+                  style={{ width: '100%', padding: '8px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Açıklama</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   rows={2}
-                  placeholder="Ders hakkında kısa açıklama..."
+                  style={{ width: '100%', padding: '8px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px', resize: 'none', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tarih & Saat *</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Tarih *</label>
                   <input
                     type="datetime-local"
                     value={formData.scheduled_at}
                     onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     required
+                    style={{ width: '100%', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px', boxSizing: 'border-box' }}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Süre (dk)</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Süre</label>
                   <select
                     value={formData.duration_minutes}
                     onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    style={{ width: '100%', padding: '8px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
                   >
                     <option value={30}>30 dk</option>
                     <option value={45}>45 dk</option>
                     <option value={60}>60 dk</option>
                     <option value={90}>90 dk</option>
-                    <option value={120}>120 dk</option>
                   </select>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Toplantı Linki</label>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Toplantı Linki</label>
                 <input
                   type="url"
                   value={formData.meeting_url}
                   onChange={(e) => setFormData({ ...formData, meeting_url: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="https://zoom.us/j/... veya https://meet.google.com/..."
+                  placeholder="https://zoom.us/j/..."
+                  style={{ width: '100%', padding: '8px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px', boxSizing: 'border-box' }}
                 />
-                <p className="text-xs text-gray-400 mt-1">Zoom, Google Meet veya başka bir platform linki</p>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div style={{ display: 'flex', gap: '12px' }}>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditingLesson(null);
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
+                  onClick={() => { setShowModal(false); setEditingLesson(null); }}
+                  style={{ flex: 1, padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', backgroundColor: 'white', color: '#4b5563', fontWeight: '500', cursor: 'pointer' }}
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+                  style={{ flex: 1, padding: '12px', border: 'none', borderRadius: '12px', backgroundColor: '#4f46e5', color: 'white', fontWeight: '500', cursor: 'pointer' }}
                 >
                   {editingLesson ? 'Güncelle' : 'Oluştur'}
                 </button>
