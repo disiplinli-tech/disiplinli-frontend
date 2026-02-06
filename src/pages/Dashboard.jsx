@@ -261,41 +261,64 @@ function CoachDashboard({ user, stats }) {
                 return (
                   <div
                     key={student.id}
-                    className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 cursor-pointer transition-colors ${isCritical ? 'bg-red-50/50' : isWarning ? 'bg-yellow-50/50' : ''}`}
+                    className={`px-3 md:px-5 py-3 md:py-4 hover:bg-gray-50 cursor-pointer transition-colors ${isCritical ? 'bg-red-50/50' : isWarning ? 'bg-yellow-50/50' : ''}`}
                     onClick={() => navigate(`/student/${student.id}`)}
                   >
-                    <div className="col-span-12 md:col-span-4 flex items-center gap-3">
-                      {/* Avatar with activity indicator */}
-                      <div className="relative">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
-                          {student.name?.charAt(0).toUpperCase() || 'Ö'}
+                    {/* Mobile Layout */}
+                    <div className="md:hidden flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
+                            {student.name?.charAt(0).toUpperCase() || 'Ö'}
+                          </div>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
                         </div>
-                        {/* Aktivite noktası */}
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
+                        <div>
+                          <p className="font-medium text-gray-800 text-sm">{student.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {lastNet && <span className="text-xs font-semibold text-gray-600">{lastNet} net</span>}
+                            {ranking && <span className="text-xs text-indigo-600">~{formatRanking(ranking)}</span>}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-800">{student.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{student.email}</p>
+                      <div className="flex items-center gap-2">
+                        <ActivityBadge activity_status={activityStatus} />
+                        <ChevronRight size={16} className="text-gray-400" />
                       </div>
                     </div>
 
-                    <div className="hidden md:block col-span-2 text-center">
-                      {lastNet ? <span className="text-lg font-bold text-gray-800">{lastNet}</span> : <span className="text-gray-400">-</span>}
-                    </div>
+                    {/* Desktop Layout */}
+                    <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+                      <div className="col-span-4 flex items-center gap-3">
+                        <div className="relative">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
+                            {student.name?.charAt(0).toUpperCase() || 'Ö'}
+                          </div>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">{student.name}</p>
+                          <p className="text-xs text-gray-400 truncate">{student.email}</p>
+                        </div>
+                      </div>
 
-                    <div className="hidden md:block col-span-2 text-center">
-                      {ranking ? <span className="text-indigo-600 font-semibold">~{formatRanking(ranking)}</span> : <span className="text-gray-400">-</span>}
-                    </div>
+                      <div className="col-span-2 text-center">
+                        {lastNet ? <span className="text-lg font-bold text-gray-800">{lastNet}</span> : <span className="text-gray-400">-</span>}
+                      </div>
 
-                    {/* Aktivite Durumu */}
-                    <div className="hidden md:flex col-span-2 justify-center">
-                      <ActivityBadge activity_status={activityStatus} />
-                    </div>
+                      <div className="col-span-2 text-center">
+                        {ranking ? <span className="text-indigo-600 font-semibold">~{formatRanking(ranking)}</span> : <span className="text-gray-400">-</span>}
+                      </div>
 
-                    <div className="hidden md:flex col-span-2 justify-end gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}`); }} className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"><Eye size={18} /></button>
-                      <button onClick={(e) => { e.stopPropagation(); navigate('/schedule'); }} className="p-2 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"><Calendar size={18} /></button>
-                      <button onClick={(e) => { e.stopPropagation(); navigate('/messages'); }} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"><MessageCircle size={18} /></button>
+                      <div className="col-span-2 flex justify-center">
+                        <ActivityBadge activity_status={activityStatus} />
+                      </div>
+
+                      <div className="col-span-2 flex justify-end gap-2">
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}`); }} className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"><Eye size={18} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); navigate('/schedule'); }} className="p-2 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"><Calendar size={18} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); navigate('/messages'); }} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"><MessageCircle size={18} /></button>
+                      </div>
                     </div>
 
                     {/* Mobil görünüm */}

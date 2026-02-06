@@ -49,15 +49,15 @@ export default function Login({ setUser }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 px-4">
-      <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 px-4 py-8">
+      <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-sm md:max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <BookOpen className="text-white" size={32} />
+        <div className="text-center mb-6 md:mb-8">
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
+            <BookOpen className="text-white w-7 h-7 md:w-8 md:h-8" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">KoçumNet</h1>
-          <p className="text-gray-500 mt-2">YKS Koçluk Platformu</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">KoçumNet</h1>
+          <p className="text-gray-500 mt-1 md:mt-2 text-sm md:text-base">YKS Koçluk Platformu</p>
         </div>
         
         {/* Error */}

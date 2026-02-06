@@ -291,24 +291,25 @@ export default function StudentDetail() {
 
         {/* Tabs */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="border-b border-gray-100 flex">
+          <div className="border-b border-gray-100 flex overflow-x-auto scrollbar-hide">
             {[
-              { key: 'overview', label: 'Genel Bakış', icon: BarChart3 },
-              { key: 'exams', label: 'Denemeler', icon: Award },
-              { key: 'topics', label: 'Konu Takibi', icon: BookOpen },
-              { key: 'goals', label: 'Hedefler', icon: Target },
-              { key: 'schedule', label: 'Program', icon: Calendar },
+              { key: 'overview', label: 'Genel', mobileLabel: 'Genel', icon: BarChart3 },
+              { key: 'exams', label: 'Denemeler', mobileLabel: 'Deneme', icon: Award },
+              { key: 'topics', label: 'Konu Takibi', mobileLabel: 'Konular', icon: BookOpen },
+              { key: 'goals', label: 'Hedefler', mobileLabel: 'Hedef', icon: Target },
+              { key: 'schedule', label: 'Program', mobileLabel: 'Program', icon: Calendar },
             ].map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors
-                  ${activeTab === tab.key 
-                    ? 'text-indigo-600 border-indigo-600 bg-indigo-50/50' 
+                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0
+                  ${activeTab === tab.key
+                    ? 'text-indigo-600 border-indigo-600 bg-indigo-50/50'
                     : 'text-gray-500 border-transparent hover:text-gray-700'}`}
               >
-                <tab.icon size={18} />
-                {tab.label}
+                <tab.icon size={16} className="md:w-[18px] md:h-[18px]" />
+                <span className="hidden md:inline">{tab.label}</span>
+                <span className="md:hidden">{tab.mobileLabel}</span>
               </button>
             ))}
           </div>
