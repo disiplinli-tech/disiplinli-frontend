@@ -310,7 +310,7 @@ function Layout({ children }) {
         setMobileOpen={setMobileOpen}
       />
 
-      <div className="flex-1 flex flex-col min-h-screen max-w-full md:max-w-none md:overflow-visible overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Mobile Header */}
         <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40 w-full">
           <button onClick={() => setMobileOpen(true)} className="p-2 text-gray-600">
@@ -328,7 +328,7 @@ function Layout({ children }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 md:overflow-visible overflow-x-hidden">
+        <main className="flex-1">
           {children}
         </main>
       </div>
