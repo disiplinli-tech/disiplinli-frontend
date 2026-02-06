@@ -268,8 +268,12 @@ export default function Schedule({ user }) {
       </div>
 
       {/* Calendar Grid */}
-      <div className="flex-1 overflow-auto">
-        <div className="min-w-[900px] max-w-[1800px] mx-auto">
+      <div className="flex-1 overflow-x-auto overflow-y-auto">
+        {/* Mobilde kaydır mesajı */}
+        <p className="md:hidden text-xs text-center text-gray-400 py-2 bg-gray-50 sticky top-0 z-10">
+          ← Takvimi görmek için kaydır →
+        </p>
+        <div className="min-w-[800px] max-w-[1800px] mx-auto">
           {/* Gün başlıkları */}
           <div className="sticky top-0 z-20 bg-white border-b border-gray-200 grid grid-cols-[60px_repeat(7,1fr)]">
             <div className="p-2 text-center text-xs text-gray-400 border-r border-gray-100">

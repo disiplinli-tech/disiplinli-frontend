@@ -444,41 +444,41 @@ export default function Exams() {
 
         {/* Özet Kartları */}
         {exams.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white">
-              <div className="flex items-center gap-2 mb-1">
-                <Trophy size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">TYT Ortalama</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                <Trophy size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+                <span className="text-xs md:text-sm opacity-90">TYT Ort.</span>
               </div>
-              <p className="text-3xl font-bold">{stats.tytAvg || '-'}</p>
-              <p className="text-xs opacity-70 mt-1">{stats.tytCount} deneme</p>
+              <p className="text-2xl md:text-3xl font-bold">{stats.tytAvg || '-'}</p>
+              <p className="text-[10px] md:text-xs opacity-70 mt-1">{stats.tytCount} deneme</p>
             </div>
-            
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-white">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">TYT En Yüksek</span>
+
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                <TrendingUp size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+                <span className="text-xs md:text-sm opacity-90">TYT Max</span>
               </div>
-              <p className="text-3xl font-bold">{stats.tytMax || '-'}</p>
-              <p className="text-xs opacity-70 mt-1">En iyi sonuç</p>
+              <p className="text-2xl md:text-3xl font-bold">{stats.tytMax || '-'}</p>
+              <p className="text-[10px] md:text-xs opacity-70 mt-1">En iyi sonuç</p>
             </div>
-            
-            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-4 text-white">
-              <div className="flex items-center gap-2 mb-1">
-                <Target size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">Tahmini Sıralama</span>
+
+            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                <Target size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+                <span className="text-xs md:text-sm opacity-90">Sıralama</span>
               </div>
-              <p className="text-2xl font-bold">{stats.tytAvg ? formatRanking(estimateRanking(parseFloat(stats.tytAvg), 'TYT')) : '-'}</p>
-              <p className="text-xs opacity-70 mt-1">TYT ortalamasına göre</p>
+              <p className="text-lg md:text-2xl font-bold">{stats.tytAvg ? formatRanking(estimateRanking(parseFloat(stats.tytAvg), 'TYT')) : '-'}</p>
+              <p className="text-[10px] md:text-xs opacity-70 mt-1">TYT ort. göre</p>
             </div>
-            
-            <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl p-4 text-white">
-              <div className="flex items-center gap-2 mb-1">
-                <Award size={18} className="opacity-80" />
-                <span className="text-sm opacity-90">AYT Deneme</span>
+
+            <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                <Award size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+                <span className="text-xs md:text-sm opacity-90">AYT</span>
               </div>
-              <p className="text-3xl font-bold">{stats.aytCount}</p>
-              <p className="text-xs opacity-70 mt-1">Toplam AYT</p>
+              <p className="text-2xl md:text-3xl font-bold">{stats.aytCount}</p>
+              <p className="text-[10px] md:text-xs opacity-70 mt-1">Toplam AYT</p>
             </div>
           </div>
         )}

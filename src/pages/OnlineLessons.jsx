@@ -197,51 +197,51 @@ export default function OnlineLessons() {
         </div>
 
         {/* İstatistik Kartları */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                <Video className="text-blue-600" size={24} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+          <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <Video className="text-blue-600 w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Toplam Ders</p>
-                <p className="text-2xl font-bold text-gray-800">{lessons.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                <Clock className="text-amber-600" size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Planlanan</p>
-                <p className="text-2xl font-bold text-gray-800">{upcomingLessons.length}</p>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-gray-500 truncate">Toplam</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-800">{lessons.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                <Check className="text-green-600" size={24} />
+          <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <Clock className="text-amber-600 w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Tamamlanan</p>
-                <p className="text-2xl font-bold text-gray-800">{completedLessons.length}</p>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-gray-500 truncate">Planlanan</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-800">{upcomingLessons.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                <Calendar className="text-purple-600" size={24} />
+          <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                <Check className="text-green-600 w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Toplam Saat</p>
-                <p className="text-2xl font-bold text-gray-800">
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-gray-500 truncate">Tamamlanan</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-800">{completedLessons.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl md:rounded-2xl p-3 md:p-5 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
+                <Calendar className="text-purple-600 w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-gray-500 truncate">Toplam Saat</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-800">
                   {Math.round(completedLessons.reduce((acc, l) => acc + l.duration_minutes, 0) / 60)}
                 </p>
               </div>
