@@ -166,10 +166,10 @@ export default function OnlineLessons() {
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6 overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Online Dersler</h1>
-            <p className="text-gray-500 text-sm mt-1">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800">Online Dersler</h1>
+            <p className="text-gray-500 text-xs md:text-sm mt-1">
               {isCoach ? 'Öğrencilerinizle online ders planlayın' : 'Planlanan ve tamamlanan dersleriniz'}
             </p>
           </div>
@@ -188,10 +188,10 @@ export default function OnlineLessons() {
                 });
                 setShowModal(true);
               }}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-colors"
+              className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors w-full sm:w-auto"
             >
               <Plus size={20} />
-              <span className="hidden sm:inline">Yeni Ders</span>
+              <span>Yeni Ders</span>
             </button>
           )}
         </div>
@@ -284,7 +284,7 @@ export default function OnlineLessons() {
         {/* Ders Listesi */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {filteredLessons.length === 0 ? (
-            <div className="p-12 text-center">
+            <div className="p-8 md:p-12 text-center">
               <Video size={48} className="mx-auto text-gray-300 mb-4" />
               <p className="text-gray-500">
                 {filter === 'all' ? 'Henüz ders bulunmuyor' : `${filter === 'scheduled' ? 'Planlanan' : filter === 'completed' ? 'Tamamlanan' : 'İptal edilen'} ders bulunmuyor`}
@@ -301,8 +301,101 @@ export default function OnlineLessons() {
           ) : (
             <div className="divide-y divide-gray-50">
               {filteredLessons.map((lesson) => (
-                <div key={lesson.id} className="p-5 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start justify-between gap-4">
+                <div key={lesson.id} className="p-4 md:p-5 hover:bg-gray-50 transition-colors">
+                  {/* Mobil Layout */}
+                  <div className="md:hidden space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                          ${lesson.status === 'scheduled' ? 'bg-blue-100' : lesson.status === 'completed' ? 'bg-green-100' : 'bg-red-100'}`}>
+                          <Video className={`${lesson.status === 'scheduled' ? 'text-blue-600' : lesson.status === 'completed' ? 'text-green-600' : 'text-red-600'}`} size={20} />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-gray-800 text-sm truncate">{lesson.title}</h3>
+                          <p className="text-xs text-gray-500">{isCoach ? lesson.student_name : lesson.coach_name}</p>
+                        </div>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${getStatusColor(lesson.status)}`}>
+                        {getStatusIcon(lesson.status)}
+                        {lesson.status_display}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                      <span className="flex items-center gap-1">
+                        <Calendar size={12} />
+                        {lesson.scheduled_at_formatted}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {lesson.duration_minutes} dk
+                      </span>
+                    </div>
+
+                    {lesson.description && (
+                      <p className="text-xs text-gray-500 line-clamp-2">{lesson.description}</p>
+                    )}
+
+                    {lesson.notes && lesson.status === 'completed' && (
+                      <div className="p-2 bg-green-50 rounded-lg text-xs text-green-700">
+                        <strong>Notlar:</strong> {lesson.notes}
+                      </div>
+                    )}
+
+                    {/* Mobil Aksiyon Butonları */}
+                    <div className="flex items-center gap-2 pt-1">
+                      {lesson.meeting_url && lesson.status === 'scheduled' && (
+                        <a
+                          href={lesson.meeting_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors"
+                        >
+                          <ExternalLink size={14} />
+                          Derse Katıl
+                        </a>
+                      )}
+
+                      {isCoach && lesson.status === 'scheduled' && (
+                        <>
+                          <button
+                            onClick={() => handleComplete(lesson.id)}
+                            className="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                            title="Tamamla"
+                          >
+                            <Check size={16} />
+                          </button>
+                          <button
+                            onClick={() => openEditModal(lesson)}
+                            className="p-2 text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                            title="Düzenle"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleCancel(lesson.id)}
+                            className="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                            title="İptal Et"
+                          >
+                            <X size={16} />
+                          </button>
+                        </>
+                      )}
+
+                      {isCoach && lesson.status !== 'scheduled' && (
+                        <button
+                          onClick={() => handleDelete(lesson.id)}
+                          className="p-2 text-gray-400 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                          title="Sil"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden md:flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
                         ${lesson.status === 'scheduled' ? 'bg-blue-100' : lesson.status === 'completed' ? 'bg-green-100' : 'bg-red-100'}`}>

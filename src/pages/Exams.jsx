@@ -687,12 +687,12 @@ export default function Exams() {
 
         {/* Geçmiş Denemeler */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-5 border-b border-gray-100">
+          <div className="p-4 md:p-5 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-800">Geçmiş Denemeler</h2>
           </div>
-          
+
           {exams.length === 0 ? (
-            <div className="p-12 text-center">
+            <div className="p-8 md:p-12 text-center">
               <Award size={48} className="mx-auto text-gray-300 mb-4" />
               <p className="text-gray-500">Henüz deneme sonucu yok</p>
               <button
@@ -708,7 +708,7 @@ export default function Exams() {
                 const examInfo = EXAM_TYPES.find(e => e.key === exam.exam_type) || { name: exam.exam_type, color: 'gray' };
                 const ranking = estimateRanking(exam.net_score, exam.exam_type);
                 const isExpanded = expandedExam === exam.id;
-                
+
                 const colorClasses = {
                   blue: 'bg-blue-100 text-blue-700',
                   purple: 'bg-purple-100 text-purple-700',
@@ -716,43 +716,77 @@ export default function Exams() {
                   orange: 'bg-orange-100 text-orange-700',
                   gray: 'bg-gray-100 text-gray-700',
                 };
-                
+
                 return (
                   <div key={exam.id || idx}>
-                    <div 
-                      className="p-5 flex items-center justify-between hover:bg-gray-50 cursor-pointer"
+                    <div
+                      className="p-4 md:p-5 hover:bg-gray-50 cursor-pointer"
                       onClick={() => setExpandedExam(isExpanded ? null : exam.id)}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl ${colorClasses[examInfo.color] || colorClasses.gray} flex items-center justify-center`}>
-                          <Award size={24} />
+                      {/* Mobil Layout */}
+                      <div className="flex md:hidden flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl ${colorClasses[examInfo.color] || colorClasses.gray} flex items-center justify-center`}>
+                              <Award size={20} />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-800 text-sm">{examInfo.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(exam.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-gray-400">
+                            {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-800">{examInfo.name}</p>
-                          <p className="text-sm text-gray-500">
-                            {new Date(exam.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </p>
+                        <div className="flex items-center justify-around bg-gray-50 rounded-xl py-2">
+                          <div className="text-center">
+                            <p className="text-xl font-bold text-gray-800">{exam.net_score}</p>
+                            <p className="text-[10px] text-gray-500">net</p>
+                          </div>
+                          <div className="w-px h-8 bg-gray-200"></div>
+                          <div className="text-center">
+                            <p className="text-lg font-semibold text-indigo-600">~{formatRanking(ranking)}</p>
+                            <p className="text-[10px] text-gray-500">sıralama</p>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-800">{exam.net_score}</p>
-                          <p className="text-xs text-gray-500">net</p>
+
+                      {/* Desktop Layout */}
+                      <div className="hidden md:flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-xl ${colorClasses[examInfo.color] || colorClasses.gray} flex items-center justify-center`}>
+                            <Award size={24} />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">{examInfo.name}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(exam.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-semibold text-indigo-600">~{formatRanking(ranking)}</p>
-                          <p className="text-xs text-gray-500">sıralama</p>
-                        </div>
-                        <div className="text-gray-400">
-                          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-gray-800">{exam.net_score}</p>
+                            <p className="text-xs text-gray-500">net</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-semibold text-indigo-600">~{formatRanking(ranking)}</p>
+                            <p className="text-xs text-gray-500">sıralama</p>
+                          </div>
+                          <div className="text-gray-400">
+                            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                          </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Expanded Content - Branş Detayları */}
                     {isExpanded && (
-                      <div className="px-5 pb-5">
+                      <div className="px-4 pb-4 md:px-5 md:pb-5">
                         <SubjectDetails
                           examType={exam.exam_type}
                           examDate={exam.date}

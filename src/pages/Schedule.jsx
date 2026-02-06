@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import API from "../api";
-import { Calendar, Plus, X, Trash2, Clock, User, ChevronRight } from "lucide-react";
+import { Calendar, Plus, X, Trash2, Clock, User, ChevronRight, ChevronLeft, List, Grid3X3 } from "lucide-react";
 
 const DAYS = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 7);
@@ -39,6 +39,8 @@ export default function Schedule({ user }) {
   const [selectedStudent, setSelectedStudent] = useState("all");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [saving, setSaving] = useState(false);
+  const [mobileView, setMobileView] = useState('list'); // 'list' or 'calendar'
+  const [selectedDayIndex, setSelectedDayIndex] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
   const currentTimeRef = useRef(null);
 
   const role = user?.role || localStorage.getItem('role');
@@ -267,12 +269,135 @@ export default function Schedule({ user }) {
         )}
       </div>
 
-      {/* Calendar Grid */}
-      <div className="flex-1 overflow-x-auto overflow-y-auto">
-        {/* Mobilde kaydır mesajı */}
-        <p className="md:hidden text-xs text-center text-gray-400 py-2 bg-gray-50 sticky top-0 z-10">
-          ← Takvimi görmek için kaydır →
-        </p>
+      {/* Mobile List View */}
+      <div className="md:hidden flex-1 overflow-y-auto">
+        {/* Gün Seçici */}
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-2 py-3">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => setSelectedDayIndex(prev => prev === 0 ? 6 : prev - 1)}
+              className="p-2 rounded-lg hover:bg-gray-100"
+            >
+              <ChevronLeft size={20} className="text-gray-600" />
+            </button>
+
+            <div className="flex-1 flex justify-center gap-1 overflow-x-auto">
+              {DAYS.map((day, i) => {
+                const dayDate = new Date(currentTime.getTime() + (i - todayIndex) * 86400000);
+                const dayPlansCount = getPlansForDay(day).length;
+                return (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDayIndex(i)}
+                    className={`flex flex-col items-center px-2.5 py-1.5 rounded-xl transition-all min-w-[44px]
+                      ${selectedDayIndex === i
+                        ? 'bg-indigo-600 text-white'
+                        : i === todayIndex
+                          ? 'bg-indigo-50 text-indigo-600'
+                          : 'text-gray-600 hover:bg-gray-100'}`}
+                  >
+                    <span className="text-[10px] font-medium">{day.slice(0, 2)}</span>
+                    <span className="text-sm font-bold">{dayDate.getDate()}</span>
+                    {dayPlansCount > 0 && (
+                      <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${selectedDayIndex === i ? 'bg-white' : 'bg-indigo-500'}`}></div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setSelectedDayIndex(prev => prev === 6 ? 0 : prev + 1)}
+              className="p-2 rounded-lg hover:bg-gray-100"
+            >
+              <ChevronRight size={20} className="text-gray-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobil Ders Listesi */}
+        <div className="p-4 space-y-3">
+          {(() => {
+            const dayPlans = getPlansForDay(DAYS[selectedDayIndex])
+              .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+
+            if (dayPlans.length === 0) {
+              return (
+                <div className="text-center py-12">
+                  <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500 text-sm">{DAYS[selectedDayIndex]} günü için ders yok</p>
+                  <button
+                    onClick={() => {
+                      setNewPlan({
+                        ...newPlan,
+                        day: DAYS[selectedDayIndex],
+                        category: '',
+                        subject: '',
+                        student_id: selectedStudent !== 'all' ? selectedStudent : ''
+                      });
+                      setShowModal(true);
+                    }}
+                    className="mt-4 text-indigo-600 font-medium text-sm"
+                  >
+                    + Ders Ekle
+                  </button>
+                </div>
+              );
+            }
+
+            return dayPlans.map(plan => {
+              const color = isCoach && plan.student_id
+                ? getStudentColor(plan.student_id)
+                : (plan.category === 'AYT' ? COLORS.AYT : COLORS.TYT);
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`bg-white rounded-xl border-l-4 ${color.border} shadow-sm p-4`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-bold ${color.text}`}>
+                          {plan.category} {plan.subject}
+                        </span>
+                        {plan.activity_type && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {ACTIVITY_TYPES.find(a => a.value === plan.activity_type)?.emoji}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          {plan.start_time?.slice(0,5)} - {plan.end_time?.slice(0,5)}
+                        </span>
+                        {isCoach && plan.student_name && (
+                          <span className="flex items-center gap-1">
+                            <User size={12} />
+                            {plan.student_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={(e) => deletePlan(plan.id, e)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              );
+            });
+          })()}
+        </div>
+      </div>
+
+      {/* Desktop Calendar Grid */}
+      <div className="hidden md:block flex-1 overflow-x-auto overflow-y-auto">
         <div className="min-w-[800px] max-w-[1800px] mx-auto">
           {/* Gün başlıkları */}
           <div className="sticky top-0 z-20 bg-white border-b border-gray-200 grid grid-cols-[60px_repeat(7,1fr)]">
@@ -302,11 +427,11 @@ export default function Schedule({ user }) {
             {DAYS.map((day, dayIndex) => {
               const dayPlans = getPlansForDay(day);
               const isToday = dayIndex === todayIndex;
-              
+
               return (
                 <div key={day} className={`relative border-r border-gray-100 last:border-r-0 ${isToday ? 'bg-indigo-50/30' : ''}`}>
                   {HOURS.map(hour => (
-                    <div 
+                    <div
                       key={hour}
                       onClick={() => handleCellClick(day, hour)}
                       className="h-[60px] border-b border-gray-100 cursor-pointer hover:bg-indigo-50/50 group"
@@ -320,15 +445,15 @@ export default function Schedule({ user }) {
                   <div className="absolute inset-0 pointer-events-none">
                     {dayPlans.map(plan => {
                       const style = getPlanStyle(plan);
-                      const color = isCoach && plan.student_id 
+                      const color = isCoach && plan.student_id
                         ? getStudentColor(plan.student_id)
                         : (plan.category === 'AYT' ? COLORS.AYT : COLORS.TYT);
-                      
+
                       return (
                         <div
                           key={plan.id}
                           style={style}
-                          className={`absolute left-1 right-1 rounded-lg border-l-4 ${color.border} ${color.light} 
+                          className={`absolute left-1 right-1 rounded-lg border-l-4 ${color.border} ${color.light}
                             shadow-sm overflow-hidden pointer-events-auto cursor-default group/plan hover:shadow-md`}
                         >
                           <div className="p-1.5 h-full flex flex-col">
@@ -358,7 +483,7 @@ export default function Schedule({ user }) {
                   </div>
 
                   {isToday && currentTimeTop >= 0 && (
-                    <div 
+                    <div
                       ref={currentTimeRef}
                       className="absolute left-0 right-0 z-10 pointer-events-none"
                       style={{ top: `${currentTimeTop}px` }}
