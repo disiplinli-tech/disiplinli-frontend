@@ -249,7 +249,7 @@ export default function Schedule({ user }) {
                 className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium"
               >
                 <Plus size={18} />
-                <span className="hidden sm:inline">Ders Ekle</span>
+                <span>Ders Ekle</span>
               </button>
             </div>
           </div>
@@ -310,8 +310,29 @@ export default function Schedule({ user }) {
                 return startHour === hour;
               });
 
+              const handleMobileHourClick = () => {
+                if (hourPlans.length === 0) {
+                  setNewPlan({
+                    student_id: selectedStudent !== 'all' ? selectedStudent : '',
+                    day: DAYS[selectedDayIndex],
+                    start_hour: hour.toString().padStart(2, '0'),
+                    start_min: '00',
+                    end_hour: Math.min(hour + 1, 22).toString().padStart(2, '0'),
+                    end_min: '00',
+                    category: '',
+                    subject: '',
+                    activity_type: 'SORU'
+                  });
+                  setShowModal(true);
+                }
+              };
+
               return (
-                <div key={hour} className="flex border-b border-gray-100 min-h-[60px]">
+                <div
+                  key={hour}
+                  className={`flex border-b border-gray-100 min-h-[60px] ${hourPlans.length === 0 ? 'cursor-pointer active:bg-indigo-50' : ''}`}
+                  onClick={handleMobileHourClick}
+                >
                   {/* Saat Kolonu */}
                   <div className="w-14 flex-shrink-0 py-2 pr-2 text-right">
                     <span className="text-xs text-gray-400">{hour.toString().padStart(2, '0')}:00</span>
