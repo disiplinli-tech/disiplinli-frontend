@@ -199,78 +199,81 @@ export default function Schedule({ user }) {
   }
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-3 max-w-[1800px] mx-auto">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="text-indigo-600" size={24} />
-              <div>
-                <h1 className="text-xl font-bold text-gray-800">Takvim</h1>
-                <p className="text-xs text-gray-500">
-                  {currentTime.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
-              </div>
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 md:py-5">
+        <div className="max-w-[1800px] mx-auto space-y-4">
+          {/* Başlık ve Butonlar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Programım</h1>
+              <p className="text-gray-500 text-sm mt-1">
+                {currentTime.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
             </div>
-            
-            <button
-              onClick={() => currentTimeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-              className="px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100"
-            >
-              Bugün
-            </button>
-          </div>
 
-          <div className="flex items-center gap-3">
-            {isCoach && students.length > 0 && (
-              <select
-                value={selectedStudent}
-                onChange={(e) => setSelectedStudent(e.target.value)}
-                className="px-4 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 bg-white"
+            <div className="flex items-center gap-3">
+              {/* Mobilde gizli - Bugün butonu */}
+              <button
+                onClick={() => {
+                  setSelectedDayIndex(todayIndex);
+                  currentTimeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="hidden md:flex px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100"
               >
-                <option value="all">Tüm Öğrenciler</option>
-                {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            )}
+                Bugün
+              </button>
 
-            <button
-              onClick={() => {
-                setNewPlan({ 
-                  ...newPlan, 
-                  day: DAYS[todayIndex], 
-                  category: '', 
-                  subject: '', 
-                  student_id: selectedStudent !== 'all' ? selectedStudent : '' 
-                });
-                setShowModal(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200"
-            >
-              <Plus size={18} />
-              <span className="hidden sm:inline">Ders Ekle</span>
-            </button>
+              {isCoach && students.length > 0 && (
+                <select
+                  value={selectedStudent}
+                  onChange={(e) => setSelectedStudent(e.target.value)}
+                  className="px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 bg-white"
+                >
+                  <option value="all">Tüm Öğrenciler</option>
+                  {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              )}
+
+              <button
+                onClick={() => {
+                  setNewPlan({
+                    ...newPlan,
+                    day: DAYS[selectedDayIndex],
+                    category: '',
+                    subject: '',
+                    student_id: selectedStudent !== 'all' ? selectedStudent : ''
+                  });
+                  setShowModal(true);
+                }}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium"
+              >
+                <Plus size={18} />
+                <span className="hidden sm:inline">Ders Ekle</span>
+              </button>
+            </div>
           </div>
+
+          {/* Öğrenci Filtreleri */}
+          {isCoach && selectedStudent === "all" && students.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {students.map((s, i) => (
+                <span
+                  key={s.id}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer hover:scale-105 transition
+                    ${STUDENT_COLORS[i % STUDENT_COLORS.length].light} ${STUDENT_COLORS[i % STUDENT_COLORS.length].text}`}
+                  onClick={() => setSelectedStudent(s.id.toString())}
+                >
+                  {s.name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-
-        {isCoach && selectedStudent === "all" && students.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3 max-w-[1800px] mx-auto">
-            {students.map((s, i) => (
-              <span 
-                key={s.id} 
-                className={`px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer hover:scale-105 transition
-                  ${STUDENT_COLORS[i % STUDENT_COLORS.length].light} ${STUDENT_COLORS[i % STUDENT_COLORS.length].text}`}
-                onClick={() => setSelectedStudent(s.id.toString())}
-              >
-                {s.name}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Mobile List View */}
-      <div className="md:hidden flex-1 overflow-y-auto">
+      <div className="md:hidden flex-1 overflow-y-auto bg-gray-50">
         {/* Gün Seçici */}
         <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-2 py-3">
           <div className="flex items-center justify-between gap-2">
