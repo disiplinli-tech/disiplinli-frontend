@@ -423,8 +423,8 @@ export default function Exams() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 overflow-x-hidden">
+      <div className="max-w-5xl mx-auto space-y-6 overflow-hidden">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

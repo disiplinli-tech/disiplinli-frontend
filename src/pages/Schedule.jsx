@@ -197,10 +197,10 @@ export default function Schedule({ user }) {
   }
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-50">
+    <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-50 overflow-x-hidden">
       {/* Header */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between max-w-[1800px] mx-auto">
+        <div className="flex flex-wrap items-center justify-between gap-3 max-w-[1800px] mx-auto">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="text-indigo-600" size={24} />
