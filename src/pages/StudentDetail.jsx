@@ -260,9 +260,9 @@ export default function StudentDetail() {
             </div>
           </div>
           
-          {/* Sıralama Kartları */}
+          {/* Sıralama Kartları - ORTALAMAYA GÖRE */}
           <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-            {/* TYT */}
+            {/* TYT Sıralama (Ortalamaya göre) */}
             <div className="bg-blue-50 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-blue-600">TYT Sıralama</span>
@@ -275,40 +275,40 @@ export default function StudentDetail() {
                 )}
               </div>
               <p className="text-2xl font-bold text-blue-700">
-                {rankings.TYT ? formatRanking(rankings.TYT.ranking) : '-'}
+                {student.tyt_avg_ranking ? formatRanking(student.tyt_avg_ranking) : '-'}
               </p>
               <p className="text-xs text-blue-500 mt-1">
-                {rankings.TYT ? `${rankings.TYT.net} net` : 'Henüz deneme yok'}
+                {student.tyt_avg_net ? `${student.tyt_avg_net} net` : 'Henüz deneme yok'}
               </p>
             </div>
-            
-            {/* AYT */}
+
+            {/* AYT Sıralama (Ortalamaya göre) */}
             <div className="bg-purple-50 rounded-xl p-4">
               <span className="text-sm font-medium text-purple-600">AYT Sıralama</span>
               <p className="text-2xl font-bold text-purple-700 mt-2">
-                {rankings.AYT_SAY ? formatRanking(rankings.AYT_SAY.ranking) : '-'}
+                {student.ayt_avg_ranking ? formatRanking(student.ayt_avg_ranking) : '-'}
               </p>
               <p className="text-xs text-purple-500 mt-1">
-                {rankings.AYT_SAY ? `${rankings.AYT_SAY.net} net` : 'Henüz deneme yok'}
+                {student.ayt_avg_net ? `${student.ayt_avg_net} net` : 'Henüz deneme yok'}
               </p>
             </div>
-            
-            {/* Ortalama */}
+
+            {/* Ort. TYT Net */}
             <div className="bg-green-50 rounded-xl p-4">
               <span className="text-sm font-medium text-green-600">Ort. TYT</span>
               <p className="text-2xl font-bold text-green-700 mt-2">
-                {getStats('TYT')?.avg || '-'}
+                {student.tyt_avg_net || getStats('TYT')?.avg || '-'}
               </p>
               <p className="text-xs text-green-500 mt-1">
                 {getStats('TYT')?.count || 0} deneme
               </p>
             </div>
-            
-            {/* Ort. AYT */}
+
+            {/* Ort. AYT Net */}
             <div className="bg-amber-50 rounded-xl p-4">
               <span className="text-sm font-medium text-amber-600">Ort. AYT</span>
               <p className="text-2xl font-bold text-amber-700 mt-2">
-                {getStats('AYT_SAY')?.avg || getStats('AYT_EA')?.avg || getStats('AYT_SOZ')?.avg || '-'}
+                {student.ayt_avg_net || getStats('AYT_SAY')?.avg || getStats('AYT_EA')?.avg || getStats('AYT_SOZ')?.avg || '-'}
               </p>
               <p className="text-xs text-amber-500 mt-1">
                 {(getStats('AYT_SAY')?.count || 0) + (getStats('AYT_EA')?.count || 0) + (getStats('AYT_SOZ')?.count || 0)} deneme
