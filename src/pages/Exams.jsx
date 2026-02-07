@@ -57,85 +57,64 @@ const EXAM_TYPES = [
   { key: 'AYT_SOZ', name: 'AYT Sözel', subjects: AYT_SOZ_SUBJECTS, color: 'orange', maxNet: 80 },
 ];
 
-// YKS 2024 Sıralama Tahmini - Gerçek verilerle
+// MEB OGM Materyal YKS Sıralama Tahmini - Diploma 85 baz alınarak
+// Kaynak: MEB OGM Materyal Puan Hesaplayıcı
+const TYT_RANKING_TABLE = [
+  { net: 120, rank: 50 },
+  { net: 115, rank: 250 },
+  { net: 110, rank: 1450 },
+  { net: 105, rank: 4550 },
+  { net: 100, rank: 10500 },
+  { net: 90, rank: 34500 },
+  { net: 80, rank: 81500 },
+  { net: 70, rank: 155500 },
+  { net: 60, rank: 265500 },
+  { net: 50, rank: 437500 },
+  { net: 40, rank: 686500 },
+  { net: 30, rank: 1047000 },
+  { net: 20, rank: 1460500 },
+  { net: 10, rank: 1903500 },
+];
+
+// AYT tabloları (TYT 80 net baz alınarak)
+const AYT_SAY_TABLE = [
+  { net: 70, rank: 3150 },
+  { net: 60, rank: 13500 },
+  { net: 50, rank: 40500 },
+  { net: 40, rank: 76500 },
+  { net: 35, rank: 126500 },
+  { net: 25, rank: 200000 },
+  { net: 15, rank: 350000 },
+];
+
+const AYT_EA_TABLE = [
+  { net: 66, rank: 5150 },
+  { net: 60, rank: 12500 },
+  { net: 50, rank: 35000 },
+  { net: 40, rank: 70000 },
+  { net: 30, rank: 130000 },
+  { net: 20, rank: 250000 },
+];
+
+const AYT_SOZ_TABLE = [
+  { net: 70, rank: 2000 },
+  { net: 60, rank: 8000 },
+  { net: 50, rank: 25000 },
+  { net: 40, rank: 55000 },
+  { net: 30, rank: 100000 },
+  { net: 20, rank: 180000 },
+];
+
 const estimateRanking = (net, type) => {
-  // 2024 YKS gerçek verileri (kaynak: unirehberi.com)
-  const TYT_TABLE = [
-    { net: 110, rank: 5000 },
-    { net: 105, rank: 12000 },
-    { net: 100, rank: 24521 },
-    { net: 95, rank: 40000 },
-    { net: 90, rank: 57962 },
-    { net: 85, rank: 85000 },
-    { net: 80, rank: 115486 },
-    { net: 75, rank: 155000 },
-    { net: 70, rank: 198012 },
-    { net: 65, rank: 250000 },
-    { net: 60, rank: 310004 },
-    { net: 55, rank: 400000 },
-    { net: 50, rank: 516088 },
-    { net: 45, rank: 650000 },
-    { net: 40, rank: 850000 },
-    { net: 35, rank: 1100000 },
-    { net: 30, rank: 1400000 },
-    { net: 25, rank: 1750000 },
-    { net: 20, rank: 2100000 },
-  ];
-
-  const AYT_SAY_TABLE = [
-    { net: 75, rank: 500 },
-    { net: 70, rank: 1500 },
-    { net: 65, rank: 4000 },
-    { net: 60, rank: 8500 },
-    { net: 55, rank: 16000 },
-    { net: 50, rank: 28000 },
-    { net: 45, rank: 45000 },
-    { net: 40, rank: 70000 },
-    { net: 35, rank: 105000 },
-    { net: 30, rank: 150000 },
-    { net: 25, rank: 210000 },
-    { net: 20, rank: 290000 },
-  ];
-
-  const AYT_EA_TABLE = [
-    { net: 75, rank: 400 },
-    { net: 70, rank: 1200 },
-    { net: 65, rank: 3000 },
-    { net: 60, rank: 6500 },
-    { net: 55, rank: 12000 },
-    { net: 50, rank: 22000 },
-    { net: 45, rank: 38000 },
-    { net: 40, rank: 60000 },
-    { net: 35, rank: 90000 },
-    { net: 30, rank: 130000 },
-    { net: 25, rank: 180000 },
-    { net: 20, rank: 240000 },
-  ];
-
-  const AYT_SOZ_TABLE = [
-    { net: 75, rank: 300 },
-    { net: 70, rank: 1000 },
-    { net: 65, rank: 2500 },
-    { net: 60, rank: 5500 },
-    { net: 55, rank: 10000 },
-    { net: 50, rank: 18000 },
-    { net: 45, rank: 30000 },
-    { net: 40, rank: 48000 },
-    { net: 35, rank: 72000 },
-    { net: 30, rank: 105000 },
-    { net: 25, rank: 145000 },
-    { net: 20, rank: 195000 },
-  ];
-
   const tables = {
-    'TYT': TYT_TABLE,
+    'TYT': TYT_RANKING_TABLE,
     'AYT_SAY': AYT_SAY_TABLE,
     'AYT_EA': AYT_EA_TABLE,
     'AYT_SOZ': AYT_SOZ_TABLE,
     'AYT': AYT_SAY_TABLE,
   };
 
-  const table = tables[type] || TYT_TABLE;
+  const table = tables[type] || TYT_RANKING_TABLE;
   if (!net || net <= 0) return null;
 
   // Tabloda interpolasyon yap
@@ -706,7 +685,8 @@ export default function Exams() {
             <div className="divide-y divide-gray-100">
               {exams.map((exam, idx) => {
                 const examInfo = EXAM_TYPES.find(e => e.key === exam.exam_type) || { name: exam.exam_type, color: 'gray' };
-                const ranking = estimateRanking(exam.net_score, exam.exam_type);
+                // Backend'den gelen MEB sıralamasını kullan, yoksa frontend hesaplaması
+                const ranking = exam.ranking || estimateRanking(exam.net_score, exam.exam_type);
                 const isExpanded = expandedExam === exam.id;
 
                 const colorClasses = {

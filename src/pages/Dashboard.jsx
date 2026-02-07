@@ -509,17 +509,25 @@ function StudentDashboard({ user, stats, onRefresh }) {
   };
   const examStats = getExamStats();
 
-  // Sıralama tahmini (Exams.jsx'tekiyle aynı)
+  // MEB OGM Materyal YKS Sıralama Tahmini - Diploma 85 baz alınarak
   const estimateRanking = (net, type) => {
-    const TYT_TABLE = [
-      { net: 110, rank: 5000 }, { net: 105, rank: 12000 }, { net: 100, rank: 24521 },
-      { net: 95, rank: 40000 }, { net: 90, rank: 57962 }, { net: 85, rank: 85000 },
-      { net: 80, rank: 115486 }, { net: 75, rank: 155000 }, { net: 70, rank: 198012 },
-      { net: 65, rank: 250000 }, { net: 60, rank: 310004 }, { net: 55, rank: 400000 },
-      { net: 50, rank: 516088 }, { net: 45, rank: 650000 }, { net: 40, rank: 850000 },
+    const TYT_RANKING_TABLE = [
+      { net: 120, rank: 50 }, { net: 115, rank: 250 }, { net: 110, rank: 1450 },
+      { net: 105, rank: 4550 }, { net: 100, rank: 10500 }, { net: 90, rank: 34500 },
+      { net: 80, rank: 81500 }, { net: 70, rank: 155500 }, { net: 60, rank: 265500 },
+      { net: 50, rank: 437500 }, { net: 40, rank: 686500 }, { net: 30, rank: 1047000 },
+      { net: 20, rank: 1460500 }, { net: 10, rank: 1903500 },
     ];
-    const table = TYT_TABLE;
+
+    const AYT_SAY_TABLE = [
+      { net: 70, rank: 3150 }, { net: 60, rank: 13500 }, { net: 50, rank: 40500 },
+      { net: 40, rank: 76500 }, { net: 35, rank: 126500 }, { net: 25, rank: 200000 },
+    ];
+
+    const tables = { 'TYT': TYT_RANKING_TABLE, 'AYT': AYT_SAY_TABLE, 'AYT_SAY': AYT_SAY_TABLE };
+    const table = tables[type] || TYT_RANKING_TABLE;
     if (!net || net <= 0) return null;
+
     for (let i = 0; i < table.length; i++) {
       if (net >= table[i].net) {
         if (i === 0) return table[0].rank;

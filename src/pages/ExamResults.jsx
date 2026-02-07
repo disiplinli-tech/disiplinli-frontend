@@ -67,20 +67,83 @@ const EXAM_TYPES = [
   { key: 'AYT_SOZ', name: 'AYT Sözel', subjects: AYT_SOZ_SUBJECTS, color: 'orange', totalQ: 80 },
 ];
 
-// Sıralama tahmini
+// MEB OGM Materyal YKS Sıralama Tahmini - Diploma 85 baz alınarak
+// Kaynak: MEB OGM Materyal Puan Hesaplayıcı
+const TYT_RANKING_TABLE = [
+  { net: 120, rank: 50 },
+  { net: 115, rank: 250 },
+  { net: 110, rank: 1450 },
+  { net: 105, rank: 4550 },
+  { net: 100, rank: 10500 },
+  { net: 90, rank: 34500 },
+  { net: 80, rank: 81500 },
+  { net: 70, rank: 155500 },
+  { net: 60, rank: 265500 },
+  { net: 50, rank: 437500 },
+  { net: 40, rank: 686500 },
+  { net: 30, rank: 1047000 },
+  { net: 20, rank: 1460500 },
+  { net: 10, rank: 1903500 },
+];
+
+// AYT tabloları (TYT 80 net baz alınarak)
+const AYT_SAY_TABLE = [
+  { net: 70, rank: 3150 },
+  { net: 60, rank: 13500 },
+  { net: 50, rank: 40500 },
+  { net: 40, rank: 76500 },
+  { net: 35, rank: 126500 },
+  { net: 25, rank: 200000 },
+  { net: 15, rank: 350000 },
+];
+
+const AYT_EA_TABLE = [
+  { net: 66, rank: 5150 },
+  { net: 60, rank: 12500 },
+  { net: 50, rank: 35000 },
+  { net: 40, rank: 70000 },
+  { net: 30, rank: 130000 },
+  { net: 20, rank: 250000 },
+];
+
+const AYT_SOZ_TABLE = [
+  { net: 70, rank: 2000 },
+  { net: 60, rank: 8000 },
+  { net: 50, rank: 25000 },
+  { net: 40, rank: 55000 },
+  { net: 30, rank: 100000 },
+  { net: 20, rank: 180000 },
+];
+
 const estimateRanking = (totalNet, examType) => {
   const tables = {
-    'TYT': { maxNet: 120, base: 3000000 },
-    'AYT_SAY': { maxNet: 80, base: 500000 },
-    'AYT_EA': { maxNet: 80, base: 400000 },
-    'AYT_SOZ': { maxNet: 80, base: 300000 },
+    'TYT': TYT_RANKING_TABLE,
+    'AYT_SAY': AYT_SAY_TABLE,
+    'AYT_EA': AYT_EA_TABLE,
+    'AYT_SOZ': AYT_SOZ_TABLE,
+    'AYT': AYT_SAY_TABLE,
   };
-  
-  const table = tables[examType] || tables['TYT'];
+
+  const table = tables[examType] || TYT_RANKING_TABLE;
   if (!totalNet || totalNet <= 0) return null;
-  
-  const ratio = 1 - (totalNet / table.maxNet);
-  return Math.max(1, Math.round(ratio * ratio * table.base));
+
+  // Tabloda interpolasyon yap
+  for (let i = 0; i < table.length; i++) {
+    if (totalNet >= table[i].net) {
+      if (i === 0) return table[0].rank;
+      // Linear interpolation
+      const higher = table[i - 1];
+      const lower = table[i];
+      const ratio = (totalNet - lower.net) / (higher.net - lower.net);
+      return Math.round(lower.rank - (lower.rank - higher.rank) * ratio);
+    }
+  }
+
+  // Tablonun altındaysa extrapolate et
+  const last = table[table.length - 1];
+  const secondLast = table[table.length - 2];
+  const slope = (last.rank - secondLast.rank) / (secondLast.net - last.net);
+  return Math.round(last.rank + slope * (last.net - totalNet));
 };
 
 export default function ExamResults() {
@@ -246,9 +309,10 @@ export default function ExamResults() {
           {EXAM_TYPES.map(type => {
             const typeExams = exams.filter(e => e.exam_type === type.key);
             if (typeExams.length === 0) return null;
-            
+
             const lastExam = typeExams[0];
-            const lastRanking = estimateRanking(lastExam.net_score, type.key);
+            // Backend'den gelen MEB sıralamasını kullan, yoksa frontend hesaplaması
+            const lastRanking = lastExam.ranking || estimateRanking(lastExam.net_score, type.key);
             
             const colorClasses = {
               blue: 'from-blue-500 to-blue-600',
@@ -291,7 +355,8 @@ export default function ExamResults() {
           <div className="divide-y divide-gray-100">
             {exams.map((exam, idx) => {
               const examInfo = EXAM_TYPES.find(e => e.key === exam.exam_type);
-              const ranking = estimateRanking(exam.net_score, exam.exam_type);
+              // Backend'den gelen MEB sıralamasını kullan, yoksa frontend hesaplaması
+              const ranking = exam.ranking || estimateRanking(exam.net_score, exam.exam_type);
               
               return (
                 <div key={exam.id || idx} className="p-4 hover:bg-gray-50 flex items-center justify-between">
