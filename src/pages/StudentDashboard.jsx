@@ -36,23 +36,23 @@ export default function StudentDashboard({ user }) {
     }
   };
 
-  // Son denemelerden sıralama hesapla
+  // Son denemelerden sıralama hesapla (backend'den gelen ranking kullanılıyor)
   const getLatestRankings = () => {
     const types = ['TYT', 'AYT_SAY', 'AYT_EA', 'AYT_SOZ'];
     const rankings = {};
-    
+
     types.forEach(type => {
       const typeExams = exams.filter(e => e.exam_type === type);
       if (typeExams.length > 0) {
         const latest = typeExams[0];
         rankings[type] = {
           net: latest.net_score,
-          ranking: estimateRanking(latest.net_score, type),
+          ranking: latest.ranking,  // Backend'den gelen ranking
           date: latest.date
         };
       }
     });
-    
+
     return rankings;
   };
 
@@ -62,7 +62,7 @@ export default function StudentDashboard({ user }) {
     return tytExams.map(e => ({
       date: new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
       net: e.net_score,
-      ranking: estimateRanking(e.net_score, 'TYT')
+      ranking: e.ranking  // Backend'den gelen ranking
     }));
   };
 
@@ -253,8 +253,7 @@ export default function StudentDashboard({ user }) {
                       'AYT_SOZ': { name: 'AYT Sözel', color: 'orange' },
                     };
                     const info = typeLabels[exam.exam_type] || { name: exam.exam_type, color: 'gray' };
-                    const ranking = estimateRanking(exam.net_score, exam.exam_type);
-                    
+
                     return (
                       <div key={idx} className="p-4 flex items-center justify-between hover:bg-gray-50">
                         <div className="flex items-center gap-3">
@@ -270,8 +269,8 @@ export default function StudentDashboard({ user }) {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-gray-800">{exam.net_score} net</p>
-                          {ranking && (
-                            <p className="text-xs text-indigo-600">~{formatRanking(ranking)}</p>
+                          {exam.ranking && (
+                            <p className="text-xs text-indigo-600">~{formatRanking(exam.ranking)}</p>
                           )}
                         </div>
                       </div>

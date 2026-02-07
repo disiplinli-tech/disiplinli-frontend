@@ -233,44 +233,32 @@ export default function ParentDashboard() {
 
       {/* İstatistik Kartları - 5'li Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        {/* TYT Ortalama */}
+        {/* TYT Yerleştirme */}
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 md:p-5 text-white">
           <div className="flex items-center gap-2 mb-2 text-blue-100">
             <Trophy size={16} />
-            <span className="text-xs md:text-sm font-medium">TYT Ortalama</span>
+            <span className="text-xs md:text-sm font-medium">TYT Yerleştirme</span>
           </div>
-          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.tyt_avg_ranking)}</p>
+          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.tyt_ranking || data.tyt_avg_ranking)}</p>
           <p className="text-blue-200 text-xs md:text-sm mt-1">
-            {data.tyt_avg_net ? `${data.tyt_avg_net} net` : '-'}
-            {data.tyt_exam_count ? ` (${data.tyt_exam_count} deneme)` : ''}
+            {data.tyt_avg_net ? `${data.tyt_avg_net} net ort.` : '-'}
           </p>
         </div>
 
-        {/* AYT Ortalama */}
+        {/* AYT Yerleştirme */}
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 md:p-5 text-white">
           <div className="flex items-center gap-2 mb-2 text-purple-100">
             <Trophy size={16} />
-            <span className="text-xs md:text-sm font-medium">AYT Ortalama</span>
+            <span className="text-xs md:text-sm font-medium">AYT Yerleştirme</span>
           </div>
-          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.ayt_avg_ranking)}</p>
+          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.ayt_ranking || data.ayt_avg_ranking)}</p>
           <p className="text-purple-200 text-xs md:text-sm mt-1">
-            {data.ayt_avg_net ? `${data.ayt_avg_net} net` : '-'}
-            {data.ayt_exam_count ? ` (${data.ayt_exam_count} deneme)` : ''}
+            {data.ayt_avg_net ? `${data.ayt_avg_net} net ort.` : '-'}
           </p>
         </div>
 
-        {/* Yerleştirme Tahmini */}
-        <div className="bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-4 md:p-5 text-white">
-          <div className="flex items-center gap-2 mb-2 text-rose-100">
-            <Award size={16} />
-            <span className="text-xs md:text-sm font-medium">Yerleştirme</span>
-          </div>
-          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.placement_ranking)}</p>
-          <p className="text-rose-200 text-xs md:text-sm mt-1">TYT+AYT+Diploma</p>
-        </div>
-
         {/* Hedef Sıralama */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-4 md:p-5 text-white">
+        <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl p-4 md:p-5 text-white">
           <div className="flex items-center gap-2 mb-2 text-orange-100">
             <Target size={16} />
             <span className="text-xs md:text-sm font-medium">Hedef</span>
@@ -279,14 +267,24 @@ export default function ParentDashboard() {
           <p className="text-orange-200 text-xs md:text-sm mt-1">Belirlenen hedef</p>
         </div>
 
-        {/* Toplam Deneme */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 md:p-5 text-white col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-2 mb-2 text-green-100">
+        {/* TYT Deneme Sayısı */}
+        <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-4 md:p-5 text-white">
+          <div className="flex items-center gap-2 mb-2 text-emerald-100">
             <BookOpen size={16} />
-            <span className="text-xs md:text-sm font-medium">Toplam Deneme</span>
+            <span className="text-xs md:text-sm font-medium">TYT Deneme</span>
           </div>
-          <p className="text-xl md:text-2xl font-bold">{data.total_exams}</p>
-          <p className="text-green-200 text-xs md:text-sm mt-1">Girilen deneme</p>
+          <p className="text-xl md:text-2xl font-bold">{data.tyt_exam_count || 0}</p>
+          <p className="text-emerald-200 text-xs md:text-sm mt-1">Çözülen TYT</p>
+        </div>
+
+        {/* AYT Deneme Sayısı */}
+        <div className="bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-4 md:p-5 text-white col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-2 mb-2 text-rose-100">
+            <BookOpen size={16} />
+            <span className="text-xs md:text-sm font-medium">AYT Deneme</span>
+          </div>
+          <p className="text-xl md:text-2xl font-bold">{data.ayt_exam_count || 0}</p>
+          <p className="text-rose-200 text-xs md:text-sm mt-1">Çözülen AYT</p>
         </div>
       </div>
 

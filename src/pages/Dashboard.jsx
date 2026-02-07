@@ -73,6 +73,51 @@ function CoachDashboard({ user, stats }) {
     );
   };
 
+  // Momentum Badge
+  const MomentumBadge = ({ momentum }) => {
+    if (!momentum) return <span className="text-gray-400">-</span>;
+    const configs = {
+      up: { icon: '↑', color: 'text-green-600 bg-green-50', label: 'Yükseliyor' },
+      down: { icon: '↓', color: 'text-red-600 bg-red-50', label: 'Düşüyor' },
+      stable: { icon: '→', color: 'text-gray-600 bg-gray-100', label: 'Sabit' }
+    };
+    const config = configs[momentum.direction] || configs.stable;
+    return (
+      <span className={`text-xs px-2 py-1 rounded-full font-medium ${config.color}`}>
+        {config.icon} {momentum.change > 0 ? '+' : ''}{momentum.change}
+      </span>
+    );
+  };
+
+  // Disiplin Skoru Badge
+  const DisciplineBadge = ({ score }) => {
+    if (score === undefined || score === null) return <span className="text-gray-400">-</span>;
+    const total = score.total || 0;
+    let color = 'text-red-600 bg-red-50';
+    if (total >= 70) color = 'text-green-600 bg-green-50';
+    else if (total >= 40) color = 'text-yellow-600 bg-yellow-50';
+    return (
+      <span className={`text-xs px-2 py-1 rounded-full font-bold ${color}`}>
+        {total}
+      </span>
+    );
+  };
+
+  // Risk Seviyesi Badge
+  const RiskBadge = ({ level }) => {
+    const configs = {
+      safe: { icon: '🟢', label: 'Güvende', color: 'text-green-700 bg-green-50' },
+      warning: { icon: '🟡', label: 'Dalgalı', color: 'text-yellow-700 bg-yellow-50' },
+      risk: { icon: '🔴', label: 'Riskte', color: 'text-red-700 bg-red-50' }
+    };
+    const config = configs[level] || configs.warning;
+    return (
+      <span className={`text-xs px-2 py-1 rounded-full font-medium ${config.color}`}>
+        {config.icon}
+      </span>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -233,12 +278,16 @@ function CoachDashboard({ user, stats }) {
             </button>
           </div>
 
-          {/* Tablo Header */}
-          <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 text-sm font-medium text-gray-500">
-            <div className="col-span-4">ÖĞRENCİ</div>
-            <div className="col-span-2 text-center">SON TYT</div>
-            <div className="col-span-2 text-center">SIRALAMA</div>
-            <div className="col-span-2 text-center">DURUM</div>
+          {/* Tablo Header - Yeni Sütunlar */}
+          <div className="hidden lg:grid grid-cols-16 gap-2 px-5 py-3 bg-gray-50 text-xs font-medium text-gray-500">
+            <div className="col-span-3">ÖĞRENCİ</div>
+            <div className="col-span-2 text-center">TYT ORT</div>
+            <div className="col-span-2 text-center">TYT SIRA</div>
+            <div className="col-span-2 text-center">AYT ORT</div>
+            <div className="col-span-2 text-center">AYT SIRA</div>
+            <div className="col-span-1 text-center">MOM.</div>
+            <div className="col-span-1 text-center">DİS.</div>
+            <div className="col-span-1 text-center">RİSK</div>
             <div className="col-span-2 text-right">İŞLEMLER</div>
           </div>
 
@@ -251,21 +300,20 @@ function CoachDashboard({ user, stats }) {
                 <p className="text-sm text-gray-400 mt-2">Davet kodunuzu paylaşarak öğrenci ekleyin</p>
               </div>
             ) : (
-              sortedStudents.map((student, idx) => {
-                const lastNet = student.last_tyt_net;
-                const ranking = student.estimated_ranking;
+              sortedStudents.map((student) => {
                 const activityStatus = student.activity_status;
                 const isCritical = activityStatus?.status === 'critical' || activityStatus?.status === 'inactive';
                 const isWarning = activityStatus?.status === 'warning';
+                const riskLevel = student.risk_level || 'warning';
 
                 return (
                   <div
                     key={student.id}
-                    className={`px-3 md:px-5 py-3 md:py-4 hover:bg-gray-50 cursor-pointer transition-colors ${isCritical ? 'bg-red-50/50' : isWarning ? 'bg-yellow-50/50' : ''}`}
+                    className={`px-3 lg:px-5 py-3 lg:py-4 hover:bg-gray-50 cursor-pointer transition-colors ${isCritical ? 'bg-red-50/50' : isWarning ? 'bg-yellow-50/50' : ''}`}
                     onClick={() => navigate(`/student/${student.id}`)}
                   >
-                    {/* Mobile Layout */}
-                    <div className="md:hidden flex items-center justify-between">
+                    {/* Mobile/Tablet Layout */}
+                    <div className="lg:hidden flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
@@ -274,61 +322,101 @@ function CoachDashboard({ user, stats }) {
                           <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-800 text-sm">{student.name}</p>
+                          <p className="font-medium text-gray-800 text-sm">
+                            {student.name}
+                            {student.field_type_display && (
+                              <span className="text-xs text-gray-400 ml-1">({student.field_type_display})</span>
+                            )}
+                          </p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            {lastNet && <span className="text-xs font-semibold text-gray-600">{lastNet} net</span>}
-                            {ranking && <span className="text-xs text-indigo-600">~{formatRanking(ranking)}</span>}
+                            {student.tyt_avg_net && <span className="text-xs text-blue-600">TYT: {student.tyt_avg_net}</span>}
+                            {student.tyt_ranking && <span className="text-xs text-gray-500">~{formatRanking(student.tyt_ranking)}</span>}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ActivityBadge activity_status={activityStatus} />
+                        <RiskBadge level={riskLevel} />
                         <ChevronRight size={16} className="text-gray-400" />
                       </div>
                     </div>
 
-                    {/* Desktop Layout */}
-                    <div className="hidden md:grid grid-cols-12 gap-4 items-center">
-                      <div className="col-span-4 flex items-center gap-3">
+                    {/* Desktop Layout - Yeni Tablo */}
+                    <div className="hidden lg:grid grid-cols-16 gap-2 items-center">
+                      {/* Öğrenci İsim + Alan */}
+                      <div className="col-span-3 flex items-center gap-2">
                         <div className="relative">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
                             {student.name?.charAt(0).toUpperCase() || 'Ö'}
                           </div>
-                          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-800">{student.name}</p>
-                          <p className="text-xs text-gray-400 truncate">{student.email}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-800 text-sm truncate">
+                            {student.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {student.field_type_display || student.exam_goal_type || 'SAY'}
+                          </p>
                         </div>
                       </div>
 
+                      {/* TYT Ortalama */}
                       <div className="col-span-2 text-center">
-                        {lastNet ? <span className="text-lg font-bold text-gray-800">{lastNet}</span> : <span className="text-gray-400">-</span>}
+                        {student.tyt_avg_net ? (
+                          <span className="text-sm font-bold text-blue-600">{student.tyt_avg_net}</span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
                       </div>
 
+                      {/* TYT Sıralama */}
                       <div className="col-span-2 text-center">
-                        {ranking ? <span className="text-indigo-600 font-semibold">~{formatRanking(ranking)}</span> : <span className="text-gray-400">-</span>}
+                        {student.tyt_ranking ? (
+                          <span className="text-xs text-blue-600 font-medium">{formatRanking(student.tyt_ranking)}</span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
                       </div>
 
-                      <div className="col-span-2 flex justify-center">
-                        <ActivityBadge activity_status={activityStatus} />
+                      {/* AYT Ortalama */}
+                      <div className="col-span-2 text-center">
+                        {student.ayt_avg_net ? (
+                          <span className="text-sm font-bold text-purple-600">{student.ayt_avg_net}</span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
                       </div>
 
-                      <div className="col-span-2 flex justify-end gap-2">
-                        <button onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}`); }} className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"><Eye size={18} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); navigate('/schedule'); }} className="p-2 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"><Calendar size={18} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); navigate('/messages'); }} className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"><MessageCircle size={18} /></button>
+                      {/* AYT Sıralama */}
+                      <div className="col-span-2 text-center">
+                        {student.ayt_ranking ? (
+                          <span className="text-xs text-purple-600 font-medium">{formatRanking(student.ayt_ranking)}</span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
                       </div>
-                    </div>
 
-                    {/* Mobil görünüm */}
-                    <div className="col-span-12 md:hidden flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-3">
-                        {lastNet && <span className="text-sm"><strong>{lastNet}</strong> net</span>}
-                        {ranking && <span className="text-sm text-indigo-600">~{formatRanking(ranking)}</span>}
-                        <ActivityBadge activity_status={activityStatus} />
+                      {/* Momentum */}
+                      <div className="col-span-1 flex justify-center">
+                        <MomentumBadge momentum={student.momentum} />
                       </div>
-                      <ChevronRight size={18} className="text-gray-400" />
+
+                      {/* Disiplin */}
+                      <div className="col-span-1 flex justify-center">
+                        <DisciplineBadge score={student.discipline_score} />
+                      </div>
+
+                      {/* Risk */}
+                      <div className="col-span-1 flex justify-center">
+                        <RiskBadge level={riskLevel} />
+                      </div>
+
+                      {/* İşlemler */}
+                      <div className="col-span-2 flex justify-end gap-1">
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}`); }} className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"><Eye size={16} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); navigate('/schedule'); }} className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"><Calendar size={16} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); navigate('/messages'); }} className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"><MessageCircle size={16} /></button>
+                      </div>
                     </div>
                   </div>
                 );
