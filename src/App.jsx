@@ -9,6 +9,7 @@ import {
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
 import KullaniciSozlesmesi from './pages/KullaniciSozlesmesi';
 
 // Ana Sayfalar
@@ -402,6 +403,11 @@ function App() {
           </PublicRoute>
         } />
         <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        } />
         <Route path="/kullanici-sozlesmesi" element={<KullaniciSozlesmesi />} />
 
         {/* ===== ANA SAYFA ===== */}

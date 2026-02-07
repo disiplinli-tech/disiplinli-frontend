@@ -116,8 +116,7 @@ export default function Login({ setUser }) {
             </div>
           </div>
 
-          {/* Şifremi Unuttum - Henüz aktif değil */}
-          {/* TODO: Şifre sıfırlama özelliği eklenecek
+          {/* Şifremi Unuttum */}
           <div className="text-right">
             <Link
               to="/forgot-password"
@@ -126,7 +125,6 @@ export default function Login({ setUser }) {
               Şifremi Unuttum
             </Link>
           </div>
-          */}
 
           <button 
             type="submit"
