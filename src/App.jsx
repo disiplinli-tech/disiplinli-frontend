@@ -235,9 +235,9 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
       {/* Menu Items */}
       <nav className="flex-1 px-3 space-y-1">
         {menuItems.map((item, index) => {
-          // Divider (ayırıcı çizgi)
+          // Divider (ayırıcı çizgi) - daha görünür
           if (item.type === 'divider') {
-            return <div key={`divider-${index}`} className="my-2 border-t border-gray-100" />;
+            return <div key={`divider-${index}`} className="my-3 border-t-2 border-gray-200" />;
           }
 
           const Icon = item.icon;

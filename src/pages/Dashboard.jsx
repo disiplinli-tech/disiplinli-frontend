@@ -201,8 +201,8 @@ function CoachDashboard({ user, stats }) {
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-5 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-80">Davet Kodu</p>
-                <p className="text-xs opacity-60 mt-1">Öğrencilerinizle paylaşın</p>
+                <p className="text-sm font-semibold">Davet Kodu</p>
+                <p className="text-sm opacity-90 mt-1">Öğrencilerinizle paylaşabilirsiniz</p>
               </div>
               <button
                 onClick={copyInviteCode}

@@ -126,9 +126,9 @@ export default function Layout({ user, onLogout }) {
         {/* Menü Linkleri */}
         <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
           {menuItems.map((item, index) => {
-            // Divider (ayırıcı çizgi)
+            // Divider (ayırıcı çizgi) - daha görünür
             if (item.type === 'divider') {
-              return <div key={`divider-${index}`} className="my-2 border-t border-gray-100" />;
+              return <div key={`divider-${index}`} className="my-3 border-t-2 border-gray-200" />;
             }
 
             const isActive = location.pathname === item.path ||
