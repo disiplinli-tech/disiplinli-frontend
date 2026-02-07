@@ -242,34 +242,34 @@ export default function TopicTracker() {
         </div>
 
         {/* Progress Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+            <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
               <BookOpen size={16} />
               Toplam Konu
             </div>
-            <p className="text-2xl font-bold text-gray-800">{currentTopics.total}</p>
+            <p className="text-3xl font-bold text-gray-800">{currentTopics.total}</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 text-green-500 text-sm mb-1">
+          <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
+            <div className="flex items-center gap-2 text-green-600 text-sm mb-2">
               <CheckCircle2 size={16} />
               Tamamlanan
             </div>
-            <p className="text-2xl font-bold text-green-600">{currentTopics.completed}</p>
+            <p className="text-3xl font-bold text-green-600">{currentTopics.completed}</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 text-orange-500 text-sm mb-1">
+          <div className="bg-orange-50 rounded-2xl p-4 border border-orange-200">
+            <div className="flex items-center gap-2 text-orange-600 text-sm mb-2">
               <Circle size={16} />
               Kalan
             </div>
-            <p className="text-2xl font-bold text-orange-600">{currentTopics.total - currentTopics.completed}</p>
+            <p className="text-3xl font-bold text-orange-600">{currentTopics.total - currentTopics.completed}</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 text-indigo-500 text-sm mb-1">
+          <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-200">
+            <div className="flex items-center gap-2 text-indigo-600 text-sm mb-2">
               <Trophy size={16} />
               İlerleme
             </div>
-            <p className="text-2xl font-bold text-indigo-600">%{currentTopics.progress}</p>
+            <p className="text-3xl font-bold text-indigo-600">%{currentTopics.progress}</p>
           </div>
         </div>
 
