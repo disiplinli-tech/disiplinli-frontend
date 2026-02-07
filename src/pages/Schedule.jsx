@@ -36,7 +36,8 @@ export default function Schedule({ user }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState("all");
+  const [showStudentPicker, setShowStudentPicker] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState("mine"); // "mine" = koçun kendi takvimi
   const [currentTime, setCurrentTime] = useState(new Date());
   const [saving, setSaving] = useState(false);
   const [mobileView, setMobileView] = useState('list'); // 'list' or 'calendar'
@@ -103,7 +104,7 @@ export default function Schedule({ user }) {
 
   const handleCellClick = (day, hour) => {
     setNewPlan({
-      student_id: selectedStudent !== 'all' ? selectedStudent : '',
+      student_id: selectedStudent !== 'all' && selectedStudent !== 'mine' ? selectedStudent : '',
       day,
       start_hour: hour.toString().padStart(2, '0'),
       start_min: '00',
@@ -165,8 +166,10 @@ export default function Schedule({ user }) {
     return STUDENT_COLORS[index % STUDENT_COLORS.length];
   };
 
-  const filteredSchedule = selectedStudent === "all" 
-    ? schedule 
+  const filteredSchedule = selectedStudent === "mine"
+    ? schedule.filter(p => !p.student_id) // Koçun kendi planları (student_id yok)
+    : selectedStudent === "all"
+    ? schedule
     : schedule.filter(p => p.student_id === parseInt(selectedStudent));
 
   const getPlansForDay = (day) => filteredSchedule.filter(p => p.day === day);
@@ -212,27 +215,22 @@ export default function Schedule({ user }) {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Mobilde gizli - Bugün butonu */}
-              <button
-                onClick={() => {
-                  setSelectedDayIndex(todayIndex);
-                  currentTimeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }}
-                className="hidden md:flex px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100"
-              >
-                Bugün
-              </button>
-
+            <div className="flex items-center gap-2 md:gap-3">
+              {/* Öğrenci Seç Butonu - Koç için */}
               {isCoach && students.length > 0 && (
-                <select
-                  value={selectedStudent}
-                  onChange={(e) => setSelectedStudent(e.target.value)}
-                  className="hidden sm:block px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 bg-white"
+                <button
+                  onClick={() => setShowStudentPicker(true)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 bg-white"
                 >
-                  <option value="all">Tüm Öğrenciler</option>
-                  {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+                  <User size={16} className="text-gray-500" />
+                  <span className="font-medium text-gray-700 max-w-[100px] md:max-w-none truncate">
+                    {selectedStudent === "mine"
+                      ? "Benim Takvimim"
+                      : selectedStudent === "all"
+                      ? "Tüm Öğrenciler"
+                      : students.find(s => s.id.toString() === selectedStudent)?.name || "Seç"}
+                  </span>
+                </button>
               )}
 
               <button
@@ -242,33 +240,18 @@ export default function Schedule({ user }) {
                     day: DAYS[selectedDayIndex],
                     category: '',
                     subject: '',
-                    student_id: selectedStudent !== 'all' ? selectedStudent : ''
+                    student_id: selectedStudent !== 'mine' && selectedStudent !== 'all' ? selectedStudent : ''
                   });
                   setShowModal(true);
                 }}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium text-sm"
+                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium text-sm"
               >
                 <Plus size={18} />
-                <span>Ders Ekle</span>
+                <span className="hidden sm:inline">Ders Ekle</span>
+                <span className="sm:hidden">Ekle</span>
               </button>
             </div>
           </div>
-
-          {/* Öğrenci Filtreleri */}
-          {isCoach && selectedStudent === "all" && students.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {students.map((s, i) => (
-                <span
-                  key={s.id}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer hover:scale-105 transition
-                    ${STUDENT_COLORS[i % STUDENT_COLORS.length].light} ${STUDENT_COLORS[i % STUDENT_COLORS.length].text}`}
-                  onClick={() => setSelectedStudent(s.id.toString())}
-                >
-                  {s.name}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
@@ -313,7 +296,7 @@ export default function Schedule({ user }) {
               const handleMobileHourClick = () => {
                 if (hourPlans.length === 0) {
                   setNewPlan({
-                    student_id: selectedStudent !== 'all' ? selectedStudent : '',
+                    student_id: selectedStudent !== 'all' && selectedStudent !== 'mine' ? selectedStudent : '',
                     day: DAYS[selectedDayIndex],
                     start_hour: hour.toString().padStart(2, '0'),
                     start_min: '00',
@@ -499,6 +482,100 @@ export default function Schedule({ user }) {
           </div>
         </div>
       </div>
+
+      {/* Öğrenci Seçici Modal */}
+      {showStudentPicker && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50" onClick={() => setShowStudentPicker(false)}>
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm max-h-[70vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-gray-800">Takvim Seç</h3>
+                <button onClick={() => setShowStudentPicker(false)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 space-y-2 overflow-y-auto max-h-[50vh]">
+              {/* Kendi Takvimim */}
+              <button
+                onClick={() => { setSelectedStudent("mine"); setShowStudentPicker(false); }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all
+                  ${selectedStudent === "mine" ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <Calendar size={20} className="text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-semibold text-gray-800">Benim Takvimim</p>
+                  <p className="text-xs text-gray-500">Kendi ders programım</p>
+                </div>
+                {selectedStudent === "mine" && (
+                  <div className="ml-auto w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+
+              {/* Tüm Öğrenciler */}
+              <button
+                onClick={() => { setSelectedStudent("all"); setShowStudentPicker(false); }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all
+                  ${selectedStudent === "all" ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center">
+                  <List size={20} className="text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-semibold text-gray-800">Tüm Öğrenciler</p>
+                  <p className="text-xs text-gray-500">Herkesin programını gör</p>
+                </div>
+                {selectedStudent === "all" && (
+                  <div className="ml-auto w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+
+              {/* Ayırıcı */}
+              <div className="py-2">
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider px-1">Öğrenciler</p>
+              </div>
+
+              {/* Öğrenci Listesi */}
+              {students.map((s, i) => (
+                <button
+                  key={s.id}
+                  onClick={() => { setSelectedStudent(s.id.toString()); setShowStudentPicker(false); }}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all
+                    ${selectedStudent === s.id.toString() ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
+                >
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                    style={{ backgroundColor: STUDENT_COLORS[i % STUDENT_COLORS.length].hex }}
+                  >
+                    {s.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="font-semibold text-gray-800">{s.name}</p>
+                  </div>
+                  {selectedStudent === s.id.toString() && (
+                    <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
