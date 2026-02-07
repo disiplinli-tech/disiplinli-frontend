@@ -138,9 +138,9 @@ export default function Students() {
         </div>
       </div>
 
-      {/* Öğrenci Kartları - 3 Katmanlı Yapı */}
+      {/* Öğrenci Kartları - Grid + 3 Katmanlı İçerik */}
       {filteredStudents.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStudents.map((student, i) => {
             const riskLevel = student.risk_level || 'warning';
             const momentum = student.momentum || {};
@@ -148,153 +148,139 @@ export default function Students() {
             const activityStatus = student.activity_status;
             const daysInactive = activityStatus?.days_inactive;
 
-            // Risk rengine göre border
-            const riskColors = {
-              risk: 'border-l-4 border-l-red-500 bg-red-50/30',
-              warning: 'border-l-4 border-l-yellow-500 bg-yellow-50/30',
-              safe: 'border-l-4 border-l-green-500 bg-white'
+            // Risk border rengi
+            const riskBorderColors = {
+              risk: 'border-l-4 border-l-red-500',
+              warning: 'border-l-4 border-l-yellow-500',
+              safe: 'border-l-4 border-l-green-500'
             };
 
             return (
               <div
                 key={student.id || i}
-                className={`rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all cursor-pointer ${riskColors[riskLevel] || ''}`}
-                onClick={() => navigate(`/student/${student.id}`)}
+                className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-lg hover:border-indigo-200 transition-all duration-300 ${riskBorderColors[riskLevel] || ''}`}
               >
-                {/* 3 KATMANLI KART YAPISI */}
-                <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div className="relative flex-shrink-0">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg ${
-                      riskLevel === 'risk' ? 'bg-red-500' :
-                      riskLevel === 'warning' ? 'bg-yellow-500' :
-                      'bg-indigo-500'
-                    }`}>
-                      {student.name?.charAt(0).toUpperCase() || 'Ö'}
-                    </div>
-                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
-                  </div>
-
-                  {/* İçerik */}
-                  <div className="flex-1 min-w-0">
-                    {/* Üst: İsim + Alan */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <p className="font-semibold text-gray-800">{student.name}</p>
-                        <p className="text-xs text-gray-400">{student.field_type_display || student.exam_goal_type || 'SAY'}</p>
-                      </div>
-                    </div>
-
-                    {/* KATMAN 1: DURUM - En büyük */}
-                    <div className="flex items-center gap-3 mb-3">
-                      {/* Momentum */}
-                      <div className="flex items-center gap-1.5">
-                        {momentum.direction === 'up' ? (
-                          <span className="text-green-600 font-bold text-base">
-                            ↗ +{momentum.change}
-                          </span>
-                        ) : momentum.direction === 'down' ? (
-                          <span className="text-red-600 font-bold text-base">
-                            ↘ {momentum.change}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">● Veri yok</span>
-                        )}
-                        {momentum.direction && momentum.direction !== 'none' && (
-                          <span className="text-xs text-gray-400">net</span>
-                        )}
-                      </div>
-
-                      {/* Risk Badge */}
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        riskLevel === 'risk' ? 'bg-red-100 text-red-700' :
-                        riskLevel === 'warning' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
+                {/* Header: Avatar + İsim + Risk Badge */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ${
+                        riskLevel === 'risk' ? 'bg-gradient-to-tr from-red-500 to-red-400' :
+                        riskLevel === 'warning' ? 'bg-gradient-to-tr from-yellow-500 to-yellow-400' :
+                        'bg-gradient-to-tr from-indigo-500 to-purple-500'
                       }`}>
-                        {riskLevel === 'risk' ? '🔴 Kritik' :
-                         riskLevel === 'warning' ? '🟡 Dalgalı' :
-                         '🟢 Güvende'}
-                      </span>
-                    </div>
-
-                    {/* KATMAN 2: DAVRANIŞ - Disiplin + Son Temas */}
-                    <div className="flex items-center gap-4 mb-2">
-                      {/* Disiplin */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">💪 Disiplin:</span>
-                        <span className={`text-sm font-bold ${
-                          disciplineScore >= 65 ? 'text-green-600' :
-                          disciplineScore >= 40 ? 'text-yellow-600' :
-                          'text-red-600'
-                        }`}>{disciplineScore}/100</span>
-                        {/* Mini progress bar */}
-                        <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              disciplineScore >= 65 ? 'bg-green-500' :
-                              disciplineScore >= 40 ? 'bg-yellow-500' :
-                              'bg-red-500'
-                            }`}
-                            style={{ width: `${disciplineScore}%` }}
-                          />
-                        </div>
+                        {student.name?.charAt(0).toUpperCase() || 'Ö'}
                       </div>
-
-                      {/* Son Temas */}
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-500">🔵 Son temas:</span>
-                        <span className={`text-xs font-medium ${
-                          daysInactive === 0 ? 'text-green-600' :
-                          daysInactive === 1 ? 'text-yellow-600' :
-                          daysInactive > 1 ? 'text-red-600' : 'text-gray-500'
-                        }`}>
-                          {daysInactive === 0 ? 'Bugün' :
-                           daysInactive === 1 ? 'Dün' :
-                           daysInactive ? `${daysInactive} gün` : '-'}
-                        </span>
-                      </div>
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
                     </div>
-
-                    {/* KATMAN 3: KİMLİK / BAĞLAM - En küçük */}
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      {/* TYT Sıralama */}
-                      {student.tyt_ranking && (
-                        <span>~ TYT {formatRanking(student.tyt_ranking)}</span>
-                      )}
-                      {/* Hedef */}
-                      {student.target_ranking && (
-                        <span className="text-indigo-500">| Hedef: {formatRanking(student.target_ranking)}</span>
-                      )}
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{student.name}</h3>
+                      <p className="text-xs text-gray-400">{student.field_type_display || student.exam_goal_type || 'SAY'}</p>
                     </div>
                   </div>
 
-                  {/* Sağ: İşlem butonları + Chevron */}
-                  <div className="flex items-center gap-2">
-                    <div className="hidden sm:flex gap-1">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}`); }}
-                        className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                        title="Detay"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}/schedule`); }}
-                        className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
-                        title="Program"
-                      >
-                        <Calendar size={18} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate('/chat', { state: { userId: student.user_id, userName: student.name } }); }}
-                        className="p-2 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-                        title="Mesaj"
-                      >
-                        <MessageCircle size={18} />
-                      </button>
+                  {/* Risk Badge */}
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                    riskLevel === 'risk' ? 'bg-red-100 text-red-700' :
+                    riskLevel === 'warning' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {riskLevel === 'risk' ? '🔴 Kritik' :
+                     riskLevel === 'warning' ? '🟡 Dalgalı' :
+                     '🟢 Güvende'}
+                  </span>
+                </div>
+
+                {/* KATMAN 1: DURUM - Momentum */}
+                <div className="bg-gray-50 rounded-xl p-3 mb-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">Momentum</span>
+                    <div className="flex items-center gap-1">
+                      {momentum.direction === 'up' ? (
+                        <span className="text-green-600 font-bold">↗ +{momentum.change} net</span>
+                      ) : momentum.direction === 'down' ? (
+                        <span className="text-red-600 font-bold">↘ {momentum.change} net</span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">● Veri yok</span>
+                      )}
                     </div>
-                    <ChevronRight size={20} className="text-gray-300 sm:hidden" />
                   </div>
+                </div>
+
+                {/* KATMAN 2: DAVRANIŞ - Disiplin + Son Temas */}
+                <div className="space-y-2 mb-3">
+                  {/* Disiplin */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">💪 Disiplin</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-bold ${
+                        disciplineScore >= 65 ? 'text-green-600' :
+                        disciplineScore >= 40 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>{disciplineScore}/100</span>
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            disciplineScore >= 65 ? 'bg-green-500' :
+                            disciplineScore >= 40 ? 'bg-yellow-500' :
+                            'bg-red-500'
+                          }`}
+                          style={{ width: `${disciplineScore}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Son Temas */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">🔵 Son temas</span>
+                    <span className={`text-sm font-medium ${
+                      daysInactive === 0 ? 'text-green-600' :
+                      daysInactive === 1 ? 'text-yellow-600' :
+                      daysInactive > 1 ? 'text-red-600' : 'text-gray-500'
+                    }`}>
+                      {daysInactive === 0 ? 'Bugün' :
+                       daysInactive === 1 ? 'Dün' :
+                       daysInactive ? `${daysInactive} gün önce` : '-'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* KATMAN 3: KİMLİK - TYT Sıralama & Hedef */}
+                <div className="text-xs text-gray-500 mb-4 pb-3 border-b border-gray-100">
+                  {student.tyt_ranking ? (
+                    <span>~ TYT {formatRanking(student.tyt_ranking)}</span>
+                  ) : (
+                    <span>Sıralama: -</span>
+                  )}
+                  {student.target_ranking && (
+                    <span className="text-indigo-500 ml-2">| Hedef: {formatRanking(student.target_ranking)}</span>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => navigate(`/student/${student.id}`)}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm"
+                  >
+                    <Eye size={16} />
+                    Detay
+                  </button>
+                  <button
+                    onClick={() => navigate(`/student/${student.id}/schedule`)}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium text-sm"
+                  >
+                    <Calendar size={16} />
+                    Program
+                  </button>
+                  <button
+                    onClick={() => navigate('/chat', { state: { userId: student.user_id, userName: student.name } })}
+                    className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors"
+                    title="Mesaj"
+                  >
+                    <MessageCircle size={16} />
+                  </button>
                 </div>
               </div>
             );
