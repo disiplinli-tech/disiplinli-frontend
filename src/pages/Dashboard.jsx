@@ -73,29 +73,32 @@ function CoachDashboard({ user, stats }) {
     );
   };
 
-  // Momentum Badge
+  // Momentum Badge - Yeni mantık: Son deneme - Önceki deneme
   const MomentumBadge = ({ momentum }) => {
-    if (!momentum) return <span className="text-gray-400">-</span>;
+    if (!momentum || momentum.direction === 'none' || momentum.change === null) {
+      return <span className="text-xs px-2 py-1 rounded-full text-gray-500 bg-gray-100">Veri yok</span>;
+    }
     const configs = {
-      up: { icon: '↑', color: 'text-green-600 bg-green-50', label: 'Yükseliyor' },
-      down: { icon: '↓', color: 'text-red-600 bg-red-50', label: 'Düşüyor' },
-      stable: { icon: '→', color: 'text-gray-600 bg-gray-100', label: 'Sabit' }
+      up: { icon: '↑', color: 'text-green-600 bg-green-50' },
+      down: { icon: '↓', color: 'text-red-600 bg-red-50' },
+      stable: { icon: '→', color: 'text-gray-600 bg-gray-100' }
     };
     const config = configs[momentum.direction] || configs.stable;
+    const displayChange = momentum.change > 0 ? `+${momentum.change}` : momentum.change;
     return (
       <span className={`text-xs px-2 py-1 rounded-full font-medium ${config.color}`}>
-        {config.icon} {momentum.change > 0 ? '+' : ''}{momentum.change}
+        {config.icon} {displayChange}
       </span>
     );
   };
 
-  // Disiplin Skoru Badge
+  // Disiplin Skoru Badge - Yeni eşikler: 65+ yeşil, 40-65 sarı, 0-40 kırmızı
   const DisciplineBadge = ({ score }) => {
     if (score === undefined || score === null) return <span className="text-gray-400">-</span>;
     const total = score.total || 0;
-    let color = 'text-red-600 bg-red-50';
-    if (total >= 70) color = 'text-green-600 bg-green-50';
-    else if (total >= 40) color = 'text-yellow-600 bg-yellow-50';
+    let color = 'text-red-600 bg-red-50';  // 0-40 kritik
+    if (total >= 65) color = 'text-green-600 bg-green-50';  // 65+ güçlü
+    else if (total >= 40) color = 'text-yellow-600 bg-yellow-50';  // 40-65 dalgalı
     return (
       <span className={`text-xs px-2 py-1 rounded-full font-bold ${color}`}>
         {total}
