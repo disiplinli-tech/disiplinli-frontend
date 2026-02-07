@@ -36,10 +36,15 @@ export default function StudentDetail() {
   });
   const [savingGoal, setSavingGoal] = useState(false);
 
+  // Schedule state
+  const [studentSchedule, setStudentSchedule] = useState([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+
   useEffect(() => {
     fetchData();
     fetchGoals();
     fetchTopics();
+    fetchSchedule();
   }, [id]);
 
   const fetchData = async () => {
@@ -81,6 +86,18 @@ export default function StudentDetail() {
       console.log('Konu verileri yüklenemedi');
     } finally {
       setTopicsLoading(false);
+    }
+  };
+
+  const fetchSchedule = async () => {
+    setScheduleLoading(true);
+    try {
+      const res = await API.get(`/api/student/${id}/schedule/`);
+      setStudentSchedule(res.data || []);
+    } catch (err) {
+      console.log('Program yüklenemedi');
+    } finally {
+      setScheduleLoading(false);
     }
   };
 
@@ -195,8 +212,8 @@ export default function StudentDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 max-w-[100vw] overflow-x-hidden">
+      <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
         
         {/* Header */}
         <button 
@@ -209,28 +226,18 @@ export default function StudentDetail() {
 
         {/* Öğrenci Bilgi Kartı */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
-                  {student.name?.charAt(0).toUpperCase() || 'Ö'}
-                </div>
-                <div className="text-white">
-                  <h1 className="text-2xl font-bold">{student.name}</h1>
-                  <p className="text-indigo-100 flex items-center gap-2 mt-1">
-                    <Mail size={14} />
-                    {student.email}
-                  </p>
-                </div>
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 md:px-6 py-4 md:py-5">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/20 flex items-center justify-center text-white text-xl md:text-2xl font-bold flex-shrink-0">
+                {student.name?.charAt(0).toUpperCase() || 'Ö'}
               </div>
-              
-              <button 
-                onClick={() => navigate('/messages')}
-                className="hidden md:flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-white"
-              >
-                <MessageCircle size={18} />
-                Mesaj Gönder
-              </button>
+              <div className="text-white min-w-0 flex-1">
+                <h1 className="text-lg md:text-2xl font-bold truncate">{student.name}</h1>
+                <p className="text-indigo-100 flex items-center gap-1.5 mt-0.5 md:mt-1 text-xs md:text-sm truncate">
+                  <Mail size={12} className="flex-shrink-0" />
+                  <span className="truncate">{student.email}</span>
+                </p>
+              </div>
             </div>
           </div>
           
@@ -705,9 +712,53 @@ export default function StudentDetail() {
 
             {/* Schedule */}
             {activeTab === 'schedule' && (
-              <div className="text-center py-12 text-gray-400">
-                <Calendar size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Program görünümü yakında</p>
+              <div>
+                {scheduleLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : studentSchedule.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <Calendar size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Bu öğrenci için henüz program oluşturulmamış</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'].map(day => {
+                      const dayPlans = studentSchedule.filter(p => p.day === day).sort((a, b) =>
+                        (a.start_time || '').localeCompare(b.start_time || '')
+                      );
+                      if (dayPlans.length === 0) return null;
+
+                      return (
+                        <div key={day} className="bg-gray-50 rounded-xl p-4">
+                          <h4 className="font-semibold text-gray-700 mb-3">{day}</h4>
+                          <div className="space-y-2">
+                            {dayPlans.map(plan => (
+                              <div
+                                key={plan.id}
+                                className={`flex items-center gap-3 p-3 rounded-lg border-l-4 bg-white
+                                  ${plan.category === 'AYT' ? 'border-l-purple-500' : 'border-l-blue-500'}`}
+                              >
+                                <div className="text-sm text-gray-500 font-medium min-w-[90px]">
+                                  {plan.start_time?.slice(0,5)} - {plan.end_time?.slice(0,5)}
+                                </div>
+                                <div className="flex-1">
+                                  <span className={`text-sm font-semibold ${plan.category === 'AYT' ? 'text-purple-700' : 'text-blue-700'}`}>
+                                    {plan.category} {plan.subject}
+                                  </span>
+                                  {plan.activity_type && (
+                                    <span className="text-xs text-gray-400 ml-2">• {plan.activity_type}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
