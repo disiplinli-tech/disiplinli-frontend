@@ -97,30 +97,29 @@ export default function Assignments() {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto max-w-[100vw] overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between gap-2 mb-6">
-        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2 md:gap-3">
           <button onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <ArrowLeft size={20} className="text-gray-600" />
           </button>
-          <div className="min-w-0">
+          <div>
             <h1 className="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
-              <BookOpen size={20} className="text-indigo-500 flex-shrink-0 hidden sm:block" />
+              <BookOpen size={20} className="text-indigo-500 hidden md:block" />
               Ödevler
             </h1>
-            <p className="text-xs md:text-sm text-gray-500 truncate">{stats.total} ödev, {stats.pending} bekliyor</p>
+            <p className="text-xs md:text-sm text-gray-500">{stats.total} ödev, {stats.pending} bekliyor</p>
           </div>
         </div>
 
         {role === 'coach' && (
           <button onClick={() => setShowModal(true)}
-            className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-indigo-500 hover:bg-indigo-600
-              text-white rounded-xl text-xs md:text-sm font-medium transition-colors shadow-md flex-shrink-0">
+            className="flex items-center gap-1.5 px-3 py-2 bg-indigo-500 hover:bg-indigo-600
+              text-white rounded-xl text-sm font-medium transition-colors shadow-md whitespace-nowrap">
             <Plus size={16} />
-            <span className="hidden sm:inline">Ödev Ver</span>
-            <span className="sm:hidden">Ekle</span>
+            Ödev Ver
           </button>
         )}
       </div>
