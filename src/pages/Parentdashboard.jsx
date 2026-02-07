@@ -3,7 +3,7 @@ import API from '../api';
 import { formatRanking, formatDate } from '../utils/formatters';
 import {
   Trophy, Target, TrendingUp, Calendar, BookOpen, User,
-  GraduationCap, Clock, AlertCircle, RefreshCw
+  GraduationCap, Clock, AlertCircle, RefreshCw, Link, Loader2
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -11,6 +11,10 @@ export default function ParentDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [needsLink, setNeedsLink] = useState(false);
+  const [studentCode, setStudentCode] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkError, setLinkError] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -22,10 +26,38 @@ export default function ParentDashboard() {
       const res = await API.get('/api/parent/dashboard/');
       setData(res.data);
       setError(null);
+      setNeedsLink(false);
     } catch (err) {
-      setError(err.response?.data?.error || 'Veriler yüklenemedi.');
+      const errorMsg = err.response?.data?.error || 'Veriler yüklenemedi.';
+      if (errorMsg.includes('Bağlı öğrenci bulunamadı')) {
+        setNeedsLink(true);
+        setError(null);
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLinkStudent = async (e) => {
+    e.preventDefault();
+    if (!studentCode.trim()) {
+      setLinkError('Lütfen öğrenci kodunu girin');
+      return;
+    }
+
+    setLinkLoading(true);
+    setLinkError('');
+
+    try {
+      await API.post('/api/parent/link-student/', { student_code: studentCode.trim() });
+      // Başarılı - dashboard'u yeniden yükle
+      fetchData();
+    } catch (err) {
+      setLinkError(err.response?.data?.error || 'Bağlantı kurulamadı');
+    } finally {
+      setLinkLoading(false);
     }
   };
 
@@ -41,6 +73,73 @@ export default function ParentDashboard() {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-500">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Öğrenci bağlama ekranı
+  if (needsLink) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Link className="text-white" size={40} />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Öğrenci Bağlantısı</h2>
+            <p className="text-gray-500">
+              Öğrencinizin size verdiği <strong>Veli Davet Kodunu</strong> girerek hesabınızı bağlayın.
+            </p>
+          </div>
+
+          <form onSubmit={handleLinkStudent} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Öğrenci Veli Davet Kodu
+              </label>
+              <input
+                type="text"
+                value={studentCode}
+                onChange={(e) => setStudentCode(e.target.value.toUpperCase())}
+                placeholder="Örn: VEL-ABC123"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-center text-lg font-mono tracking-wider"
+                maxLength={15}
+              />
+            </div>
+
+            {linkError && (
+              <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                <AlertCircle size={18} />
+                {linkError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={linkLoading}
+              className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {linkLoading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  Bağlanıyor...
+                </>
+              ) : (
+                <>
+                  <Link size={20} />
+                  Öğrenciyi Bağla
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
+            <p className="text-amber-800 text-sm">
+              <strong>💡 İpucu:</strong> Öğrenciniz, kendi panelindeki <strong>Ayarlar</strong> sayfasından
+              Veli Davet Kodunu bulabilir.
+            </p>
+          </div>
         </div>
       </div>
     );
