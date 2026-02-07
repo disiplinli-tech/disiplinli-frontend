@@ -37,22 +37,13 @@ export default function Layout({ user, onLogout }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Koç menüsü - ChatGPT önerisi ile yeniden yapılandırıldı
+  // Koç menüsü - ChatGPT V1 Menü önerisi (sadeleştirildi)
   const coachMenu = [
-    // 1. BLOK - GÜNLÜK OPERASYON
     { icon: Compass, label: "Bugün", path: "/today", highlight: true },
     { icon: Users, label: "Öğrenciler", path: "/students" },
     { icon: MessageCircle, label: "Mesajlar", path: "/chat", badge: unreadMessages },
-    { type: "divider" },
-    // 2. BLOK - ZAMAN & EMEK
-    { icon: Calendar, label: "Takvim", path: "/calendar" },
-    { icon: Video, label: "Online Dersler", path: "/online-lessons" },
-    { type: "divider" },
-    // 3. BLOK - AKADEMİK AKIŞ
-    { icon: ClipboardList, label: "Ödevler", path: "/assignments", badge: pendingAssignments },
+    { icon: Calendar, label: "Takvim", path: "/schedule" },
     { icon: FileText, label: "Denemeler", path: "/coach-exams" },
-    { type: "divider" },
-    // 4. BLOK - PASİF / AYAR
     { icon: Settings, label: "Ayarlar", path: "/settings", muted: true },
   ];
 

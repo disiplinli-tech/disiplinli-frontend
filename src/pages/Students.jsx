@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
-import { formatRanking } from "../utils/formatters";
 import {
-  Users, Eye, Calendar, MessageCircle, Search,
-  ChevronRight, SortAsc, AlertTriangle, Zap
+  Users, Eye, MessageCircle, Search, SortAsc, Zap
 } from "lucide-react";
 
 export default function Students() {
@@ -232,11 +230,11 @@ export default function Students() {
                   </span>
                 </div>
 
-                {/* ORTA ALAN: Sadece 3 şey - Momentum, Disiplin, Sıralama */}
-                <div className="bg-gray-50 rounded-xl p-3 space-y-3 mb-4">
-                  {/* 1. Momentum */}
+                {/* ORTA ALAN: ChatGPT önerisi - sadece 2 şey (Momentum + Disiplin) */}
+                <div className="bg-gray-50 rounded-xl p-3 space-y-2.5 mb-4">
+                  {/* 1. Momentum - sayı + yön */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 font-medium">Momentum</span>
+                    <span className="text-sm text-gray-600">Momentum</span>
                     {momentum.direction === 'up' ? (
                       <span className="text-green-600 font-bold text-sm">↑ +{momentum.change} net</span>
                     ) : momentum.direction === 'down' ? (
@@ -248,11 +246,11 @@ export default function Students() {
 
                   {/* 2. Disiplin - Bar + Sayı */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 font-medium">Disiplin</span>
+                    <span className="text-sm text-gray-600">Disiplin</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-24 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all ${
+                          className={`h-full rounded-full ${
                             disciplineScore >= 65 ? 'bg-green-500' :
                             disciplineScore >= 40 ? 'bg-yellow-500' :
                             'bg-red-500'
@@ -260,46 +258,30 @@ export default function Students() {
                           style={{ width: `${disciplineScore}%` }}
                         />
                       </div>
-                      <span className={`text-sm font-bold min-w-[40px] text-right ${
+                      <span className={`text-sm font-bold ${
                         disciplineScore >= 65 ? 'text-green-600' :
                         disciplineScore >= 40 ? 'text-yellow-600' :
                         'text-red-600'
                       }`}>{disciplineScore}</span>
                     </div>
                   </div>
-
-                  {/* 3. Sıralama - Tek satır */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 font-medium">Sıralama</span>
-                    <span className="text-sm font-bold text-indigo-600">
-                      {student.tyt_ranking ? `TYT ${formatRanking(student.tyt_ranking)}` :
-                       student.ayt_ranking ? `AYT ${formatRanking(student.ayt_ranking)}` : '-'}
-                    </span>
-                  </div>
                 </div>
 
-                {/* ALT SATIR: Aksiyon Butonları */}
+                {/* ALT SATIR: Sadeleştirilmiş Aksiyon Butonları */}
                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   <button
                     onClick={() => navigate(`/student/${student.id}`)}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm"
                   >
-                    <Eye size={15} />
+                    <Eye size={14} />
                     Detay
-                  </button>
-                  <button
-                    onClick={() => navigate(`/student/${student.id}/schedule`)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-sm"
-                  >
-                    <Calendar size={15} />
-                    Program
                   </button>
                   <button
                     onClick={() => navigate('/chat', { state: { userId: student.user_id, userName: student.name } })}
                     className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors"
-                    title="Mesaj"
+                    title="Mesaj Gönder"
                   >
-                    <MessageCircle size={15} />
+                    <MessageCircle size={14} />
                   </button>
                   <button
                     onClick={() => sendReminder(student)}
@@ -311,7 +293,7 @@ export default function Students() {
                     }`}
                     title="Hatırlat"
                   >
-                    <Zap size={15} className={sendingReminder === student.id ? 'animate-pulse' : ''} />
+                    <Zap size={14} className={sendingReminder === student.id ? 'animate-pulse' : ''} />
                   </button>
                 </div>
               </div>
