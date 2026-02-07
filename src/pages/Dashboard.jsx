@@ -279,16 +279,16 @@ function CoachDashboard({ user, stats }) {
           </div>
 
           {/* Tablo Header - Yeni Sütunlar */}
-          <div className="hidden lg:grid grid-cols-16 gap-2 px-5 py-3 bg-gray-50 text-xs font-medium text-gray-500">
-            <div className="col-span-3">ÖĞRENCİ</div>
-            <div className="col-span-2 text-center">TYT ORT</div>
-            <div className="col-span-2 text-center">TYT SIRA</div>
-            <div className="col-span-2 text-center">AYT ORT</div>
-            <div className="col-span-2 text-center">AYT SIRA</div>
-            <div className="col-span-1 text-center">MOM.</div>
-            <div className="col-span-1 text-center">DİS.</div>
-            <div className="col-span-1 text-center">RİSK</div>
-            <div className="col-span-2 text-right">İŞLEMLER</div>
+          <div className="hidden lg:grid gap-2 px-5 py-3 bg-gray-50 text-xs font-medium text-gray-500" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr 0.7fr 1.2fr'}}>
+            <div>ÖĞRENCİ</div>
+            <div className="text-center">TYT ORT</div>
+            <div className="text-center">TYT SIRA</div>
+            <div className="text-center">AYT ORT</div>
+            <div className="text-center">AYT SIRA</div>
+            <div className="text-center">MOM.</div>
+            <div className="text-center">DİS.</div>
+            <div className="text-center">RİSK</div>
+            <div className="text-right">İŞLEMLER</div>
           </div>
 
           {/* Öğrenci Listesi */}
@@ -341,9 +341,9 @@ function CoachDashboard({ user, stats }) {
                     </div>
 
                     {/* Desktop Layout - Yeni Tablo */}
-                    <div className="hidden lg:grid grid-cols-16 gap-2 items-center">
+                    <div className="hidden lg:grid gap-2 items-center" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr 0.7fr 1.2fr'}}>
                       {/* Öğrenci İsim + Alan */}
-                      <div className="col-span-3 flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <div className="relative">
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm ${isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-indigo-500'}`}>
                             {student.name?.charAt(0).toUpperCase() || 'Ö'}
@@ -361,7 +361,7 @@ function CoachDashboard({ user, stats }) {
                       </div>
 
                       {/* TYT Ortalama */}
-                      <div className="col-span-2 text-center">
+                      <div className="text-center">
                         {student.tyt_avg_net ? (
                           <span className="text-sm font-bold text-blue-600">{student.tyt_avg_net}</span>
                         ) : (
@@ -370,7 +370,7 @@ function CoachDashboard({ user, stats }) {
                       </div>
 
                       {/* TYT Sıralama */}
-                      <div className="col-span-2 text-center">
+                      <div className="text-center">
                         {student.tyt_ranking ? (
                           <span className="text-xs text-blue-600 font-medium">{formatRanking(student.tyt_ranking)}</span>
                         ) : (
@@ -379,7 +379,7 @@ function CoachDashboard({ user, stats }) {
                       </div>
 
                       {/* AYT Ortalama */}
-                      <div className="col-span-2 text-center">
+                      <div className="text-center">
                         {student.ayt_avg_net ? (
                           <span className="text-sm font-bold text-purple-600">{student.ayt_avg_net}</span>
                         ) : (
@@ -388,7 +388,7 @@ function CoachDashboard({ user, stats }) {
                       </div>
 
                       {/* AYT Sıralama */}
-                      <div className="col-span-2 text-center">
+                      <div className="text-center">
                         {student.ayt_ranking ? (
                           <span className="text-xs text-purple-600 font-medium">{formatRanking(student.ayt_ranking)}</span>
                         ) : (
@@ -397,22 +397,22 @@ function CoachDashboard({ user, stats }) {
                       </div>
 
                       {/* Momentum */}
-                      <div className="col-span-1 flex justify-center">
+                      <div className="flex justify-center">
                         <MomentumBadge momentum={student.momentum} />
                       </div>
 
                       {/* Disiplin */}
-                      <div className="col-span-1 flex justify-center">
+                      <div className="flex justify-center">
                         <DisciplineBadge score={student.discipline_score} />
                       </div>
 
                       {/* Risk */}
-                      <div className="col-span-1 flex justify-center">
+                      <div className="flex justify-center">
                         <RiskBadge level={riskLevel} />
                       </div>
 
                       {/* İşlemler */}
-                      <div className="col-span-2 flex justify-end gap-1">
+                      <div className="flex justify-end gap-1">
                         <button onClick={(e) => { e.stopPropagation(); navigate(`/student/${student.id}`); }} className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"><Eye size={16} /></button>
                         <button onClick={(e) => { e.stopPropagation(); navigate('/schedule'); }} className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"><Calendar size={16} /></button>
                         <button onClick={(e) => { e.stopPropagation(); navigate('/messages'); }} className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"><MessageCircle size={16} /></button>
