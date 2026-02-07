@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
-  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator, Target
+  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator, Target, Compass, FileText
 } from 'lucide-react';
 
 // Auth Sayfaları
@@ -25,6 +25,8 @@ import Settings from './pages/Settings';
 import OnlineLessons from './pages/OnlineLessons';
 import RankingCalculator from './pages/RankingCalculator';
 import TopicTracker from './pages/TopicTracker';
+import Today from './pages/Today';
+import CoachExams from './pages/CoachExams';
 import API from './api';
 
 // Alan Tipleri
@@ -91,15 +93,23 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     navigate('/login');
   };
 
-  // Koç menüsü
+  // Koç menüsü - ChatGPT önerisi ile yeniden yapılandırıldı
   const coachMenuItems = [
-    { icon: LayoutDashboard, label: 'Koç Paneli', path: '/dashboard' },
+    // 1. BLOK - GÜNLÜK OPERASYON (en önemli)
+    { icon: Compass, label: 'Bugün', path: '/today', highlight: true },
     { icon: Users, label: 'Öğrenciler', path: '/students' },
-    { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
-    { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
+    { type: 'divider' },
+    // 2. BLOK - ZAMAN & EMEK
     { icon: Calendar, label: 'Takvim', path: '/schedule' },
-    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
+    { icon: Video, label: 'Online Dersler', path: '/lessons' },
+    { type: 'divider' },
+    // 3. BLOK - AKADEMİK AKIŞ
+    { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
+    { icon: FileText, label: 'Denemeler', path: '/coach-exams' },
+    { type: 'divider' },
+    // 4. BLOK - PASİF / AYAR
+    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings', muted: true },
   ];
 
   // Öğrenci menüsü
@@ -229,9 +239,36 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
 
       {/* Menu Items */}
       <nav className="flex-1 px-3 space-y-1">
-        {menuItems.map((item) => {
+        {menuItems.map((item, index) => {
+          // Divider (ayırıcı çizgi)
+          if (item.type === 'divider') {
+            return <div key={`divider-${index}`} className="my-2 border-t border-gray-100" />;
+          }
+
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
+
+          // Highlight (Bugün menüsü için özel stil)
+          if (item.highlight) {
+            return (
+              <button
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  setMobileOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
+                  ${isActive
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-200'
+                    : 'bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 hover:from-orange-100 hover:to-amber-100 border border-orange-200'}
+                  ${collapsed ? 'justify-center px-2' : ''}`}
+              >
+                <Icon size={20} className={isActive ? 'text-white' : 'text-orange-500'} />
+                {!collapsed && <span className="text-sm font-semibold">{item.label}</span>}
+              </button>
+            );
+          }
+
           return (
             <button
               key={item.path}
@@ -240,13 +277,15 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
                 setMobileOpen(false);
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
-                ${isActive 
-                  ? 'bg-indigo-50 text-indigo-600 font-medium' 
-                  : 'text-gray-600 hover:bg-gray-50'}
+                ${isActive
+                  ? 'bg-indigo-50 text-indigo-600 font-medium'
+                  : item.muted
+                    ? 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+                    : 'text-gray-600 hover:bg-gray-50'}
                 ${collapsed ? 'justify-center px-2' : ''}`}
             >
-              <Icon size={20} className={isActive ? 'text-indigo-500' : 'text-gray-400'} />
-              {!collapsed && <span className="text-sm">{item.label}</span>}
+              <Icon size={20} className={isActive ? 'text-indigo-500' : item.muted ? 'text-gray-300' : 'text-gray-400'} />
+              {!collapsed && <span className={`text-sm ${item.muted ? '' : ''}`}>{item.label}</span>}
             </button>
           );
         })}
@@ -419,8 +458,10 @@ function App() {
         
         {/* ===== PROTECTED ROUTES ===== */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
+        <Route path="/today" element={<ProtectedRoute><Today /></ProtectedRoute>} />
         <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
         <Route path="/student/:id" element={<ProtectedRoute><StudentDetail /></ProtectedRoute>} />
+        <Route path="/coach-exams" element={<ProtectedRoute><CoachExams /></ProtectedRoute>} />
         <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
         <Route path="/exams" element={<ProtectedRoute><Exams /></ProtectedRoute>} />
         <Route path="/assignments" element={<ProtectedRoute><Assignments /></ProtectedRoute>} />

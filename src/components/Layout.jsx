@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, LogOut, GraduationCap,
   Users, Calendar, MessageCircle, ClipboardList,
-  Settings, BarChart3, Menu, X
+  Settings, BarChart3, Menu, X, Compass, Video, FileText
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import API from "../api";
@@ -37,14 +37,23 @@ export default function Layout({ user, onLogout }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Koç menüsü
+  // Koç menüsü - ChatGPT önerisi ile yeniden yapılandırıldı
   const coachMenu = [
-    { icon: LayoutDashboard, label: "Genel Bakış", path: "/" },
+    // 1. BLOK - GÜNLÜK OPERASYON
+    { icon: Compass, label: "Bugün", path: "/today", highlight: true },
     { icon: Users, label: "Öğrenciler", path: "/students" },
     { icon: MessageCircle, label: "Mesajlar", path: "/chat", badge: unreadMessages },
-    { icon: ClipboardList, label: "Ödevler", path: "/assignments", badge: pendingAssignments },
+    { type: "divider" },
+    // 2. BLOK - ZAMAN & EMEK
     { icon: Calendar, label: "Takvim", path: "/calendar" },
-    { icon: Settings, label: "Ayarlar", path: "/settings" },
+    { icon: Video, label: "Online Dersler", path: "/online-lessons" },
+    { type: "divider" },
+    // 3. BLOK - AKADEMİK AKIŞ
+    { icon: ClipboardList, label: "Ödevler", path: "/assignments", badge: pendingAssignments },
+    { icon: FileText, label: "Denemeler", path: "/coach-exams" },
+    { type: "divider" },
+    // 4. BLOK - PASİF / AYAR
+    { icon: Settings, label: "Ayarlar", path: "/settings", muted: true },
   ];
 
   // Öğrenci menüsü
@@ -121,33 +130,68 @@ export default function Layout({ user, onLogout }) {
 
         {/* Menü Linkleri */}
         <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => {
+          {menuItems.map((item, index) => {
+            // Divider (ayırıcı çizgi)
+            if (item.type === 'divider') {
+              return <div key={`divider-${index}`} className="my-2 border-t border-gray-100" />;
+            }
+
             const isActive = location.pathname === item.path ||
-              (item.path !== '/' && location.pathname.startsWith(item.path));
+              (item.path !== '/' && item.path !== '/today' && location.pathname.startsWith(item.path));
+
+            // Highlight (Bugün menüsü için özel stil)
+            if (item.highlight) {
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl
+                    transition-all duration-200 group
+                    ${isActive
+                      ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-200"
+                      : "bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 hover:from-orange-100 hover:to-amber-100 border border-orange-200"
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <item.icon size={19} className={isActive ? "text-white" : "text-orange-500"} />
+                    <span className="text-sm font-semibold">{item.label}</span>
+                  </div>
+                </Link>
+              );
+            }
 
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl 
+                className={`flex items-center justify-between px-3 py-2.5 rounded-xl
                   transition-all duration-200 group
                   ${isActive
                     ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                    : item.muted
+                      ? "text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                   }`}
               >
                 <div className="flex items-center gap-3">
                   <item.icon
                     size={19}
-                    className={`transition-colors ${isActive ? "text-indigo-600" : "text-gray-400 group-hover:text-gray-600"}`}
+                    className={`transition-colors ${
+                      isActive
+                        ? "text-indigo-600"
+                        : item.muted
+                          ? "text-gray-300 group-hover:text-gray-500"
+                          : "text-gray-400 group-hover:text-gray-600"
+                    }`}
                   />
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <span className={`text-sm ${item.muted ? 'font-normal' : 'font-medium'}`}>{item.label}</span>
                 </div>
 
                 {/* Badge (okunmamış mesaj vs.) */}
                 {item.badge > 0 && (
-                  <span className="min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-[10px] 
+                  <span className="min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-[10px]
                     font-bold rounded-full flex items-center justify-center animate-pulse">
                     {item.badge > 9 ? '9+' : item.badge}
                   </span>
@@ -269,12 +313,15 @@ export default function Layout({ user, onLogout }) {
 function getPageTitle(pathname, role) {
   const titles = {
     '/': role === 'coach' ? 'Koç Paneli' : 'Öğrenci Paneli',
+    '/today': 'Bugün',
     '/students': 'Öğrenciler',
     '/chat': 'Mesajlar',
     '/assignments': 'Ödevler',
     '/calendar': 'Takvim',
     '/schedule': 'Haftalık Program',
     '/exams': 'Deneme Sonuçları',
+    '/coach-exams': 'Denemeler',
+    '/online-lessons': 'Online Dersler',
     '/settings': 'Ayarlar',
   };
 
