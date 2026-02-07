@@ -1,30 +1,59 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Clock, TrendingDown, FileText, MessageCircle, Calendar, ChevronRight } from 'lucide-react';
+import { AlertCircle, Clock, TrendingDown, FileText, ChevronRight, Zap } from 'lucide-react';
 import API from '../api';
 
 export default function Today() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
-    critical_students: [],
-    no_contact_students: [],
-    momentum_down_students: [],
-    pending_exams: []
-  });
+  const [students, setStudents] = useState([]);
+  const [sendingReminder, setSendingReminder] = useState(null);
 
   useEffect(() => {
-    fetchTodayData();
+    fetchData();
   }, []);
 
-  const fetchTodayData = async () => {
+  const fetchData = async () => {
     try {
-      const res = await API.get('/api/coach/today/');
-      setData(res.data);
+      // Mevcut dashboard endpoint'ini kullan
+      const res = await API.get('/api/dashboard/');
+      setStudents(res.data.students || []);
     } catch (err) {
-      console.error('Bugün verisi yüklenemedi:', err);
+      console.error('Veri yüklenemedi:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Verileri kategorize et
+  const criticalStudents = students.filter(s => s.risk_level === 'risk');
+  const noContactStudents = students.filter(s => {
+    const days = s.activity_status?.days_inactive;
+    return days === undefined || days === null || days >= 2;
+  });
+  const momentumDownStudents = students.filter(s => s.momentum?.direction === 'down');
+  const pendingExamStudents = students.filter(s => {
+    // Son deneme 7+ gün önce veya hiç yok
+    const lastExam = s.last_exam_date;
+    if (!lastExam) return true;
+    const daysSince = Math.floor((new Date() - new Date(lastExam)) / (1000 * 60 * 60 * 24));
+    return daysSince >= 7;
+  });
+
+  // Hatırlat butonu
+  const sendReminder = async (student) => {
+    setSendingReminder(student.id);
+    try {
+      const message = `Merhaba ${student.name?.split(' ')[0] || ''}, bugün çalışma durumunu merak ettim. Her şey yolunda mı? 📚`;
+      await API.post('/api/chat/send/', {
+        receiver_id: student.user_id,
+        content: message
+      });
+      alert(`✅ ${student.name}'e hatırlatma gönderildi!`);
+    } catch (err) {
+      alert('Mesaj gönderilemedi');
+    } finally {
+      setSendingReminder(null);
     }
   };
 
@@ -39,6 +68,7 @@ export default function Today() {
           <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
             color.includes('red') ? 'bg-red-100 text-red-700' :
             color.includes('yellow') ? 'bg-yellow-100 text-yellow-700' :
+            color.includes('orange') ? 'bg-orange-100 text-orange-700' :
             color.includes('blue') ? 'bg-blue-100 text-blue-700' :
             'bg-gray-100 text-gray-700'
           }`}>
@@ -58,29 +88,43 @@ export default function Today() {
     </div>
   );
 
-  const StudentRow = ({ student, badge, badgeColor, onClick }) => (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 transition-colors group"
-    >
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+  const StudentRow = ({ student, badge, badgeColor, showReminder = true }) => (
+    <div className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 transition-colors group">
+      <button
+        onClick={() => navigate(`/student/${student.id}`)}
+        className="flex items-center gap-3 flex-1 text-left"
+      >
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
           {student.name?.charAt(0) || '?'}
         </div>
-        <div className="text-left">
+        <div>
           <p className="font-medium text-gray-800 text-sm">{student.name}</p>
-          <p className="text-xs text-gray-400">{student.field || 'SAY'}</p>
+          <p className="text-xs text-gray-400">{student.field_type_display || student.exam_goal_type || 'SAY'}</p>
         </div>
-      </div>
+      </button>
       <div className="flex items-center gap-2">
         {badge && (
           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badgeColor}`}>
             {badge}
           </span>
         )}
+        {showReminder && (
+          <button
+            onClick={() => sendReminder(student)}
+            disabled={sendingReminder === student.id}
+            className={`p-1.5 rounded-lg transition-colors ${
+              sendingReminder === student.id
+                ? 'bg-gray-100 text-gray-400'
+                : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+            }`}
+            title="Hatırlat"
+          >
+            <Zap size={14} className={sendingReminder === student.id ? 'animate-pulse' : ''} />
+          </button>
+        )}
         <ChevronRight size={16} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
       </div>
-    </button>
+    </div>
   );
 
   if (loading) {
@@ -88,6 +132,11 @@ export default function Today() {
       <div className="p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded w-48"></div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-20 bg-gray-200 rounded-xl"></div>
+            ))}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-48 bg-gray-200 rounded-2xl"></div>
@@ -111,19 +160,19 @@ export default function Today() {
       {/* Özet Kartları */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-red-600">{data.critical_students?.length || 0}</p>
+          <p className="text-2xl font-bold text-red-600">{criticalStudents.length}</p>
           <p className="text-xs text-red-600">Kritik</p>
         </div>
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-yellow-600">{data.momentum_down_students?.length || 0}</p>
+          <p className="text-2xl font-bold text-yellow-600">{momentumDownStudents.length}</p>
           <p className="text-xs text-yellow-600">Momentum ↓</p>
         </div>
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-orange-600">{data.no_contact_students?.length || 0}</p>
+          <p className="text-2xl font-bold text-orange-600">{noContactStudents.length}</p>
           <p className="text-xs text-orange-600">48s Temas Yok</p>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-blue-600">{data.pending_exams?.length || 0}</p>
+          <p className="text-2xl font-bold text-blue-600">{pendingExamStudents.length}</p>
           <p className="text-xs text-blue-600">Deneme Bekliyor</p>
         </div>
       </div>
@@ -134,76 +183,104 @@ export default function Today() {
         <ActionCard
           icon={AlertCircle}
           title="Kritik Öğrenciler"
-          count={data.critical_students?.length || 0}
+          count={criticalStudents.length}
           color="border-red-200"
-          emptyText="Kritik öğrenci yok"
+          emptyText="🎉 Kritik öğrenci yok!"
         >
-          {data.critical_students?.slice(0, 5).map(student => (
+          {criticalStudents.slice(0, 5).map(student => (
             <StudentRow
               key={student.id}
               student={student}
               badge="Kritik"
               badgeColor="bg-red-100 text-red-700"
-              onClick={() => navigate(`/student/${student.id}`)}
             />
           ))}
+          {criticalStudents.length > 5 && (
+            <button
+              onClick={() => navigate('/students')}
+              className="w-full text-center text-sm text-red-600 hover:text-red-700 py-2"
+            >
+              +{criticalStudents.length - 5} daha...
+            </button>
+          )}
         </ActionCard>
 
         {/* 48 Saattir Temas Yok */}
         <ActionCard
           icon={Clock}
           title="48 Saattir Temas Yok"
-          count={data.no_contact_students?.length || 0}
+          count={noContactStudents.length}
           color="border-orange-200"
-          emptyText="Tüm öğrencilerle temas kuruldu"
+          emptyText="🎉 Tüm öğrencilerle temas kuruldu!"
         >
-          {data.no_contact_students?.slice(0, 5).map(student => (
+          {noContactStudents.slice(0, 5).map(student => (
             <StudentRow
               key={student.id}
               student={student}
-              badge={student.last_contact_days ? `${student.last_contact_days}g` : '?'}
+              badge={student.activity_status?.days_inactive ? `${student.activity_status.days_inactive}g` : '?'}
               badgeColor="bg-orange-100 text-orange-700"
-              onClick={() => navigate(`/student/${student.id}`)}
             />
           ))}
+          {noContactStudents.length > 5 && (
+            <button
+              onClick={() => navigate('/students')}
+              className="w-full text-center text-sm text-orange-600 hover:text-orange-700 py-2"
+            >
+              +{noContactStudents.length - 5} daha...
+            </button>
+          )}
         </ActionCard>
 
         {/* Momentum Düşenler */}
         <ActionCard
           icon={TrendingDown}
           title="Momentum Düşenler"
-          count={data.momentum_down_students?.length || 0}
+          count={momentumDownStudents.length}
           color="border-yellow-200"
-          emptyText="Momentum düşen öğrenci yok"
+          emptyText="🎉 Momentum düşen öğrenci yok!"
         >
-          {data.momentum_down_students?.slice(0, 5).map(student => (
+          {momentumDownStudents.slice(0, 5).map(student => (
             <StudentRow
               key={student.id}
               student={student}
-              badge={student.momentum ? `${student.momentum > 0 ? '+' : ''}${student.momentum}` : '↓'}
+              badge={student.momentum?.change ? `${student.momentum.change}` : '↓'}
               badgeColor="bg-yellow-100 text-yellow-700"
-              onClick={() => navigate(`/student/${student.id}`)}
             />
           ))}
+          {momentumDownStudents.length > 5 && (
+            <button
+              onClick={() => navigate('/students')}
+              className="w-full text-center text-sm text-yellow-600 hover:text-yellow-700 py-2"
+            >
+              +{momentumDownStudents.length - 5} daha...
+            </button>
+          )}
         </ActionCard>
 
         {/* Deneme Girmesi Gerekenler */}
         <ActionCard
           icon={FileText}
           title="Deneme Girmesi Gerekenler"
-          count={data.pending_exams?.length || 0}
+          count={pendingExamStudents.length}
           color="border-blue-200"
-          emptyText="Herkes deneme girmiş"
+          emptyText="🎉 Herkes deneme girmiş!"
         >
-          {data.pending_exams?.slice(0, 5).map(student => (
+          {pendingExamStudents.slice(0, 5).map(student => (
             <StudentRow
               key={student.id}
               student={student}
-              badge={student.days_since_exam ? `${student.days_since_exam}g` : 'Yok'}
+              badge="7g+"
               badgeColor="bg-blue-100 text-blue-700"
-              onClick={() => navigate(`/student/${student.id}`)}
             />
           ))}
+          {pendingExamStudents.length > 5 && (
+            <button
+              onClick={() => navigate('/students')}
+              className="w-full text-center text-sm text-blue-600 hover:text-blue-700 py-2"
+            >
+              +{pendingExamStudents.length - 5} daha...
+            </button>
+          )}
         </ActionCard>
       </div>
 
