@@ -40,11 +40,16 @@ export default function StudentDetail() {
   const [studentSchedule, setStudentSchedule] = useState([]);
   const [scheduleLoading, setScheduleLoading] = useState(false);
 
+  // Subject results state (branş detayları)
+  const [subjectResults, setSubjectResults] = useState([]);
+  const [expandedExamId, setExpandedExamId] = useState(null);
+
   useEffect(() => {
     fetchData();
     fetchGoals();
     fetchTopics();
     fetchSchedule();
+    fetchSubjectResults();
   }, [id]);
 
   const fetchData = async () => {
@@ -99,6 +104,20 @@ export default function StudentDetail() {
     } finally {
       setScheduleLoading(false);
     }
+  };
+
+  const fetchSubjectResults = async () => {
+    try {
+      const res = await API.get(`/api/subject-results/?student_id=${id}`);
+      setSubjectResults(res.data || []);
+    } catch (err) {
+      console.log('Branş sonuçları yüklenemedi');
+    }
+  };
+
+  // Bir denemenin branş sonuçlarını getir (tarihe göre)
+  const getExamSubjectResults = (examDate) => {
+    return subjectResults.filter(r => r.date === examDate);
   };
 
   const toggleSubjectExpand = (key) => {
@@ -285,13 +304,15 @@ export default function StudentDetail() {
               </p>
             </div>
             
-            {/* Max */}
+            {/* Ort. AYT */}
             <div className="bg-amber-50 rounded-xl p-4">
-              <span className="text-sm font-medium text-amber-600">Max TYT</span>
+              <span className="text-sm font-medium text-amber-600">Ort. AYT</span>
               <p className="text-2xl font-bold text-amber-700 mt-2">
-                {getStats('TYT')?.max || '-'}
+                {getStats('AYT_SAY')?.avg || getStats('AYT_EA')?.avg || getStats('AYT_SOZ')?.avg || '-'}
               </p>
-              <p className="text-xs text-amber-500 mt-1">En iyi sonuç</p>
+              <p className="text-xs text-amber-500 mt-1">
+                {(getStats('AYT_SAY')?.count || 0) + (getStats('AYT_EA')?.count || 0) + (getStats('AYT_SOZ')?.count || 0)} deneme
+              </p>
             </div>
           </div>
         </div>
@@ -433,36 +454,99 @@ export default function StudentDetail() {
                     <p>Henüz deneme sonucu yok</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="text-left text-sm text-gray-500 border-b border-gray-100">
-                          <th className="pb-3 font-medium">Tarih</th>
-                          <th className="pb-3 font-medium">Tür</th>
-                          <th className="pb-3 font-medium text-right">Net</th>
-                          <th className="pb-3 font-medium text-right">Sıralama</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-50">
-                        {exams.map((exam, idx) => {
-                          const typeColors = { 'TYT': 'blue', 'AYT_SAY': 'purple', 'AYT_EA': 'green', 'AYT_SOZ': 'orange' };
-                          const typeNames = { 'TYT': 'TYT', 'AYT_SAY': 'AYT Sayısal', 'AYT_EA': 'AYT EA', 'AYT_SOZ': 'AYT Sözel' };
+                  <div className="space-y-3">
+                    {exams.map((exam, idx) => {
+                      const typeColors = { 'TYT': 'blue', 'AYT_SAY': 'purple', 'AYT_EA': 'green', 'AYT_SOZ': 'orange' };
+                      const typeNames = { 'TYT': 'TYT', 'AYT_SAY': 'AYT Sayısal', 'AYT_EA': 'AYT EA', 'AYT_SOZ': 'AYT Sözel' };
+                      const isExpanded = expandedExamId === exam.id;
+                      const examSubjects = getExamSubjectResults(exam.date);
+                      const color = typeColors[exam.exam_type] || 'gray';
 
-                          return (
-                            <tr key={idx} className="hover:bg-gray-50">
-                              <td className="py-3">{new Date(exam.date).toLocaleDateString('tr-TR')}</td>
-                              <td className="py-3">
-                                <span className={`px-2.5 py-1 rounded-full text-xs font-medium bg-${typeColors[exam.exam_type] || 'gray'}-100 text-${typeColors[exam.exam_type] || 'gray'}-700`}>
-                                  {typeNames[exam.exam_type] || exam.exam_type}
-                                </span>
-                              </td>
-                              <td className="py-3 text-right font-bold">{exam.net_score}</td>
-                              <td className="py-3 text-right text-indigo-600 font-medium">~{formatRanking(exam.estimated_ranking)}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                      return (
+                        <div key={exam.id || idx} className={`bg-${color}-50 rounded-xl border border-${color}-100 overflow-hidden`}>
+                          {/* Deneme Header - Tıklanabilir */}
+                          <div
+                            className="p-4 cursor-pointer hover:bg-opacity-80 transition-colors"
+                            onClick={() => setExpandedExamId(isExpanded ? null : exam.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg bg-${color}-100 flex items-center justify-center`}>
+                                  <Award className={`text-${color}-600`} size={20} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium bg-${color}-100 text-${color}-700`}>
+                                      {typeNames[exam.exam_type] || exam.exam_type}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                      {new Date(exam.date).toLocaleDateString('tr-TR')}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <p className="text-xl font-bold text-gray-800">{exam.net_score} <span className="text-sm font-normal text-gray-500">net</span></p>
+                                  <p className="text-sm text-indigo-600 font-medium">~{formatRanking(exam.estimated_ranking)}</p>
+                                </div>
+                                {isExpanded ? (
+                                  <ChevronUp size={20} className="text-gray-400" />
+                                ) : (
+                                  <ChevronDown size={20} className="text-gray-400" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Branş Detayları - Expandable */}
+                          {isExpanded && (
+                            <div className="border-t border-gray-200 bg-white p-4">
+                              {examSubjects.length === 0 ? (
+                                <p className="text-sm text-gray-400 text-center py-4">
+                                  Bu deneme için branş detayı kaydedilmemiş
+                                </p>
+                              ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  {examSubjects.map((subject) => {
+                                    const subjectNames = {
+                                      'TYT_TURKCE': 'Türkçe', 'TYT_SOSYAL': 'Sosyal', 'TYT_MATEMATIK': 'Matematik', 'TYT_FEN': 'Fen',
+                                      'AYT_MAT': 'Matematik', 'AYT_FIZIK': 'Fizik', 'AYT_KIMYA': 'Kimya', 'AYT_BIYOLOJI': 'Biyoloji',
+                                      'AYT_EDEBIYAT': 'Edebiyat', 'AYT_TARIH1': 'Tarih-1', 'AYT_COGRAFYA1': 'Coğrafya-1',
+                                      'AYT_TARIH2': 'Tarih-2', 'AYT_COGRAFYA2': 'Coğrafya-2', 'AYT_FELSEFE': 'Felsefe', 'AYT_DIN': 'Din'
+                                    };
+                                    const net = subject.net || (subject.correct - (subject.wrong / 4));
+                                    const blank = subject.blank || 0;
+
+                                    return (
+                                      <div key={subject.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
+                                        <div>
+                                          <p className="font-medium text-gray-800 text-sm">
+                                            {subjectNames[subject.subject] || subject.subject}
+                                          </p>
+                                          <p className="text-xs text-gray-500 mt-0.5">
+                                            <span className="text-green-600 font-medium">{subject.correct}D</span>
+                                            {' / '}
+                                            <span className="text-red-500 font-medium">{subject.wrong}Y</span>
+                                            {blank > 0 && <span className="text-gray-400"> / {blank}B</span>}
+                                          </p>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className={`text-lg font-bold ${net >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                            {net.toFixed(2)}
+                                          </p>
+                                          <p className="text-xs text-gray-400">net</p>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
