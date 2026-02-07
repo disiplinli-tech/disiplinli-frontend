@@ -207,27 +207,22 @@ export default function Schedule({ user }) {
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 md:py-5">
         <div className="max-w-[1800px] mx-auto space-y-4">
           {/* Başlık ve Butonlar */}
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Programım</h1>
-              <p className="text-gray-500 text-sm mt-1 hidden sm:block">
-                {currentTime.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-            </div>
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800 flex-shrink-0">Programım</h1>
 
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-2">
               {/* Öğrenci Seç Butonu - Koç için */}
               {isCoach && students.length > 0 && (
                 <button
                   onClick={() => setShowStudentPicker(true)}
-                  className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 bg-white"
+                  className="flex items-center gap-1.5 px-2.5 md:px-3 py-2 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 bg-white"
                 >
-                  <User size={16} className="text-gray-500" />
-                  <span className="font-medium text-gray-700 max-w-[100px] md:max-w-none truncate">
+                  <User size={14} className="text-gray-500 flex-shrink-0" />
+                  <span className="font-medium text-gray-700 truncate max-w-[60px] sm:max-w-[100px] md:max-w-none text-xs md:text-sm">
                     {selectedStudent === "mine"
-                      ? "Benim Takvimim"
+                      ? "Takvimim"
                       : selectedStudent === "all"
-                      ? "Tüm Öğrenciler"
+                      ? "Tümü"
                       : students.find(s => s.id.toString() === selectedStudent)?.name || "Seç"}
                   </span>
                 </button>
@@ -244,11 +239,10 @@ export default function Schedule({ user }) {
                   });
                   setShowModal(true);
                 }}
-                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium text-sm"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-medium text-sm whitespace-nowrap"
               >
-                <Plus size={18} />
-                <span className="hidden sm:inline">Ders Ekle</span>
-                <span className="sm:hidden">Ekle</span>
+                <Plus size={16} />
+                <span>Ekle</span>
               </button>
             </div>
           </div>
