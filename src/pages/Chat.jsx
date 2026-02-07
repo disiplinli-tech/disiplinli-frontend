@@ -97,10 +97,10 @@ export default function Chat() {
   const grouped = groupMessagesByDate(messages);
 
   return (
-    <div className="flex h-[calc(100vh-80px)] bg-gray-50">
+    <div className="flex h-[calc(100vh-80px)] bg-gray-50 max-w-[100vw] overflow-hidden">
       {/* Sol: Sohbet Listesi */}
-      <div className={`${selectedUser && role === 'student' ? 'hidden md:flex' : 'flex'} 
-        flex-col w-full md:w-80 bg-white border-r border-gray-200`}>
+      <div className={`${selectedUser ? 'hidden md:flex' : 'flex'}
+        flex-col w-full md:w-80 bg-white border-r border-gray-200 flex-shrink-0`}>
         
         {/* Header */}
         <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-purple-600">
@@ -167,7 +167,7 @@ export default function Chat() {
       </div>
 
       {/* Sağ: Mesaj Alanı */}
-      <div className={`${!selectedUser ? 'hidden md:flex' : 'flex'} flex-col flex-1`}>
+      <div className={`${!selectedUser ? 'hidden md:flex' : 'flex'} flex-col flex-1 min-w-0`}>
         {selectedUser ? (
           <>
             {/* Chat Header */}
