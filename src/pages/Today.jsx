@@ -44,14 +44,23 @@ export default function Today() {
   const sendReminder = async (student) => {
     setSendingReminder(student.id);
     try {
-      const message = `Merhaba ${student.name?.split(' ')[0] || ''}, bugün çalışma durumunu merak ettim. Her şey yolunda mı? 📚`;
+      const messageText = `Merhaba ${student.name?.split(' ')[0] || ''}, bugün çalışma durumunu merak ettim. Her şey yolunda mı? 📚`;
+
+      // Debug: user_id kontrolü
+      if (!student.user_id) {
+        console.error('user_id bulunamadı:', student);
+        alert('Öğrenci bilgisi eksik (user_id yok)');
+        return;
+      }
+
       await API.post('/api/chat/send/', {
         receiver_id: student.user_id,
-        content: message
+        message: messageText
       });
       alert(`✅ ${student.name}'e hatırlatma gönderildi!`);
     } catch (err) {
-      alert('Mesaj gönderilemedi');
+      console.error('Mesaj gönderme hatası:', err.response?.data || err);
+      alert(`Mesaj gönderilemedi: ${err.response?.data?.error || 'Bilinmeyen hata'}`);
     } finally {
       setSendingReminder(null);
     }
