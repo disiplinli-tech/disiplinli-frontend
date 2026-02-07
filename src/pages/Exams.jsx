@@ -243,6 +243,7 @@ export default function Exams() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [expandedExam, setExpandedExam] = useState(null);
+  const [studentProfile, setStudentProfile] = useState(null);
 
   // Form state
   const [examType, setExamType] = useState('TYT');
@@ -252,6 +253,7 @@ export default function Exams() {
   useEffect(() => {
     fetchExams();
     fetchSubjectResults();
+    fetchStudentProfile();
   }, []);
 
   const fetchExams = async () => {
@@ -268,6 +270,14 @@ export default function Exams() {
     try {
       const res = await API.get("/api/subject-results/");
       setSubjectResults(res.data || []);
+    } catch (err) {
+    }
+  };
+
+  const fetchStudentProfile = async () => {
+    try {
+      const res = await API.get("/api/dashboard-stats/");
+      setStudentProfile(res.data);
     } catch (err) {
     }
   };
@@ -383,12 +393,40 @@ export default function Exams() {
   const getStats = () => {
     const tytExams = exams.filter(e => e.exam_type === 'TYT');
     const aytExams = exams.filter(e => e.exam_type?.startsWith('AYT'));
-    
+
+    // TYT istatistikleri
+    const tytAvg = tytExams.length > 0 ? (tytExams.reduce((a, e) => a + e.net_score, 0) / tytExams.length) : null;
+    const tytRanking = tytAvg ? estimateRanking(tytAvg, 'TYT') : null;
+
+    // AYT istatistikleri
+    const aytAvg = aytExams.length > 0 ? (aytExams.reduce((a, e) => a + e.net_score, 0) / aytExams.length) : null;
+    const aytRanking = aytAvg ? estimateRanking(aytAvg, 'AYT_SAY') : null;
+
+    // Momentum: Son 3 deneme vs genel ortalama
+    const allExamsSorted = [...exams].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const last3 = allExamsSorted.slice(0, 3);
+    const last3Avg = last3.length > 0 ? last3.reduce((a, e) => a + e.net_score, 0) / last3.length : null;
+    const overallAvg = exams.length > 0 ? exams.reduce((a, e) => a + e.net_score, 0) / exams.length : null;
+    const momentum = (last3Avg !== null && overallAvg !== null) ? (last3Avg - overallAvg) : null;
+
+    // Hedefe kalan (AYT yerleşme sıralaması kullan)
+    const targetRanking = studentProfile?.target_ranking || null;
+    // AYT sıralaması varsa onu kullan, yoksa TYT
+    const currentRanking = aytRanking || tytRanking;
+    const rankingDiff = (targetRanking && currentRanking) ? (currentRanking - targetRanking) : null;
+
     return {
       tytCount: tytExams.length,
-      tytAvg: tytExams.length > 0 ? (tytExams.reduce((a, e) => a + e.net_score, 0) / tytExams.length).toFixed(1) : null,
+      tytAvg: tytAvg ? tytAvg.toFixed(1) : null,
       tytMax: tytExams.length > 0 ? Math.max(...tytExams.map(e => e.net_score)) : null,
+      tytRanking,
       aytCount: aytExams.length,
+      aytAvg: aytAvg ? aytAvg.toFixed(1) : null,
+      aytRanking,
+      momentum: momentum !== null ? momentum.toFixed(1) : null,
+      targetRanking,
+      currentRanking,
+      rankingDiff,
     };
   };
   const stats = getStats();
@@ -424,40 +462,74 @@ export default function Exams() {
         {/* Özet Kartları */}
         {exams.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+            {/* TYT Sıralama */}
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
               <div className="flex items-center gap-1.5 md:gap-2 mb-1">
                 <Trophy size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
-                <span className="text-xs md:text-sm opacity-90">TYT Ort.</span>
+                <span className="text-xs md:text-sm opacity-90">TYT Sıralama</span>
               </div>
-              <p className="text-2xl md:text-3xl font-bold">{stats.tytAvg || '-'}</p>
-              <p className="text-[10px] md:text-xs opacity-70 mt-1">{stats.tytCount} deneme</p>
+              <p className="text-xl md:text-2xl font-bold">{stats.tytRanking ? formatRanking(stats.tytRanking) : '-'}</p>
+              <p className="text-[10px] md:text-xs opacity-70 mt-1">{stats.tytAvg || '-'} net ort.</p>
             </div>
 
+            {/* AYT Sıralama */}
             <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
               <div className="flex items-center gap-1.5 md:gap-2 mb-1">
-                <TrendingUp size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
-                <span className="text-xs md:text-sm opacity-90">TYT Max</span>
+                <Award size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+                <span className="text-xs md:text-sm opacity-90">AYT Sıralama</span>
               </div>
-              <p className="text-2xl md:text-3xl font-bold">{stats.tytMax || '-'}</p>
-              <p className="text-[10px] md:text-xs opacity-70 mt-1">En iyi sonuç</p>
+              <p className="text-xl md:text-2xl font-bold">{stats.aytRanking ? formatRanking(stats.aytRanking) : '-'}</p>
+              <p className="text-[10px] md:text-xs opacity-70 mt-1">{stats.aytAvg ? `${stats.aytAvg} net ort.` : 'Henüz AYT yok'}</p>
             </div>
 
-            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
+            {/* Momentum - Son 3 deneme vs genel ortalama */}
+            <div className={`bg-gradient-to-br ${
+              stats.momentum > 0 ? 'from-green-500 to-emerald-600' :
+              stats.momentum < 0 ? 'from-red-500 to-rose-600' :
+              'from-gray-500 to-gray-600'
+            } rounded-xl md:rounded-2xl p-3 md:p-4 text-white`}>
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                <TrendingUp size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
+                <span className="text-xs md:text-sm opacity-90">Momentum</span>
+              </div>
+              <p className="text-xl md:text-2xl font-bold">
+                {stats.momentum !== null ? (
+                  <>
+                    {parseFloat(stats.momentum) > 0 ? '+' : ''}{stats.momentum}
+                    <span className="text-sm font-normal ml-1">net</span>
+                  </>
+                ) : '-'}
+              </p>
+              <p className="text-[10px] md:text-xs opacity-70 mt-1">Son 3 deneme farkı</p>
+            </div>
+
+            {/* Hedefe Kalan */}
+            <div className={`bg-gradient-to-br ${
+              stats.rankingDiff !== null ? (
+                stats.rankingDiff <= 0 ? 'from-green-500 to-emerald-600' : 'from-orange-500 to-amber-500'
+              ) : 'from-gray-500 to-gray-600'
+            } rounded-xl md:rounded-2xl p-3 md:p-4 text-white`}>
               <div className="flex items-center gap-1.5 md:gap-2 mb-1">
                 <Target size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
-                <span className="text-xs md:text-sm opacity-90">Sıralama</span>
+                <span className="text-xs md:text-sm opacity-90">Hedefe Kalan</span>
               </div>
-              <p className="text-lg md:text-2xl font-bold">{stats.tytAvg ? formatRanking(estimateRanking(parseFloat(stats.tytAvg), 'TYT')) : '-'}</p>
-              <p className="text-[10px] md:text-xs opacity-70 mt-1">TYT ort. göre</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl md:rounded-2xl p-3 md:p-4 text-white">
-              <div className="flex items-center gap-1.5 md:gap-2 mb-1">
-                <Award size={14} className="opacity-80 md:w-[18px] md:h-[18px]" />
-                <span className="text-xs md:text-sm opacity-90">AYT</span>
-              </div>
-              <p className="text-2xl md:text-3xl font-bold">{stats.aytCount}</p>
-              <p className="text-[10px] md:text-xs opacity-70 mt-1">Toplam AYT</p>
+              {stats.targetRanking ? (
+                <>
+                  <p className="text-xl md:text-2xl font-bold">
+                    {stats.rankingDiff !== null ? formatRanking(Math.abs(stats.rankingDiff)) : '-'}
+                  </p>
+                  <p className="text-[10px] md:text-xs opacity-70 mt-1">
+                    {stats.rankingDiff !== null ? (
+                      stats.rankingDiff <= 0 ? '🎯 İleridesin!' : 'Geridesin'
+                    ) : 'Hesaplanamadı'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg md:text-xl font-bold">-</p>
+                  <p className="text-[10px] md:text-xs opacity-70 mt-1">Hedef belirlenmedi</p>
+                </>
+              )}
             </div>
           </div>
         )}
