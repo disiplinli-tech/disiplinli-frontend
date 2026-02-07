@@ -3,7 +3,7 @@ import API from '../api';
 import { formatRanking, formatDate } from '../utils/formatters';
 import {
   Trophy, Target, TrendingUp, Calendar, BookOpen, User,
-  GraduationCap, Clock, AlertCircle, RefreshCw, Link, Loader2
+  GraduationCap, Clock, AlertCircle, RefreshCw, Link, Loader2, Award, BarChart3
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -168,28 +168,30 @@ export default function ParentDashboard() {
 
   if (!data) return null;
 
-  // Grafik verisi hazırla
-  const chartData = data.exams
-    .filter(e => e.exam_type === 'TYT')
-    .slice(0, 10)
-    .reverse()
-    .map(e => ({
-      date: new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
-      net: e.net_score,
-    }));
+  // TYT Grafik verisi
+  const tytChartData = (data.tyt_chart_data || []).map(e => ({
+    date: new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
+    net: e.net,
+  }));
+
+  // AYT Grafik verisi
+  const aytChartData = (data.ayt_chart_data || []).map(e => ({
+    date: new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
+    net: e.net,
+  }));
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 mb-6 text-white">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold mb-1">Merhaba, {data.parent_name}! 👋</h1>
             <p className="text-emerald-100">
               {new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
-          <div className="hidden md:flex items-center gap-3 bg-white/20 rounded-xl px-4 py-2">
+          <div className="flex items-center gap-3 bg-white/20 rounded-xl px-4 py-2">
             <User size={20} />
             <span className="font-medium">Veli Paneli</span>
           </div>
@@ -198,24 +200,30 @@ export default function ParentDashboard() {
 
       {/* Öğrenci Bilgisi */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
             {data.student.name?.charAt(0) || 'Ö'}
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h2 className="text-xl font-bold text-gray-800">{data.student.name}</h2>
-            <p className="text-gray-500 text-sm">{data.student.email}</p>
-            <div className="flex items-center gap-4 mt-2">
+            <p className="text-gray-500 text-sm truncate">{data.student.email}</p>
+            <div className="flex items-center gap-2 md:gap-4 mt-2 flex-wrap">
+              {data.student.field_type_display && (
+                <span className="flex items-center gap-1 text-sm text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+                  <BarChart3 size={14} />
+                  {data.student.field_type_display}
+                </span>
+              )}
               {data.coach_name && (
                 <span className="flex items-center gap-1 text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
                   <GraduationCap size={14} />
                   Koç: {data.coach_name}
                 </span>
               )}
-              {data.student.last_activity && (
-                <span className="flex items-center gap-1 text-sm text-gray-500">
-                  <Clock size={14} />
-                  Son aktivite: {formatDate(data.student.last_activity)}
+              {data.student.obp && (
+                <span className="flex items-center gap-1 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                  <Award size={14} />
+                  Diploma: {data.student.obp}
                 </span>
               )}
             </div>
@@ -223,75 +231,97 @@ export default function ParentDashboard() {
         </div>
       </div>
 
-      {/* İstatistik Kartları */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* TYT Sıralama */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
-          <div className="flex items-center gap-2 mb-3 text-blue-100">
-            <Trophy size={18} />
-            <span className="text-sm font-medium">TYT Sıralama</span>
+      {/* İstatistik Kartları - 5'li Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        {/* TYT Ortalama */}
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 md:p-5 text-white">
+          <div className="flex items-center gap-2 mb-2 text-blue-100">
+            <Trophy size={16} />
+            <span className="text-xs md:text-sm font-medium">TYT Ortalama</span>
           </div>
-          <p className="text-2xl font-bold">{formatRanking(data.last_tyt_ranking)}</p>
-          <p className="text-blue-200 text-sm mt-1">{data.last_tyt_net ? `${data.last_tyt_net} net` : '-'}</p>
+          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.tyt_avg_ranking)}</p>
+          <p className="text-blue-200 text-xs md:text-sm mt-1">
+            {data.tyt_avg_net ? `${data.tyt_avg_net} net` : '-'}
+            {data.tyt_exam_count ? ` (${data.tyt_exam_count} deneme)` : ''}
+          </p>
         </div>
 
-        {/* AYT Sıralama */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
-          <div className="flex items-center gap-2 mb-3 text-purple-100">
-            <Trophy size={18} />
-            <span className="text-sm font-medium">AYT Sıralama</span>
+        {/* AYT Ortalama */}
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 md:p-5 text-white">
+          <div className="flex items-center gap-2 mb-2 text-purple-100">
+            <Trophy size={16} />
+            <span className="text-xs md:text-sm font-medium">AYT Ortalama</span>
           </div>
-          <p className="text-2xl font-bold">{formatRanking(data.last_ayt_ranking)}</p>
-          <p className="text-purple-200 text-sm mt-1">{data.last_ayt_net ? `${data.last_ayt_net} net` : '-'}</p>
+          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.ayt_avg_ranking)}</p>
+          <p className="text-purple-200 text-xs md:text-sm mt-1">
+            {data.ayt_avg_net ? `${data.ayt_avg_net} net` : '-'}
+            {data.ayt_exam_count ? ` (${data.ayt_exam_count} deneme)` : ''}
+          </p>
+        </div>
+
+        {/* Yerleştirme Tahmini */}
+        <div className="bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-4 md:p-5 text-white">
+          <div className="flex items-center gap-2 mb-2 text-rose-100">
+            <Award size={16} />
+            <span className="text-xs md:text-sm font-medium">Yerleştirme</span>
+          </div>
+          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.placement_ranking)}</p>
+          <p className="text-rose-200 text-xs md:text-sm mt-1">TYT+AYT+Diploma</p>
         </div>
 
         {/* Hedef Sıralama */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-5 text-white">
-          <div className="flex items-center gap-2 mb-3 text-orange-100">
-            <Target size={18} />
-            <span className="text-sm font-medium">Hedef Sıralama</span>
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-4 md:p-5 text-white">
+          <div className="flex items-center gap-2 mb-2 text-orange-100">
+            <Target size={16} />
+            <span className="text-xs md:text-sm font-medium">Hedef</span>
           </div>
-          <p className="text-2xl font-bold">{formatRanking(data.student.target_ranking)}</p>
-          <p className="text-orange-200 text-sm mt-1">Belirlenen hedef</p>
+          <p className="text-xl md:text-2xl font-bold">{formatRanking(data.student.target_ranking)}</p>
+          <p className="text-orange-200 text-xs md:text-sm mt-1">Belirlenen hedef</p>
         </div>
 
         {/* Toplam Deneme */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-5 text-white">
-          <div className="flex items-center gap-2 mb-3 text-green-100">
-            <BookOpen size={18} />
-            <span className="text-sm font-medium">Toplam Deneme</span>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 md:p-5 text-white col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-2 mb-2 text-green-100">
+            <BookOpen size={16} />
+            <span className="text-xs md:text-sm font-medium">Toplam Deneme</span>
           </div>
-          <p className="text-2xl font-bold">{data.total_exams}</p>
-          <p className="text-green-200 text-sm mt-1">Girilen deneme</p>
+          <p className="text-xl md:text-2xl font-bold">{data.total_exams}</p>
+          <p className="text-green-200 text-xs md:text-sm mt-1">Girilen deneme</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Grafik */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      {/* Grafikler - 2'li Grid */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* TYT Grafik */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center gap-2 mb-6">
-            <TrendingUp className="text-indigo-500" size={20} />
+            <TrendingUp className="text-blue-500" size={20} />
             <h3 className="font-bold text-gray-800">TYT Net Gelişimi</h3>
+            {data.tyt_avg_net && (
+              <span className="ml-auto text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                Ort: {data.tyt_avg_net} net
+              </span>
+            )}
           </div>
-          
-          {chartData.length > 0 ? (
+
+          {tytChartData.length > 0 ? (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <LineChart data={tytChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9ca3af" />
-                  <YAxis domain={[0, 120]} tick={{ fontSize: 12 }} stroke="#9ca3af" />
-                  <Tooltip 
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                  <YAxis domain={[0, 120]} tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                  <Tooltip
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                     formatter={(value) => [`${value} net`, 'TYT']}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="net" 
-                    stroke="#6366f1" 
+                  <Line
+                    type="monotone"
+                    dataKey="net"
+                    stroke="#3b82f6"
                     strokeWidth={3}
-                    dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: '#4f46e5' }}
+                    dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: '#2563eb' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -303,42 +333,83 @@ export default function ParentDashboard() {
           )}
         </div>
 
-        {/* Son Denemeler */}
+        {/* AYT Grafik */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="text-indigo-500" size={20} />
-            <h3 className="font-bold text-gray-800">Son Denemeler</h3>
-          </div>
-          
-          <div className="space-y-3 max-h-80 overflow-y-auto">
-            {data.exams.length > 0 ? (
-              data.exams.slice(0, 10).map((exam) => (
-                <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                  <div>
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${
-                      exam.exam_type === 'TYT' ? 'bg-blue-100 text-blue-700' :
-                      exam.exam_type.startsWith('AYT') ? 'bg-purple-100 text-purple-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {exam.exam_type}
-                    </span>
-                    <p className="text-xs text-gray-400 mt-1">{formatDate(exam.date)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-800">{exam.net_score} net</p>
-                    <p className="text-xs text-gray-400">~{formatRanking(exam.ranking)}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400 text-center py-8">Henüz deneme girilmemiş</p>
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="text-purple-500" size={20} />
+            <h3 className="font-bold text-gray-800">AYT Net Gelişimi</h3>
+            {data.ayt_avg_net && (
+              <span className="ml-auto text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                Ort: {data.ayt_avg_net} net
+              </span>
             )}
           </div>
+
+          {aytChartData.length > 0 ? (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={aytChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                  <YAxis domain={[0, 80]} tick={{ fontSize: 11 }} stroke="#9ca3af" />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                    formatter={(value) => [`${value} net`, 'AYT']}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="net"
+                    stroke="#a855f7"
+                    strokeWidth={3}
+                    dot={{ fill: '#a855f7', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: '#9333ea' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-gray-400">
+              Henüz AYT denemesi girilmemiş
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Son Denemeler */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar className="text-indigo-500" size={20} />
+          <h3 className="font-bold text-gray-800">Son Denemeler</h3>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {data.exams.length > 0 ? (
+            data.exams.slice(0, 12).map((exam) => (
+              <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <div>
+                  <span className={`text-xs font-bold px-2 py-1 rounded ${
+                    exam.exam_type === 'TYT' ? 'bg-blue-100 text-blue-700' :
+                    exam.exam_type.startsWith('AYT') ? 'bg-purple-100 text-purple-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {exam.exam_type}
+                  </span>
+                  <p className="text-xs text-gray-400 mt-1">{formatDate(exam.date)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-gray-800">{exam.net_score} net</p>
+                  <p className="text-xs text-gray-400">~{formatRanking(exam.ranking)}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-center py-8 col-span-full">Henüz deneme girilmemiş</p>
+          )}
         </div>
       </div>
 
       {/* Alt Bilgi */}
-      <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <AlertCircle className="text-indigo-600" size={20} />
@@ -346,8 +417,9 @@ export default function ParentDashboard() {
           <div>
             <h4 className="font-semibold text-gray-800 mb-1">Veli Paneli Hakkında</h4>
             <p className="text-gray-600 text-sm">
-              Bu panel üzerinden öğrencinizin deneme sonuçlarını, sıralama tahminlerini ve gelişim grafiğini takip edebilirsiniz. 
-              Veriler öğrenciniz yeni deneme girdikçe otomatik olarak güncellenir.
+              Bu panelde öğrencinizin <strong>TYT ve AYT ortalama netleri</strong>, <strong>yerleştirme sıralaması tahmini</strong> ve
+              gelişim grafiklerini takip edebilirsiniz. Sıralamalar, öğrencinizin tüm denemelerinin ortalamasına göre hesaplanır.
+              Yerleştirme tahmini, TYT + AYT ortalamaları ve diploma notuna göre hesaplanır.
             </p>
           </div>
         </div>
