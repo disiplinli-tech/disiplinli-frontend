@@ -4,7 +4,7 @@ import API from "../api";
 import { formatRanking } from "../utils/formatters";
 import {
   Users, Eye, Calendar, MessageCircle, Search,
-  ChevronRight, SortAsc, AlertTriangle
+  ChevronRight, SortAsc, AlertTriangle, Zap
 } from "lucide-react";
 
 export default function Students() {
@@ -13,6 +13,7 @@ export default function Students() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("risk"); // Varsayılan: Risk sırasına göre
+  const [sendingReminder, setSendingReminder] = useState(null); // Hatırlat butonu için
 
   useEffect(() => {
     fetchStudents();
@@ -58,6 +59,23 @@ export default function Students() {
       case 'warning': return 'bg-yellow-500';
       case 'critical': return 'bg-red-500';
       default: return 'bg-gray-400';
+    }
+  };
+
+  // Hatırlat butonu - tek tıkla preset mesaj gönder
+  const sendReminder = async (student) => {
+    setSendingReminder(student.id);
+    try {
+      const message = `Merhaba ${student.name?.split(' ')[0] || ''}, bugün çalışma durumunu merak ettim. Her şey yolunda mı? 📚`;
+      await API.post('/api/chat/send/', {
+        receiver_id: student.user_id,
+        content: message
+      });
+      alert(`✅ ${student.name}'e hatırlatma gönderildi!`);
+    } catch (err) {
+      alert('Mesaj gönderilemedi');
+    } finally {
+      setSendingReminder(null);
     }
   };
 
@@ -138,7 +156,7 @@ export default function Students() {
         </div>
       </div>
 
-      {/* Öğrenci Kartları - Grid + 3 Katmanlı İçerik */}
+      {/* Öğrenci Kartları - ChatGPT Önerisi ile Yeni Format */}
       {filteredStudents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStudents.map((student, i) => {
@@ -148,79 +166,84 @@ export default function Students() {
             const activityStatus = student.activity_status;
             const daysInactive = activityStatus?.days_inactive;
 
-            // Risk border rengi
-            const riskBorderColors = {
-              risk: 'border-l-4 border-l-red-500',
-              warning: 'border-l-4 border-l-yellow-500',
-              safe: 'border-l-4 border-l-green-500'
+            // Risk renkleri
+            const riskStyles = {
+              risk: {
+                border: 'border-red-300',
+                badge: 'bg-red-500 text-white',
+                badgeText: '🔴 Kritik'
+              },
+              warning: {
+                border: 'border-yellow-300',
+                badge: 'bg-yellow-500 text-white',
+                badgeText: '🟡 Dalgalı'
+              },
+              safe: {
+                border: 'border-green-300',
+                badge: 'bg-green-500 text-white',
+                badgeText: '🟢 Güvende'
+              }
             };
+            const style = riskStyles[riskLevel] || riskStyles.warning;
 
             return (
               <div
                 key={student.id || i}
-                className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-lg hover:border-indigo-200 transition-all duration-300 ${riskBorderColors[riskLevel] || ''}`}
+                onClick={() => navigate(`/student/${student.id}`)}
+                className={`bg-white rounded-2xl border-2 ${style.border} p-4 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
               >
-                {/* Header: Avatar + İsim + Risk Badge */}
-                <div className="flex items-start justify-between mb-4">
+                {/* ÜST SATIR: İsim + Alan + Risk Badge + Son Temas */}
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ${
-                        riskLevel === 'risk' ? 'bg-gradient-to-tr from-red-500 to-red-400' :
-                        riskLevel === 'warning' ? 'bg-gradient-to-tr from-yellow-500 to-yellow-400' :
-                        'bg-gradient-to-tr from-indigo-500 to-purple-500'
-                      }`}>
-                        {student.name?.charAt(0).toUpperCase() || 'Ö'}
-                      </div>
-                      <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getActivityColor(activityStatus)}`} />
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                      {student.name?.charAt(0).toUpperCase() || 'Ö'}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-800">{student.name}</h3>
-                      <p className="text-xs text-gray-400">{student.field_type_display || student.exam_goal_type || 'SAY'}</p>
+                      <h3 className="font-bold text-gray-800">{student.name}</h3>
+                      <p className="text-xs text-gray-400">{student.field_type_display || student.exam_goal_type || 'Sayısal'}</p>
                     </div>
                   </div>
 
-                  {/* Risk Badge */}
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    riskLevel === 'risk' ? 'bg-red-100 text-red-700' :
-                    riskLevel === 'warning' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    {riskLevel === 'risk' ? '🔴 Kritik' :
-                     riskLevel === 'warning' ? '🟡 Dalgalı' :
-                     '🟢 Güvende'}
+                  {/* Risk Badge - Büyük ve Belirgin */}
+                  <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${style.badge}`}>
+                    {style.badgeText}
                   </span>
                 </div>
 
-                {/* KATMAN 1: DURUM - Momentum */}
-                <div className="bg-gray-50 rounded-xl p-3 mb-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Momentum</span>
-                    <div className="flex items-center gap-1">
-                      {momentum.direction === 'up' ? (
-                        <span className="text-green-600 font-bold">↗ +{momentum.change} net</span>
-                      ) : momentum.direction === 'down' ? (
-                        <span className="text-red-600 font-bold">↘ {momentum.change} net</span>
-                      ) : (
-                        <span className="text-gray-400 text-sm">● Veri yok</span>
-                      )}
-                    </div>
-                  </div>
+                {/* Son Temas - Üst satırın devamı */}
+                <div className="flex items-center justify-end mb-3 -mt-2">
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    daysInactive === 0 ? 'bg-green-100 text-green-700' :
+                    daysInactive === 1 ? 'bg-yellow-100 text-yellow-700' :
+                    daysInactive > 1 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {daysInactive === 0 ? '📍 Bugün' :
+                     daysInactive === 1 ? '📍 Dün' :
+                     daysInactive ? `📍 ${daysInactive}g önce` : '📍 -'}
+                  </span>
                 </div>
 
-                {/* KATMAN 2: DAVRANIŞ - Disiplin + Son Temas */}
-                <div className="space-y-2 mb-3">
-                  {/* Disiplin */}
+                {/* ORTA ALAN: Sadece 3 şey - Momentum, Disiplin, Sıralama */}
+                <div className="bg-gray-50 rounded-xl p-3 space-y-3 mb-4">
+                  {/* 1. Momentum */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">💪 Disiplin</span>
+                    <span className="text-sm text-gray-600 font-medium">Momentum</span>
+                    {momentum.direction === 'up' ? (
+                      <span className="text-green-600 font-bold text-sm">↑ +{momentum.change} net</span>
+                    ) : momentum.direction === 'down' ? (
+                      <span className="text-red-600 font-bold text-sm">↓ {momentum.change} net</span>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Veri yok</span>
+                    )}
+                  </div>
+
+                  {/* 2. Disiplin - Bar + Sayı */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 font-medium">Disiplin</span>
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-bold ${
-                        disciplineScore >= 65 ? 'text-green-600' :
-                        disciplineScore >= 40 ? 'text-yellow-600' :
-                        'text-red-600'
-                      }`}>{disciplineScore}/100</span>
-                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="w-24 h-2.5 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${
+                          className={`h-full rounded-full transition-all ${
                             disciplineScore >= 65 ? 'bg-green-500' :
                             disciplineScore >= 40 ? 'bg-yellow-500' :
                             'bg-red-500'
@@ -228,50 +251,38 @@ export default function Students() {
                           style={{ width: `${disciplineScore}%` }}
                         />
                       </div>
+                      <span className={`text-sm font-bold min-w-[40px] text-right ${
+                        disciplineScore >= 65 ? 'text-green-600' :
+                        disciplineScore >= 40 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>{disciplineScore}</span>
                     </div>
                   </div>
 
-                  {/* Son Temas */}
+                  {/* 3. Sıralama - Tek satır */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">🔵 Son temas</span>
-                    <span className={`text-sm font-medium ${
-                      daysInactive === 0 ? 'text-green-600' :
-                      daysInactive === 1 ? 'text-yellow-600' :
-                      daysInactive > 1 ? 'text-red-600' : 'text-gray-500'
-                    }`}>
-                      {daysInactive === 0 ? 'Bugün' :
-                       daysInactive === 1 ? 'Dün' :
-                       daysInactive ? `${daysInactive} gün önce` : '-'}
+                    <span className="text-sm text-gray-600 font-medium">Sıralama</span>
+                    <span className="text-sm font-bold text-indigo-600">
+                      {student.tyt_ranking ? `TYT ${formatRanking(student.tyt_ranking)}` :
+                       student.ayt_ranking ? `AYT ${formatRanking(student.ayt_ranking)}` : '-'}
                     </span>
                   </div>
                 </div>
 
-                {/* KATMAN 3: KİMLİK - TYT Sıralama & Hedef */}
-                <div className="text-xs text-gray-500 mb-4 pb-3 border-b border-gray-100">
-                  {student.tyt_ranking ? (
-                    <span>~ TYT {formatRanking(student.tyt_ranking)}</span>
-                  ) : (
-                    <span>Sıralama: -</span>
-                  )}
-                  {student.target_ranking && (
-                    <span className="text-indigo-500 ml-2">| Hedef: {formatRanking(student.target_ranking)}</span>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2">
+                {/* ALT SATIR: Aksiyon Butonları */}
+                <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   <button
                     onClick={() => navigate(`/student/${student.id}`)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm"
                   >
-                    <Eye size={16} />
+                    <Eye size={15} />
                     Detay
                   </button>
                   <button
                     onClick={() => navigate(`/student/${student.id}/schedule`)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium text-sm"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-sm"
                   >
-                    <Calendar size={16} />
+                    <Calendar size={15} />
                     Program
                   </button>
                   <button
@@ -279,7 +290,19 @@ export default function Students() {
                     className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors"
                     title="Mesaj"
                   >
-                    <MessageCircle size={16} />
+                    <MessageCircle size={15} />
+                  </button>
+                  <button
+                    onClick={() => sendReminder(student)}
+                    disabled={sendingReminder === student.id}
+                    className={`p-2 rounded-lg transition-colors ${
+                      sendingReminder === student.id
+                        ? 'bg-gray-100 text-gray-400'
+                        : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                    }`}
+                    title="Hatırlat"
+                  >
+                    <Zap size={15} className={sendingReminder === student.id ? 'animate-pulse' : ''} />
                   </button>
                 </div>
               </div>
