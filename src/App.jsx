@@ -93,13 +93,17 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     navigate('/login');
   };
 
-  // Koç menüsü - ChatGPT V1 Menü önerisi (sadeleştirildi)
+  // Koç menüsü - Güncellenmiş
   const coachMenuItems = [
+    { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
+    { type: 'divider' },
     { icon: Compass, label: 'Bugün', path: '/today', highlight: true },
     { icon: Users, label: 'Öğrenciler', path: '/students' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: Calendar, label: 'Takvim', path: '/schedule' },
     { icon: FileText, label: 'Denemeler', path: '/coach-exams' },
+    { icon: Video, label: 'Canlı Dersler', path: '/lessons' },
+    { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
     { icon: SettingsIcon, label: 'Ayarlar', path: '/settings', muted: true },
   ];
 
