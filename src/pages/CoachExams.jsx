@@ -16,7 +16,7 @@ export default function CoachExams() {
 
   const fetchExamData = async () => {
     try {
-      const res = await API.get('/api/coach/students/');
+      const res = await API.get('/api/dashboard/');
       setStudents(res.data.students || []);
     } catch (err) {
       console.error('Deneme verisi yüklenemedi:', err);
