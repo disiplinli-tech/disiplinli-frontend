@@ -138,7 +138,7 @@ export default function CoachExams() {
             {filteredStudents.map(student => (
               <button
                 key={student.id}
-                onClick={() => navigate(`/student/${student.id}`)}
+                onClick={() => navigate(`/student/${student.id}?tab=exams`)}
                 className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors group"
               >
                 <div className="flex items-center gap-3">

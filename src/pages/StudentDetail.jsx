@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import API from "../api";
 import { formatRanking } from "../utils/formatters";
 import {
@@ -15,10 +15,13 @@ import {
 export default function StudentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'overview';
+
   const [student, setStudent] = useState(null);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // Haftalık hedef state'leri
   const [weeklyGoals, setWeeklyGoals] = useState([]);
