@@ -5,7 +5,8 @@ import { formatRanking } from "../utils/formatters";
 import {
   ArrowLeft, Mail, Target, TrendingUp, TrendingDown, Minus,
   Calendar, Award, BarChart3, Trophy, MessageCircle, Plus, X, Save,
-  BookOpen, CheckCircle2, Circle, ChevronDown, ChevronUp
+  BookOpen, CheckCircle2, Circle, ChevronDown, ChevronUp,
+  Flame, Clock, AlertTriangle, HelpCircle, FileQuestion
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -47,12 +48,20 @@ export default function StudentDetail() {
   const [subjectResults, setSubjectResults] = useState([]);
   const [expandedExamId, setExpandedExamId] = useState(null);
 
+  // Odak Alanları ve Soru Aktivitesi (Koç görünümü)
+  const [focusAreas, setFocusAreas] = useState([]);
+  const [focusLoading, setFocusLoading] = useState(false);
+  const [questionActivity, setQuestionActivity] = useState(null);
+  const [activityLoading, setActivityLoading] = useState(false);
+
   useEffect(() => {
     fetchData();
     fetchGoals();
     fetchTopics();
     fetchSchedule();
     fetchSubjectResults();
+    fetchFocusAreas();
+    fetchQuestionActivity();
   }, [id]);
 
   const fetchData = async () => {
@@ -115,6 +124,30 @@ export default function StudentDetail() {
       setSubjectResults(res.data || []);
     } catch (err) {
       console.log('Branş sonuçları yüklenemedi');
+    }
+  };
+
+  const fetchFocusAreas = async () => {
+    setFocusLoading(true);
+    try {
+      const res = await API.get(`/api/coach/student/${id}/focus-areas/`);
+      setFocusAreas(res.data.focus_areas || []);
+    } catch (err) {
+      console.log('Odak alanları yüklenemedi');
+    } finally {
+      setFocusLoading(false);
+    }
+  };
+
+  const fetchQuestionActivity = async () => {
+    setActivityLoading(true);
+    try {
+      const res = await API.get(`/api/coach/student/${id}/question-activity/`);
+      setQuestionActivity(res.data);
+    } catch (err) {
+      console.log('Soru aktivitesi yüklenemedi');
+    } finally {
+      setActivityLoading(false);
     }
   };
 
@@ -326,9 +359,11 @@ export default function StudentDetail() {
             <div className="flex min-w-max md:min-w-0">
               {[
                 { key: 'overview', label: 'Genel', icon: BarChart3 },
+                { key: 'focus', label: 'Odak', icon: Target },
+                { key: 'questions', label: 'Sorular', icon: FileQuestion },
                 { key: 'exams', label: 'Deneme', icon: Award },
                 { key: 'topics', label: 'Konular', icon: BookOpen },
-                { key: 'goals', label: 'Hedef', icon: Target },
+                { key: 'goals', label: 'Hedef', icon: Trophy },
                 { key: 'schedule', label: 'Program', icon: Calendar },
               ].map(tab => (
                 <button
@@ -445,6 +480,229 @@ export default function StudentDetail() {
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* Focus Areas - Odak Alanları (Koç görünümü) */}
+            {activeTab === 'focus' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Öğrencinin Odak Alanları</h3>
+                    <p className="text-sm text-gray-500">Öğrencinin belirlediği öncelikli konular</p>
+                  </div>
+                </div>
+
+                {focusLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : focusAreas.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <Target size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Henüz odak alanı belirlenmemiş</p>
+                    <p className="text-sm mt-2">Öğrenci kendi panelinden ekleyebilir</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {focusAreas.map((area, idx) => {
+                      const priorityColors = {
+                        1: { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700' },
+                        2: { bg: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-700' },
+                        3: { bg: 'bg-green-50', border: 'border-green-200', badge: 'bg-green-100 text-green-700' },
+                      };
+                      const statusLabels = {
+                        active: { label: 'Aktif', icon: Clock, color: 'text-blue-600 bg-blue-50' },
+                        working: { label: 'Yoğun çalışılıyor', icon: Flame, color: 'text-orange-600 bg-orange-50' },
+                      };
+                      const colors = priorityColors[area.priority] || priorityColors[2];
+                      const status = statusLabels[area.status] || statusLabels.active;
+                      const StatusIcon = status.icon;
+
+                      return (
+                        <div key={area.id} className={`${colors.bg} ${colors.border} border-2 rounded-xl p-4`}>
+                          <div className="flex items-start gap-4">
+                            {/* Numara */}
+                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                              {idx + 1}
+                            </div>
+
+                            {/* İçerik */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <span className="font-semibold text-gray-800">{area.subject}</span>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-gray-700">{area.topic}</span>
+                              </div>
+
+                              {area.reason && (
+                                <p className="text-sm text-gray-500 mb-2 italic">"{area.reason}"</p>
+                              )}
+
+                              {/* Etiketler */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {/* Durum */}
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
+                                  <StatusIcon size={12} />
+                                  {status.label}
+                                </span>
+
+                                {/* Süre */}
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                  <Clock size={12} />
+                                  {area.days_in_focus} gündür odakta
+                                </span>
+
+                                {/* Kırmızı Bayrak */}
+                                {area.is_stale && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                    <AlertTriangle size={12} />
+                                    7+ gün değişiklik yok
+                                  </span>
+                                )}
+
+                                {/* İlişkili Sorular */}
+                                {area.related_questions > 0 && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                    <FileQuestion size={12} />
+                                    {area.unsolved_questions}/{area.related_questions} soru
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Öncelik Badge */}
+                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${colors.badge}`}>
+                              {area.priority === 1 ? 'Yüksek' : area.priority === 2 ? 'Orta' : 'Düşük'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Koç Notu */}
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <p className="text-sm text-blue-800">
+                    💡 <strong>Koç olarak:</strong> Odak alanlarını sadece görebilirsin. Öğrenci bunları kendi belirler.
+                    Ders sırasında bu konulara odaklanarak yardımcı olabilirsin.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Question Activity - Soru Aktivitesi (Koç görünümü) */}
+            {activeTab === 'questions' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Soru Aktivitesi</h3>
+                    <p className="text-sm text-gray-500">Öğrencinin soru çarkı kullanımı</p>
+                  </div>
+                </div>
+
+                {activityLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : !questionActivity ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <FileQuestion size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Soru aktivitesi yüklenemedi</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Metrikler */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <p className="text-xs text-gray-500 mb-1">Toplam Yüklenen</p>
+                        <p className="text-2xl font-bold text-gray-800">{questionActivity.metrics?.total_uploaded || 0}</p>
+                      </div>
+                      <div className="bg-orange-50 rounded-xl p-4">
+                        <p className="text-xs text-orange-600 mb-1">Bekleyen</p>
+                        <p className="text-2xl font-bold text-orange-700">{questionActivity.metrics?.total_pending || 0}</p>
+                      </div>
+                      <div className="bg-green-50 rounded-xl p-4">
+                        <p className="text-xs text-green-600 mb-1">Çözülen</p>
+                        <p className="text-2xl font-bold text-green-700">{questionActivity.metrics?.total_solved || 0}</p>
+                      </div>
+                      <div className="bg-red-50 rounded-xl p-4">
+                        <p className="text-xs text-red-600 mb-1">Çözemedi</p>
+                        <p className="text-2xl font-bold text-red-700">{questionActivity.metrics?.total_failed || 0}</p>
+                      </div>
+                    </div>
+
+                    {/* Son 7 Gün */}
+                    <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                      <h4 className="text-sm font-semibold text-indigo-800 mb-2">Son 7 Gün</h4>
+                      <p className="text-gray-700">
+                        <strong>{questionActivity.metrics?.recent_uploaded_7d || 0}</strong> soru yükledi,
+                        <strong className="text-orange-600 ml-1">{questionActivity.metrics?.recent_pending_7d || 0}</strong>'i hâlâ bekliyor
+                      </p>
+                    </div>
+
+                    {/* Kırmızı Bayraklar */}
+                    {questionActivity.has_red_flags && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                          <AlertTriangle className="text-red-500" size={16} />
+                          Dikkat Gerektiren Durumlar
+                        </h4>
+                        {questionActivity.red_flags?.map((flag, idx) => (
+                          <div
+                            key={idx}
+                            className={`p-3 rounded-lg border-l-4 ${
+                              flag.severity === 'high'
+                                ? 'bg-red-50 border-red-500 text-red-800'
+                                : 'bg-yellow-50 border-yellow-500 text-yellow-800'
+                            }`}
+                          >
+                            <p className="text-sm font-medium">{flag.message}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Branş Dağılımı */}
+                    {questionActivity.subject_breakdown?.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-800 mb-3">Çözülmemiş Sorular (Branşa Göre)</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {questionActivity.subject_breakdown.map((item, idx) => (
+                            <span
+                              key={idx}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                                item.count >= 5
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-gray-100 text-gray-700'
+                              }`}
+                            >
+                              {item.subject || 'Belirtilmemiş'}: {item.count}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Boş Durum */}
+                    {questionActivity.metrics?.total_uploaded === 0 && (
+                      <div className="text-center py-8 text-gray-400">
+                        <HelpCircle size={40} className="mx-auto mb-3 opacity-50" />
+                        <p>Henüz soru yüklememiş</p>
+                        <p className="text-sm mt-1">Öğrenci "Soru Çarkı" özelliğini kullanmaya başladığında burada göreceksin</p>
+                      </div>
+                    )}
+
+                    {/* Koç Notu */}
+                    <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                      <p className="text-sm text-purple-800">
+                        💡 <strong>Koç olarak:</strong> Öğrencinin fotoğraflarını göremezsin (gizlilik).
+                        Sadece desenleri ve takıldığı konuları görürsün. Derste bu konulara odaklanabilirsin.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
