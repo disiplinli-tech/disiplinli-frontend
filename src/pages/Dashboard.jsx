@@ -6,7 +6,7 @@ import {
   TrendingUp, Target, Award, Calendar, MessageCircle,
   ChevronRight, Trophy, Zap, BarChart3, CheckCircle, Users,
   Copy, Check, Eye, Bell, X, Edit2, Save, AlertTriangle, AlertCircle, Mail, Send,
-  Flame, Star, Sparkles
+  Flame, Star, Sparkles, BookOpen, RefreshCw, Brain, FileText, PartyPopper
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
@@ -425,6 +425,8 @@ function StudentDashboard({ user, stats, onRefresh }) {
   const [saving, setSaving] = useState(false);
   const [weeklyGoals, setWeeklyGoals] = useState([]);
   const [dailyProgress, setDailyProgress] = useState(null);
+  const [activityLoading, setActivityLoading] = useState({});
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Haftalık hedefleri ve günlük progress yükle
   useEffect(() => {
@@ -447,6 +449,35 @@ function StudentDashboard({ user, stats, onRefresh }) {
     fetchGoals();
     fetchDailyProgress();
   }, []);
+
+  // Manuel aktivite toggle
+  const toggleActivity = async (actionType) => {
+    setActivityLoading(prev => ({ ...prev, [actionType]: true }));
+    try {
+      const res = await API.post('/api/activity/record/', {
+        action_type: actionType,
+        toggle: true
+      });
+
+      // Daily progress güncelle
+      if (res.data.daily_progress) {
+        const wasNotComplete = !dailyProgress?.points?.daily_complete;
+        const isNowComplete = res.data.daily_progress.points?.daily_complete;
+
+        setDailyProgress(res.data.daily_progress);
+
+        // Eğer yeni tamamlandıysa konfeti göster
+        if (wasNotComplete && isNowComplete) {
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 3000);
+        }
+      }
+    } catch (err) {
+      console.error('Aktivite kaydedilemedi:', err);
+    } finally {
+      setActivityLoading(prev => ({ ...prev, [actionType]: false }));
+    }
+  };
 
   // Tüm denemelerin ORTALAMASINA göre sıralama hesapla
   const getAverageRankings = () => {
@@ -772,6 +803,43 @@ function StudentDashboard({ user, stats, onRefresh }) {
           {/* 🔥 Günlük Progress Kartı */}
           {dailyProgress && (
             <div className="p-4 border-b border-gray-100">
+              {/* Konfeti Animasyonu */}
+              {showConfetti && (
+                <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+                  <div className="animate-bounce">
+                    <div className="text-6xl">🎉</div>
+                  </div>
+                  {[...Array(20)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute animate-ping"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 0.5}s`,
+                        animationDuration: `${0.5 + Math.random() * 0.5}s`
+                      }}
+                    >
+                      {['⭐', '🌟', '✨', '💫'][Math.floor(Math.random() * 4)]}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Günlük Hedef Tamamlandı Badge */}
+              {dailyProgress.points?.daily_complete && (
+                <div className="mb-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-4 text-white shadow-lg animate-pulse">
+                  <div className="flex items-center justify-center gap-3">
+                    <PartyPopper size={28} />
+                    <div className="text-center">
+                      <p className="text-xl font-bold">🎯 Günlük Hedef Tamamlandı!</p>
+                      <p className="text-sm opacity-90">Harikasın! 50/50 puana ulaştın 🏆</p>
+                    </div>
+                    <PartyPopper size={28} />
+                  </div>
+                </div>
+              )}
+
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   {/* Streak */}
@@ -787,12 +855,12 @@ function StudentDashboard({ user, stats, onRefresh }) {
 
                   {/* Günlük Puan */}
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
-                      <Star className="text-white" size={24} />
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${dailyProgress.points?.daily_complete ? 'bg-gradient-to-br from-green-400 to-emerald-500' : 'bg-gradient-to-br from-yellow-400 to-amber-500'}`}>
+                      {dailyProgress.points?.daily_complete ? <CheckCircle className="text-white" size={24} /> : <Star className="text-white" size={24} />}
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-gray-800">{dailyProgress.points?.today || 0} <span className="text-sm font-normal text-gray-500">/ {dailyProgress.points?.daily_limit}</span></p>
-                      <p className="text-xs text-gray-500">Bugünkü puan</p>
+                      <p className="text-xs text-gray-500">{dailyProgress.points?.daily_complete ? '✅ Tamamlandı!' : 'Bugünkü puan'}</p>
                     </div>
                   </div>
 
@@ -807,17 +875,26 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     </div>
                   </div>
 
-                  {/* Haftalık Mini Chart */}
+                  {/* Haftalık Mini Chart - Renkli Statüler */}
                   <div className="hidden md:flex items-end gap-1 h-10">
-                    {dailyProgress.week_chart?.map((day, i) => (
-                      <div key={i} className="flex flex-col items-center">
-                        <div
-                          className={`w-6 rounded-t transition-all ${day.active ? 'bg-gradient-to-t from-amber-400 to-orange-400' : 'bg-gray-200'}`}
-                          style={{ height: `${Math.max(4, (day.points / dailyProgress.points?.daily_limit) * 40)}px` }}
-                        />
-                        <span className="text-[10px] text-gray-400 mt-1">{day.day}</span>
-                      </div>
-                    ))}
+                    {dailyProgress.week_chart?.map((day, i) => {
+                      // Status bazlı renk: empty=gray, partial=yellow, complete=green
+                      const getBarColor = () => {
+                        if (day.status === 'complete') return 'bg-gradient-to-t from-green-400 to-emerald-400';
+                        if (day.status === 'partial') return 'bg-gradient-to-t from-yellow-400 to-amber-400';
+                        return 'bg-gray-200';
+                      };
+                      return (
+                        <div key={i} className="flex flex-col items-center">
+                          <div
+                            className={`w-6 rounded-t transition-all ${getBarColor()}`}
+                            style={{ height: `${Math.max(4, (day.points / (dailyProgress.points?.daily_limit || 50)) * 40)}px` }}
+                            title={`${day.day}: ${day.points} puan`}
+                          />
+                          <span className="text-[10px] text-gray-400 mt-1">{day.day}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -825,15 +902,114 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
                     <span>Bugünkü ilerleme</span>
-                    <span>{dailyProgress.points?.today || 0} / {dailyProgress.points?.daily_limit} puan</span>
+                    <span className={dailyProgress.points?.daily_complete ? 'text-green-600 font-bold' : ''}>
+                      {dailyProgress.points?.today || 0} / {dailyProgress.points?.daily_limit} puan
+                      {dailyProgress.points?.daily_complete && ' ✓'}
+                    </span>
                   </div>
                   <div className="h-2 bg-amber-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all"
-                      style={{ width: `${Math.min(100, ((dailyProgress.points?.today || 0) / dailyProgress.points?.daily_limit) * 100)}%` }}
+                      className={`h-full rounded-full transition-all ${dailyProgress.points?.daily_complete ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`}
+                      style={{ width: `${Math.min(100, ((dailyProgress.points?.today || 0) / (dailyProgress.points?.daily_limit || 50)) * 100)}%` }}
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* 📘 Bugünkü Çalışmam - Manuel Aktiviteler */}
+              <div className="mt-4 bg-white border border-gray-200 rounded-xl p-4">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <BookOpen size={18} className="text-indigo-500" />
+                  Bugünkü Çalışmam
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {/* Konu Çalıştım (+10) */}
+                  <button
+                    onClick={() => toggleActivity('study_topic')}
+                    disabled={activityLoading.study_topic}
+                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      dailyProgress.manual_status?.study_topic
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-600'
+                    }`}
+                  >
+                    {activityLoading.study_topic ? (
+                      <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <BookOpen size={24} className={dailyProgress.manual_status?.study_topic ? 'text-blue-500' : 'text-gray-400'} />
+                    )}
+                    <span className="text-sm font-medium">Konu çalıştım</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_topic ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                      +10 puan
+                    </span>
+                  </button>
+
+                  {/* Tekrar Yaptım (+10) */}
+                  <button
+                    onClick={() => toggleActivity('study_review')}
+                    disabled={activityLoading.study_review}
+                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      dailyProgress.manual_status?.study_review
+                        ? 'border-purple-500 bg-purple-50 text-purple-700'
+                        : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-600'
+                    }`}
+                  >
+                    {activityLoading.study_review ? (
+                      <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <RefreshCw size={24} className={dailyProgress.manual_status?.study_review ? 'text-purple-500' : 'text-gray-400'} />
+                    )}
+                    <span className="text-sm font-medium">Tekrar yaptım</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_review ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500'}`}>
+                      +10 puan
+                    </span>
+                  </button>
+
+                  {/* Soru Çözdüm (+20) */}
+                  <button
+                    onClick={() => toggleActivity('study_questions')}
+                    disabled={activityLoading.study_questions}
+                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      dailyProgress.manual_status?.study_questions
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : 'border-gray-200 hover:border-green-300 hover:bg-green-50 text-gray-600'
+                    }`}
+                  >
+                    {activityLoading.study_questions ? (
+                      <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Brain size={24} className={dailyProgress.manual_status?.study_questions ? 'text-green-500' : 'text-gray-400'} />
+                    )}
+                    <span className="text-sm font-medium">Soru çözdüm</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_questions ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                      +20 puan
+                    </span>
+                  </button>
+
+                  {/* Deneme Analizi (+10) */}
+                  <button
+                    onClick={() => toggleActivity('study_exam_analysis')}
+                    disabled={activityLoading.study_exam_analysis}
+                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      dailyProgress.manual_status?.study_exam_analysis
+                        ? 'border-orange-500 bg-orange-50 text-orange-700'
+                        : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-gray-600'
+                    }`}
+                  >
+                    {activityLoading.study_exam_analysis ? (
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <FileText size={24} className={dailyProgress.manual_status?.study_exam_analysis ? 'text-orange-500' : 'text-gray-400'} />
+                    )}
+                    <span className="text-sm font-medium">Deneme analizi</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_exam_analysis ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
+                      +10 puan
+                    </span>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-3 text-center">
+                  💡 Aktivitelere tıklayarak puan kazan. Tekrar tıklarsan iptal olur.
+                </p>
               </div>
             </div>
           )}
