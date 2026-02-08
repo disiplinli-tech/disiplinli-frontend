@@ -133,7 +133,7 @@ export default function StudentDetail() {
       const res = await API.get(`/api/coach/student/${id}/focus-areas/`);
       setFocusAreas(res.data.focus_areas || []);
     } catch (err) {
-      console.log('Odak alanları yüklenemedi');
+      console.error('Odak alanları yüklenemedi:', err.response?.data || err.message);
     } finally {
       setFocusLoading(false);
     }
@@ -145,7 +145,7 @@ export default function StudentDetail() {
       const res = await API.get(`/api/coach/student/${id}/question-activity/`);
       setQuestionActivity(res.data);
     } catch (err) {
-      console.log('Soru aktivitesi yüklenemedi');
+      console.error('Soru aktivitesi yüklenemedi:', err.response?.data || err.message);
     } finally {
       setActivityLoading(false);
     }
