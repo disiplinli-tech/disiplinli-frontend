@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import {
   Target, Plus, X, Check, AlertCircle, Loader2,
-  ChevronUp, ChevronDown, Trash2, Edit2, Save
+  Trash2, Edit2, Save, Sparkles, FileText, User, GraduationCap,
+  Flame, Clock, CheckCircle
 } from 'lucide-react';
 
 const SUBJECTS = [
@@ -17,7 +19,22 @@ const PRIORITY_LABELS = {
   3: { label: 'Düşük', color: 'bg-green-100 text-green-700 border-green-200' },
 };
 
+// Kaynak türleri
+const SOURCE_TYPES = {
+  exam: { label: 'Deneme', icon: FileText, color: 'bg-blue-100 text-blue-700' },
+  coach: { label: 'Koç önerisi', icon: GraduationCap, color: 'bg-purple-100 text-purple-700' },
+  self: { label: 'Kendim ekledim', icon: User, color: 'bg-gray-100 text-gray-600' },
+};
+
+// Durum türleri
+const STATUS_TYPES = {
+  active: { label: 'Aktif', icon: Clock, color: 'bg-blue-50 text-blue-600 border-blue-200' },
+  working: { label: 'Yoğun çalışılıyor', icon: Flame, color: 'bg-orange-50 text-orange-600 border-orange-200' },
+  completed: { label: 'Tamamlandı', icon: CheckCircle, color: 'bg-green-50 text-green-600 border-green-200' },
+};
+
 export default function FocusAreas() {
+  const navigate = useNavigate();
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,7 +47,9 @@ export default function FocusAreas() {
     subject: '',
     topic: '',
     reason: '',
-    priority: 2
+    priority: 2,
+    source: 'self',
+    status: 'active'
   });
 
   // Düzenleme
@@ -64,7 +83,7 @@ export default function FocusAreas() {
     try {
       const res = await API.post('/api/focus-areas/', newArea);
       setAreas([...areas, { id: res.data.id, ...newArea, created_at: new Date().toISOString() }]);
-      setNewArea({ subject: '', topic: '', reason: '', priority: 2 });
+      setNewArea({ subject: '', topic: '', reason: '', priority: 2, source: 'self', status: 'active' });
       setShowAddForm(false);
       setSuccess('Odak alanı eklendi!');
       setTimeout(() => setSuccess(''), 3000);
@@ -103,14 +122,19 @@ export default function FocusAreas() {
     }
   };
 
-  const markComplete = async (id) => {
+  const updateStatus = async (id, newStatus) => {
     try {
-      await API.put(`/api/focus-areas/${id}/`, { is_completed: true });
-      setAreas(areas.filter(a => a.id !== id));
-      setSuccess('Tamamlandı olarak işaretlendi!');
+      await API.put(`/api/focus-areas/${id}/`, { status: newStatus });
+      if (newStatus === 'completed') {
+        setAreas(areas.filter(a => a.id !== id));
+        setSuccess('Tebrikler! Alan tamamlandı 🎉');
+      } else {
+        setAreas(areas.map(a => a.id === id ? { ...a, status: newStatus } : a));
+        setSuccess('Durum güncellendi');
+      }
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError('İşaretlenemedi');
+      setError('Durum güncellenemedi');
     }
   };
 
@@ -120,7 +144,9 @@ export default function FocusAreas() {
       subject: area.subject,
       topic: area.topic,
       reason: area.reason,
-      priority: area.priority
+      priority: area.priority,
+      source: area.source || 'self',
+      status: area.status || 'active'
     });
   };
 
@@ -145,7 +171,7 @@ export default function FocusAreas() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Odak Alanlarım</h1>
-            <p className="text-gray-500 text-sm">Öncelikli çalışman gereken konular</p>
+            <p className="text-gray-500 text-sm">Şu an kafanı meşgul eden 3-5 konu</p>
           </div>
         </div>
 
@@ -178,8 +204,8 @@ export default function FocusAreas() {
       {/* Info Box */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
         <p className="text-sm text-amber-800">
-          <strong>💡 İpucu:</strong> 3-5 adet odak alanı belirle. Bunlar zorunluluk değil, sadece önerin.
-          Tamamladığında ✓ ile işaretle ve yeni bir alan ekle.
+          <strong>💡 Felsefe:</strong> Bu liste AI'ın değil, <strong>senin</strong> belirlediğin öncelikler.
+          Konu değil, plan değil — şu an kafanı meşgul eden şeyler.
         </p>
       </div>
 
@@ -233,6 +259,27 @@ export default function FocusAreas() {
               />
             </div>
 
+            {/* Kaynak */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Kaynak</label>
+              <div className="flex gap-2">
+                {Object.entries(SOURCE_TYPES).map(([key, { label, icon: Icon, color }]) => (
+                  <button
+                    key={key}
+                    onClick={() => setNewArea({ ...newArea, source: key })}
+                    className={`flex-1 py-2 px-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+                      newArea.source === key
+                        ? color + ' border-current'
+                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    <Icon size={14} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Öncelik */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Öncelik</label>
@@ -272,7 +319,7 @@ export default function FocusAreas() {
             <Target className="text-gray-400" size={32} />
           </div>
           <h3 className="text-lg font-semibold text-gray-800 mb-2">Henüz odak alanı yok</h3>
-          <p className="text-gray-500 mb-4">Odaklanman gereken konuları ekle ve takip et.</p>
+          <p className="text-gray-500 mb-4">Kafanı meşgul eden konuları ekle ve takip et.</p>
           <button
             onClick={() => setShowAddForm(true)}
             className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
@@ -284,115 +331,162 @@ export default function FocusAreas() {
 
       {/* Areas List */}
       <div className="space-y-3">
-        {areas.map((area, index) => (
-          <div
-            key={area.id}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
-          >
-            {editingId === area.id ? (
-              // Edit Mode
-              <div className="space-y-3">
-                <div className="flex gap-3">
-                  <select
-                    value={editData.subject}
-                    onChange={(e) => setEditData({ ...editData, subject: e.target.value })}
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                  >
-                    {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+        {areas.map((area, index) => {
+          const sourceInfo = SOURCE_TYPES[area.source] || SOURCE_TYPES.self;
+          const statusInfo = STATUS_TYPES[area.status] || STATUS_TYPES.active;
+          const SourceIcon = sourceInfo.icon;
+          const StatusIcon = statusInfo.icon;
+
+          return (
+            <div
+              key={area.id}
+              className={`bg-white rounded-2xl shadow-sm border-2 p-4 hover:shadow-md transition-all ${
+                area.status === 'working' ? 'border-orange-200 bg-orange-50/30' : 'border-gray-100'
+              }`}
+            >
+              {editingId === area.id ? (
+                // Edit Mode
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    <select
+                      value={editData.subject}
+                      onChange={(e) => setEditData({ ...editData, subject: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    >
+                      {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    <input
+                      type="text"
+                      value={editData.topic}
+                      onChange={(e) => setEditData({ ...editData, topic: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                      placeholder="Konu"
+                    />
+                  </div>
                   <input
                     type="text"
-                    value={editData.topic}
-                    onChange={(e) => setEditData({ ...editData, topic: e.target.value })}
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                    placeholder="Konu"
+                    value={editData.reason}
+                    onChange={(e) => setEditData({ ...editData, reason: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    placeholder="Sebep (opsiyonel)"
                   />
-                </div>
-                <input
-                  type="text"
-                  value={editData.reason}
-                  onChange={(e) => setEditData({ ...editData, reason: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                  placeholder="Sebep (opsiyonel)"
-                />
-                <div className="flex gap-2">
-                  {[1, 2, 3].map(p => (
+                  <div className="flex gap-2">
+                    {[1, 2, 3].map(p => (
+                      <button
+                        key={p}
+                        onClick={() => setEditData({ ...editData, priority: p })}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium ${
+                          editData.priority === p ? PRIORITY_LABELS[p].color : 'bg-gray-100 text-gray-500'
+                        }`}
+                      >
+                        {PRIORITY_LABELS[p].label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
                     <button
-                      key={p}
-                      onClick={() => setEditData({ ...editData, priority: p })}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-medium ${
-                        editData.priority === p ? PRIORITY_LABELS[p].color : 'bg-gray-100 text-gray-500'
-                      }`}
+                      onClick={() => setEditingId(null)}
+                      className="flex-1 py-2 border border-gray-200 rounded-lg text-gray-600 text-sm"
                     >
-                      {PRIORITY_LABELS[p].label}
+                      İptal
                     </button>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="flex-1 py-2 border border-gray-200 rounded-lg text-gray-600 text-sm"
-                  >
-                    İptal
-                  </button>
-                  <button
-                    onClick={() => updateArea(area.id)}
-                    className="flex-1 py-2 bg-indigo-600 text-white rounded-lg text-sm flex items-center justify-center gap-1"
-                  >
-                    <Save size={14} /> Kaydet
-                  </button>
-                </div>
-              </div>
-            ) : (
-              // View Mode
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
-                  {index + 1}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-gray-800">{area.subject}</span>
-                    <span className="text-gray-400">•</span>
-                    <span className="text-gray-600">{area.topic}</span>
-                  </div>
-                  {area.reason && (
-                    <p className="text-sm text-gray-500">{area.reason}</p>
-                  )}
-                  <div className="mt-2">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${PRIORITY_LABELS[area.priority]?.color || PRIORITY_LABELS[2].color}`}>
-                      {PRIORITY_LABELS[area.priority]?.label || 'Orta'} Öncelik
-                    </span>
+                    <button
+                      onClick={() => updateArea(area.id)}
+                      className="flex-1 py-2 bg-indigo-600 text-white rounded-lg text-sm flex items-center justify-center gap-1"
+                    >
+                      <Save size={14} /> Kaydet
+                    </button>
                   </div>
                 </div>
+              ) : (
+                // View Mode
+                <div>
+                  {/* Üst kısım: İçerik */}
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
 
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => markComplete(area.id)}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                    title="Tamamlandı"
-                  >
-                    <Check size={18} />
-                  </button>
-                  <button
-                    onClick={() => startEdit(area)}
-                    className="p-2 text-gray-400 hover:bg-gray-50 rounded-lg transition-colors"
-                    title="Düzenle"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button
-                    onClick={() => deleteArea(area.id)}
-                    className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Sil"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="font-semibold text-gray-800">{area.subject}</span>
+                        <span className="text-gray-400">•</span>
+                        <span className="text-gray-600">{area.topic}</span>
+                      </div>
+                      {area.reason && (
+                        <p className="text-sm text-gray-500 mb-2">{area.reason}</p>
+                      )}
+
+                      {/* Etiketler: Kaynak + Öncelik + Durum */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Kaynak */}
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${sourceInfo.color}`}>
+                          <SourceIcon size={12} />
+                          {sourceInfo.label}
+                        </span>
+
+                        {/* Öncelik */}
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${PRIORITY_LABELS[area.priority]?.color || PRIORITY_LABELS[2].color}`}>
+                          {PRIORITY_LABELS[area.priority]?.label || 'Orta'}
+                        </span>
+
+                        {/* Durum */}
+                        <button
+                          onClick={() => {
+                            const statuses = ['active', 'working', 'completed'];
+                            const currentIndex = statuses.indexOf(area.status || 'active');
+                            const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+                            updateStatus(area.id, nextStatus);
+                          }}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${statusInfo.color} hover:opacity-80 transition-opacity`}
+                        >
+                          <StatusIcon size={12} />
+                          {statusInfo.label}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Sağ: Aksiyonlar */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => startEdit(area)}
+                        className="p-2 text-gray-400 hover:bg-gray-50 rounded-lg transition-colors"
+                        title="Düzenle"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => deleteArea(area.id)}
+                        className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Sil"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Alt kısım: Aksiyon butonları */}
+                  <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                    <button
+                      onClick={() => navigate('/question-wheel')}
+                      className="flex-1 py-2 px-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5"
+                    >
+                      <Sparkles size={14} />
+                      Soru Çöz
+                    </button>
+                    <button
+                      onClick={() => updateStatus(area.id, 'completed')}
+                      className="py-2 px-4 bg-green-50 text-green-600 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors flex items-center gap-1.5"
+                    >
+                      <CheckCircle size={14} />
+                      Tamamlandı
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Counter */}
