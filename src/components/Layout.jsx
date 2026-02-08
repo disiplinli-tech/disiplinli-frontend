@@ -56,7 +56,7 @@ export default function Layout({ user, onLogout }) {
   const studentMenu = [
     { icon: LayoutDashboard, label: "Genel Bakış", path: "/" },
     { icon: BarChart3, label: "Deneme Sonuçları", path: "/exams" },
-    { icon: Target, label: "Odak Alanlarım", path: "/focus-areas" },
+    { icon: Target, label: "TEST-MENU-12345", path: "/focus-areas" },
     { icon: Sparkles, label: "Soru Çarkı", path: "/question-wheel", highlight: true },
     { icon: MessageCircle, label: "Mesajlar", path: "/chat", badge: unreadMessages },
     { icon: ClipboardList, label: "Ödevler", path: "/assignments", badge: pendingAssignments },
