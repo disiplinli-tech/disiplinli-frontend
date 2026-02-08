@@ -285,7 +285,7 @@ export default function Today() {
         {/* Momentum Düşenler */}
         <ActionCard
           icon={TrendingDown}
-          title={`Momentum -{thresholds.momentum_drop_threshold}+ Net Düşenler`}
+          title={`Momentum -${thresholds.momentum_drop_threshold}+ Net Düşenler`}
           subtitle="Ayarlar'dan değiştirebilirsiniz"
           count={momentumDownStudents.length}
           color="border-yellow-200"
