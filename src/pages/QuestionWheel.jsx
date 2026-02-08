@@ -5,9 +5,6 @@ import {
   ThumbsUp, ThumbsDown, RotateCcw, Trash2
 } from 'lucide-react';
 
-// Backend URL
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://web-production-fe7c.up.railway.app';
-
 export default function QuestionWheel() {
   const [questions, setQuestions] = useState([]);
   const [stats, setStats] = useState({});
@@ -30,13 +27,6 @@ export default function QuestionWheel() {
   useEffect(() => {
     fetchQuestions();
   }, []);
-
-  // Görsel URL'ini düzelt
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `${BACKEND_URL}${imagePath}`;
-  };
 
   const fetchQuestions = async () => {
     try {
@@ -278,22 +268,22 @@ export default function QuestionWheel() {
                       {animationItems.map((item, idx) => (
                         <div
                           key={`${item.id}-${idx}`}
-                          className="flex-shrink-0 w-[120px] sm:w-[160px] h-24 sm:h-32 rounded-xl overflow-hidden bg-white/10 border-2 border-white/30"
+                          className="flex-shrink-0 w-[120px] sm:w-[160px] h-24 sm:h-32 rounded-xl overflow-hidden bg-white/20 border-2 border-white/30 flex items-center justify-center"
                         >
                           {item.image ? (
                             <img
-                              src={getImageUrl(item.image)}
+                              src={item.image}
                               alt="Soru"
                               className="w-full h-full object-cover"
                               onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '';
                                 e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'flex';
                               }}
                             />
-                          ) : null}
-                          <div className="w-full h-full items-center justify-center text-white/50 hidden">
-                            <span className="text-sm">Soru</span>
-                          </div>
+                          ) : (
+                            <ImageIcon className="text-white/40" size={32} />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -345,7 +335,7 @@ export default function QuestionWheel() {
               <div className="p-4">
                 {selectedQuestion?.image && (
                   <img
-                    src={getImageUrl(selectedQuestion.image)}
+                    src={selectedQuestion.image}
                     alt="Soru"
                     className="w-full max-h-96 object-contain rounded-xl border border-gray-200"
                   />
@@ -423,7 +413,7 @@ export default function QuestionWheel() {
                 >
                   {q.image ? (
                     <img
-                      src={getImageUrl(q.image)}
+                      src={q.image}
                       alt="Soru"
                       className={`w-full h-full object-cover ${q.is_solved ? 'opacity-50' : ''}`}
                       onError={(e) => {
