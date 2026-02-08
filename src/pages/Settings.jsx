@@ -772,6 +772,32 @@ export default function Settings() {
         </div>
       )}
 
+      {/* Hesap Bilgileri - EN ÜSTTE */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <User className="text-blue-600" size={20} />
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-800">Hesap Bilgileri</h2>
+            <p className="text-gray-500 text-sm">Temel hesap bilgileriniz</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="bg-gray-50 rounded-xl p-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">Ad Soyad</label>
+            <p className="text-gray-800 font-medium">{localStorage.getItem('user') || '-'}</p>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <label className="block text-sm font-medium text-gray-600 mb-1">Hesap Türü</label>
+            <p className="text-gray-800 font-medium capitalize">
+              {role === 'coach' ? '🎓 Koç' : role === 'student' ? '📚 Öğrenci' : '👨‍👩‍👧 Veli'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Öğrenci Ayarları */}
       {role === 'student' && userData && (
         <div className="space-y-6">
@@ -1029,32 +1055,6 @@ export default function Settings() {
 
       {/* Koç Ayarları */}
       {role === 'coach' && <CoachSettingsPanel />}
-
-      {/* Hesap Bilgileri */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-            <User className="text-blue-600" size={20} />
-          </div>
-          <div>
-            <h2 className="font-bold text-gray-800">Hesap Bilgileri</h2>
-            <p className="text-gray-500 text-sm">Temel hesap bilgileriniz</p>
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="bg-gray-50 rounded-xl p-4">
-            <label className="block text-sm font-medium text-gray-600 mb-1">Ad Soyad</label>
-            <p className="text-gray-800 font-medium">{localStorage.getItem('user') || '-'}</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-4">
-            <label className="block text-sm font-medium text-gray-600 mb-1">Hesap Türü</label>
-            <p className="text-gray-800 font-medium capitalize">
-              {role === 'coach' ? '🎓 Koç' : role === 'student' ? '📚 Öğrenci' : '👨‍👩‍👧 Veli'}
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
