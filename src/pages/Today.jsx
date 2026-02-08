@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Clock, TrendingDown, FileText, ChevronRight, Zap } from 'lucide-react';
+import { AlertCircle, Clock, TrendingDown, FileText, ChevronRight, Zap, Settings } from 'lucide-react';
 import API from '../api';
 
 export default function Today() {
@@ -9,15 +9,35 @@ export default function Today() {
   const [students, setStudents] = useState([]);
   const [sendingReminder, setSendingReminder] = useState(null);
 
+  // Dinamik eşik değerleri (koç ayarlarından gelecek)
+  const [thresholds, setThresholds] = useState({
+    no_contact_hours: 48,
+    exam_missing_days: 7,
+    momentum_drop_threshold: 10
+  });
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      // Mevcut dashboard endpoint'ini kullan
-      const res = await API.get('/api/dashboard/');
-      setStudents(res.data.students || []);
+      // Dashboard ve ayarları paralel çek
+      const [dashboardRes, settingsRes] = await Promise.all([
+        API.get('/api/dashboard/'),
+        API.get('/api/coach/settings/').catch(() => null) // Ayarlar yoksa hata vermesin
+      ]);
+
+      setStudents(dashboardRes.data.students || []);
+
+      // Koç ayarlarından eşik değerlerini al
+      if (settingsRes?.data?.rules) {
+        setThresholds({
+          no_contact_hours: settingsRes.data.rules.no_contact_hours || 48,
+          exam_missing_days: settingsRes.data.rules.exam_missing_days || 7,
+          momentum_drop_threshold: settingsRes.data.rules.momentum_drop_threshold || 10
+        });
+      }
     } catch (err) {
       console.error('Veri yüklenemedi:', err);
     } finally {
@@ -25,19 +45,28 @@ export default function Today() {
     }
   };
 
+  // Dinamik eşiklere göre hesapla
+  const noContactDays = Math.ceil(thresholds.no_contact_hours / 24);
+
   // Verileri kategorize et
   const criticalStudents = students.filter(s => s.risk_level === 'risk');
+
   const noContactStudents = students.filter(s => {
     const days = s.activity_status?.days_inactive;
-    return days === undefined || days === null || days >= 2;
+    return days === undefined || days === null || days >= noContactDays;
   });
-  const momentumDownStudents = students.filter(s => s.momentum?.direction === 'down');
+
+  const momentumDownStudents = students.filter(s => {
+    if (s.momentum?.direction !== 'down') return false;
+    const change = Math.abs(s.momentum?.change || 0);
+    return change >= thresholds.momentum_drop_threshold;
+  });
+
   const pendingExamStudents = students.filter(s => {
-    // Son deneme 7+ gün önce veya hiç yok
     const lastExam = s.last_exam_date;
     if (!lastExam) return true;
     const daysSince = Math.floor((new Date() - new Date(lastExam)) / (1000 * 60 * 60 * 24));
-    return daysSince >= 7;
+    return daysSince >= thresholds.exam_missing_days;
   });
 
   // Hatırlat butonu
@@ -66,12 +95,15 @@ export default function Today() {
     }
   };
 
-  const ActionCard = ({ icon: Icon, title, count, color, children, emptyText }) => (
+  const ActionCard = ({ icon: Icon, title, count, color, children, emptyText, subtitle }) => (
     <div className={`bg-white rounded-2xl border-2 ${color} overflow-hidden`}>
       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon size={18} className="text-gray-600" />
-          <h3 className="font-semibold text-gray-800">{title}</h3>
+          <div>
+            <h3 className="font-semibold text-gray-800">{title}</h3>
+            {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
+          </div>
         </div>
         {count > 0 && (
           <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
@@ -159,11 +191,20 @@ export default function Today() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <span className="text-3xl">🧭</span> Bugün
-        </h1>
-        <p className="text-gray-500 mt-1">Şu an kime ne yapmalıyım?</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <span className="text-3xl">🧭</span> Bugün
+          </h1>
+          <p className="text-gray-500 mt-1">Şu an kime ne yapmalıyım?</p>
+        </div>
+        <button
+          onClick={() => navigate('/settings')}
+          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          title="Eşik değerlerini ayarla"
+        >
+          <Settings size={20} />
+        </button>
       </div>
 
       {/* Özet Kartları */}
@@ -174,15 +215,15 @@ export default function Today() {
         </div>
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-center">
           <p className="text-2xl font-bold text-yellow-600">{momentumDownStudents.length}</p>
-          <p className="text-xs text-yellow-600">Momentum ↓</p>
+          <p className="text-xs text-yellow-600">Momentum ↓{thresholds.momentum_drop_threshold}+</p>
         </div>
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 text-center">
           <p className="text-2xl font-bold text-orange-600">{noContactStudents.length}</p>
-          <p className="text-xs text-orange-600">48s Temas Yok</p>
+          <p className="text-xs text-orange-600">{thresholds.no_contact_hours}s Temas Yok</p>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
           <p className="text-2xl font-bold text-blue-600">{pendingExamStudents.length}</p>
-          <p className="text-xs text-blue-600">Deneme Bekliyor</p>
+          <p className="text-xs text-blue-600">{thresholds.exam_missing_days}g+ Deneme Yok</p>
         </div>
       </div>
 
@@ -214,10 +255,11 @@ export default function Today() {
           )}
         </ActionCard>
 
-        {/* 48 Saattir Temas Yok */}
+        {/* Temas Yok */}
         <ActionCard
           icon={Clock}
-          title="48 Saattir Temas Yok"
+          title={`${thresholds.no_contact_hours} Saattir Temas Yok`}
+          subtitle="Ayarlar'dan değiştirebilirsiniz"
           count={noContactStudents.length}
           color="border-orange-200"
           emptyText="🎉 Tüm öğrencilerle temas kuruldu!"
@@ -243,7 +285,8 @@ export default function Today() {
         {/* Momentum Düşenler */}
         <ActionCard
           icon={TrendingDown}
-          title="Momentum Düşenler"
+          title={`Momentum -{thresholds.momentum_drop_threshold}+ Net Düşenler`}
+          subtitle="Ayarlar'dan değiştirebilirsiniz"
           count={momentumDownStudents.length}
           color="border-yellow-200"
           emptyText="🎉 Momentum düşen öğrenci yok!"
@@ -269,7 +312,8 @@ export default function Today() {
         {/* Deneme Girmesi Gerekenler */}
         <ActionCard
           icon={FileText}
-          title="Deneme Girmesi Gerekenler"
+          title={`${thresholds.exam_missing_days}+ Gündür Deneme Yok`}
+          subtitle="Ayarlar'dan değiştirebilirsiniz"
           count={pendingExamStudents.length}
           color="border-blue-200"
           emptyText="🎉 Herkes deneme girmiş!"
@@ -278,7 +322,7 @@ export default function Today() {
             <StudentRow
               key={student.id}
               student={student}
-              badge="7g+"
+              badge={`${thresholds.exam_missing_days}g+`}
               badgeColor="bg-blue-100 text-blue-700"
             />
           ))}
@@ -296,7 +340,7 @@ export default function Today() {
       {/* Alt Bilgi */}
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-400">
-          Bu sayfa günde 3-5 kere açacağın yer olur.
+          Bu sayfa günde 3-5 kere açacağın yer olur. <button onClick={() => navigate('/settings')} className="text-indigo-500 hover:underline">Eşik değerlerini ayarla →</button>
         </p>
       </div>
     </div>
