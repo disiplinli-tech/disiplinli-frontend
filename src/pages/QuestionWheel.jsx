@@ -2,14 +2,50 @@ import { useState, useEffect, useRef } from 'react';
 import API from '../api';
 import {
   Sparkles, Upload, X, Check, Loader2, Image as ImageIcon,
-  ThumbsUp, ThumbsDown, RotateCcw, Trash2, AlertCircle
+  ThumbsUp, ThumbsDown, RotateCcw, Trash2, AlertCircle, Camera
 } from 'lucide-react';
+
+// Branş renkleri
+const SUBJECT_COLORS = {
+  turkce: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-300' },
+  matematik: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },
+  geometri: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300' },
+  fizik: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300' },
+  kimya: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-300' },
+  biyoloji: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300' },
+  tarih: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' },
+  cografya: { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-300' },
+  felsefe: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-300' },
+  din: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-300' },
+  edebiyat: { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300' },
+};
+
+const SUBJECT_LABELS = {
+  turkce: 'Türkçe',
+  matematik: 'Matematik',
+  geometri: 'Geometri',
+  fizik: 'Fizik',
+  kimya: 'Kimya',
+  biyoloji: 'Biyoloji',
+  tarih: 'Tarih',
+  cografya: 'Coğrafya',
+  felsefe: 'Felsefe',
+  din: 'Din',
+  edebiyat: 'Edebiyat',
+};
 
 export default function QuestionWheel() {
   const [questions, setQuestions] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+
+  // Upload modal state
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadPreview, setUploadPreview] = useState(null);
+  const [uploadExamType, setUploadExamType] = useState('tyt');
+  const [uploadSubject, setUploadSubject] = useState('matematik');
 
   // Spin state
   const [isSpinning, setIsSpinning] = useState(false);
@@ -30,6 +66,11 @@ export default function QuestionWheel() {
   // Sabit animasyon süresi (ms)
   const SPIN_DURATION = 2800;
 
+  // TYT branşları
+  const TYT_SUBJECTS = ['turkce', 'matematik', 'fizik', 'kimya', 'biyoloji', 'tarih', 'cografya', 'felsefe', 'din'];
+  // AYT branşları
+  const AYT_SUBJECTS = ['matematik', 'geometri', 'fizik', 'kimya', 'biyoloji', 'edebiyat', 'tarih', 'cografya', 'felsefe'];
+
   useEffect(() => {
     fetchQuestions();
   }, []);
@@ -46,12 +87,31 @@ export default function QuestionWheel() {
     }
   };
 
-  const uploadQuestion = async (e) => {
+  const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setUploadFile(file);
+    setUploadPreview(URL.createObjectURL(file));
+    setShowUploadModal(true);
+  };
+
+  const closeUploadModal = () => {
+    setShowUploadModal(false);
+    setUploadFile(null);
+    setUploadPreview(null);
+    setUploadExamType('tyt');
+    setUploadSubject('matematik');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const submitUpload = async () => {
+    if (!uploadFile) return;
+
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', uploadFile);
+    formData.append('exam_type', uploadExamType);
+    formData.append('subject', uploadSubject);
 
     setUploading(true);
     try {
@@ -59,11 +119,11 @@ export default function QuestionWheel() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       fetchQuestions();
+      closeUploadModal();
     } catch (err) {
       alert('Yükleme başarısız');
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -89,49 +149,35 @@ export default function QuestionWheel() {
         return;
       }
 
-      // Backend'den gelen seçili soru
       const selected = res.data.selected;
       setSelectedQuestion(selected);
 
-      // Animasyon için item listesi oluştur
-      // Her zaman en az 25 item olsun (soru sayısından bağımsız)
       let items = res.data.animation_items || [];
       const originalItems = items.length > 0 ? [...items] : [selected];
 
-      // 25 item'a tamamla (döngüsel)
       while (items.length < 25) {
         items = [...items, ...originalItems];
       }
       items = items.slice(0, 25);
-
-      // Son item her zaman seçili soru olsun
       items[items.length - 3] = selected;
 
       setAnimationItems(items);
 
-      // Reset carousel position
       if (carouselRef.current) {
         carouselRef.current.style.transition = 'none';
         carouselRef.current.style.transform = 'translateX(0)';
       }
 
-      // Animasyon başlat
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (carouselRef.current) {
-            // Kart genişliği + gap hesapla
             const isMobile = window.innerWidth < 640;
             const cardWidth = isMobile ? 100 : 140;
             const gap = isMobile ? 8 : 12;
             const itemWidth = cardWidth + gap;
-
-            // Hedef: sondan 3. kart (seçili soru) ortada olsun
             const targetIndex = items.length - 3;
-
-            // Container genişliğinin yarısını çıkar (ortalamak için)
             const containerWidth = carouselRef.current.parentElement?.offsetWidth || 300;
             const offset = (containerWidth / 2) - (cardWidth / 2);
-
             const translateX = (targetIndex * itemWidth) - offset;
 
             carouselRef.current.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(0.15, 0.85, 0.25, 1)`;
@@ -140,7 +186,6 @@ export default function QuestionWheel() {
         });
       });
 
-      // Animasyon bitince sonucu göster
       setTimeout(() => {
         setShowResult(true);
         setIsSpinning(false);
@@ -228,6 +273,19 @@ export default function QuestionWheel() {
     );
   };
 
+  // Çark kartı - meta gösterimli
+  const WheelCard = ({ item }) => {
+    const colors = SUBJECT_COLORS[item.subject] || SUBJECT_COLORS.matematik;
+    return (
+      <div className={`flex-shrink-0 w-[100px] sm:w-[140px] h-20 sm:h-28 rounded-xl overflow-hidden ${colors.bg} ${colors.border} border-2 flex flex-col items-center justify-center p-2`}>
+        <span className="text-xs font-bold text-gray-600 uppercase">{item.exam_type || 'TYT'}</span>
+        <span className={`text-sm font-semibold ${colors.text} text-center leading-tight`}>
+          {SUBJECT_LABELS[item.subject] || 'Matematik'}
+        </span>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -240,6 +298,99 @@ export default function QuestionWheel() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">Soru Ekle</h3>
+              <button onClick={closeUploadModal} className="p-1 hover:bg-white/20 rounded-lg">
+                <X className="text-white" size={20} />
+              </button>
+            </div>
+
+            <div className="p-5">
+              {/* Preview */}
+              {uploadPreview && (
+                <div className="mb-4 rounded-xl overflow-hidden border border-gray-200">
+                  <img src={uploadPreview} alt="Önizleme" className="w-full h-48 object-contain bg-gray-50" />
+                </div>
+              )}
+
+              {/* TYT / AYT Seçimi */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Sınav Türü</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setUploadExamType('tyt'); setUploadSubject('matematik'); }}
+                    className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
+                      uploadExamType === 'tyt'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    TYT
+                  </button>
+                  <button
+                    onClick={() => { setUploadExamType('ayt'); setUploadSubject('matematik'); }}
+                    className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
+                      uploadExamType === 'ayt'
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    AYT
+                  </button>
+                </div>
+              </div>
+
+              {/* Branş Seçimi */}
+              <div className="mb-5">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Branş</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(uploadExamType === 'tyt' ? TYT_SUBJECTS : AYT_SUBJECTS).map(sub => {
+                    const colors = SUBJECT_COLORS[sub];
+                    const isSelected = uploadSubject === sub;
+                    return (
+                      <button
+                        key={sub}
+                        onClick={() => setUploadSubject(sub)}
+                        className={`py-2 px-2 rounded-lg text-xs font-medium transition-all ${
+                          isSelected
+                            ? `${colors.bg} ${colors.text} ${colors.border} border-2`
+                            : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        {SUBJECT_LABELS[sub]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Kaydet */}
+              <button
+                onClick={submitUpload}
+                disabled={uploading}
+                className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    Yükleniyor...
+                  </>
+                ) : (
+                  <>
+                    <Check size={20} />
+                    Kaydet
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Image Modal */}
       {modalImage && (
         <div
@@ -274,13 +425,14 @@ export default function QuestionWheel() {
         </div>
 
         <label className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors flex items-center gap-2 cursor-pointer">
-          {uploading ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-          <span className="hidden sm:inline">Soru</span> Yükle
+          {uploading ? <Loader2 className="animate-spin" size={18} /> : <Camera size={18} />}
+          <span className="hidden sm:inline">Soru</span> Ekle
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            onChange={uploadQuestion}
+            capture="environment"
+            onChange={handleFileSelect}
             className="hidden"
           />
         </label>
@@ -308,7 +460,6 @@ export default function QuestionWheel() {
 
       {/* Main Area */}
       {questions.length === 0 ? (
-        // Empty State
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
           <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <ImageIcon className="text-purple-400" size={40} />
@@ -316,12 +467,13 @@ export default function QuestionWheel() {
           <h3 className="text-xl font-semibold text-gray-800 mb-2">Henüz soru yok</h3>
           <p className="text-gray-500 mb-6">Çözmek istediğin soruların fotoğraflarını yükle!</p>
           <label className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors cursor-pointer">
-            <Upload size={20} />
+            <Camera size={20} />
             İlk Soruyu Yükle
             <input
               type="file"
               accept="image/*"
-              onChange={uploadQuestion}
+              capture="environment"
+              onChange={handleFileSelect}
               className="hidden"
             />
           </label>
@@ -331,57 +483,24 @@ export default function QuestionWheel() {
           {/* Spin Area */}
           {!showResult ? (
             <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 rounded-2xl p-4 sm:p-6 mb-6">
-              {/* Carousel Container - TAM OVERFLOW KONTROLÜ */}
               {isSpinning && animationItems.length > 0 ? (
                 <div className="relative h-28 sm:h-36 mb-4 sm:mb-6 overflow-hidden">
-                  {/* Indicator Arrow */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                     <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-t-yellow-400" />
                   </div>
 
-                  {/* Carousel Track */}
-                  <div
-                    className="absolute top-5 left-0 right-0 overflow-hidden"
-                    style={{
-                      transform: 'translateZ(0)',
-                      willChange: 'transform'
-                    }}
-                  >
+                  <div className="absolute top-5 left-0 right-0 overflow-hidden">
                     <div
                       ref={carouselRef}
                       className="flex gap-2 sm:gap-3"
-                      style={{
-                        transform: 'translateX(0)',
-                        willChange: 'transform'
-                      }}
+                      style={{ transform: 'translateX(0)', willChange: 'transform' }}
                     >
                       {animationItems.map((item, idx) => (
-                        <div
-                          key={`${item.id}-${idx}`}
-                          className="flex-shrink-0 w-[100px] sm:w-[140px] h-20 sm:h-28 rounded-xl overflow-hidden bg-white/20 border-2 border-white/30 flex items-center justify-center"
-                        >
-                          {item.image ? (
-                            <img
-                              src={item.image}
-                              alt="Soru"
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.nextSibling && (e.target.nextSibling.style.display = 'flex');
-                              }}
-                            />
-                          ) : null}
-                          <div
-                            className={`w-full h-full items-center justify-center bg-white/10 ${item.image ? 'hidden' : 'flex'}`}
-                          >
-                            <ImageIcon className="text-white/40" size={28} />
-                          </div>
-                        </div>
+                        <WheelCard key={`${item.id}-${idx}`} item={item} />
                       ))}
                     </div>
                   </div>
 
-                  {/* Edge Gradients */}
                   <div className="absolute top-5 left-0 w-12 h-full bg-gradient-to-r from-purple-900 to-transparent z-10 pointer-events-none" />
                   <div className="absolute top-5 right-0 w-12 h-full bg-gradient-to-l from-purple-900 to-transparent z-10 pointer-events-none" />
                 </div>
@@ -395,7 +514,6 @@ export default function QuestionWheel() {
                 </div>
               )}
 
-              {/* Spin Button */}
               <button
                 onClick={spinWheel}
                 disabled={isSpinning || unsolvedCount === 0}
@@ -415,10 +533,19 @@ export default function QuestionWheel() {
               </button>
             </div>
           ) : (
-            // Result Screen
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
               <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-                <h3 className="text-base sm:text-lg font-bold text-white">Senin Sorun!</h3>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white">Senin Sorun!</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="px-2 py-0.5 bg-white/20 rounded text-xs text-white font-medium">
+                      {selectedQuestion?.exam_type?.toUpperCase() || 'TYT'}
+                    </span>
+                    <span className="px-2 py-0.5 bg-white/20 rounded text-xs text-white font-medium">
+                      {SUBJECT_LABELS[selectedQuestion?.subject] || 'Matematik'}
+                    </span>
+                  </div>
+                </div>
                 <button
                   onClick={resetSpin}
                   className="p-2 bg-white/20 rounded-lg text-white hover:bg-white/30 transition-colors"
@@ -427,7 +554,6 @@ export default function QuestionWheel() {
                 </button>
               </div>
 
-              {/* Question Image */}
               <div className="p-4">
                 {selectedQuestion?.image ? (
                   <img
@@ -435,9 +561,7 @@ export default function QuestionWheel() {
                     alt="Soru"
                     className="w-full max-h-96 object-contain rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() => setModalImage(selectedQuestion.image)}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 ) : (
                   <div className="w-full h-48 flex flex-col items-center justify-center bg-gray-100 rounded-xl text-gray-400">
@@ -446,11 +570,9 @@ export default function QuestionWheel() {
                   </div>
                 )}
 
-                {/* Feedback Section */}
                 {!feedbackGiven ? (
                   <div className="mt-6 space-y-4">
                     <p className="text-center text-gray-600 font-medium">Çözdün mü?</p>
-
                     <div className="flex gap-3">
                       <button
                         onClick={() => giveFeedback(true, null)}
@@ -466,23 +588,6 @@ export default function QuestionWheel() {
                         <ThumbsDown size={20} />
                         Çözemedim
                       </button>
-                    </div>
-
-                    <p className="text-center text-gray-500 text-sm">Zorluk (opsiyonel):</p>
-                    <div className="flex gap-2">
-                      {[
-                        { value: 'easy', label: 'Kolay', color: 'bg-green-50 text-green-600 hover:bg-green-100' },
-                        { value: 'medium', label: 'Orta', color: 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100' },
-                        { value: 'hard', label: 'Zor', color: 'bg-red-50 text-red-600 hover:bg-red-100' },
-                      ].map(d => (
-                        <button
-                          key={d.value}
-                          onClick={() => giveFeedback(null, d.value)}
-                          className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${d.color}`}
-                        >
-                          {d.label}
-                        </button>
-                      ))}
                     </div>
                   </div>
                 ) : (
@@ -507,45 +612,50 @@ export default function QuestionWheel() {
               <h3 className="font-semibold text-gray-800">Soru Bankam ({questions.length})</h3>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
-              {questions.map(q => (
-                <div
-                  key={q.id}
-                  className={`relative group rounded-xl overflow-hidden border-2 aspect-square cursor-pointer ${
-                    q.is_solved
-                      ? q.could_solve ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
-                      : 'border-gray-200 hover:border-purple-300'
-                  }`}
-                  onClick={() => q.image && setModalImage(q.image)}
-                >
-                  <QuestionThumbnail
-                    src={q.image}
-                    alt="Soru"
-                    className={`w-full h-full ${q.is_solved ? 'opacity-50' : ''}`}
-                  />
-
-                  {/* Solved Overlay */}
-                  {q.is_solved && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      {q.could_solve ? (
-                        <Check className="text-green-500" size={32} />
-                      ) : (
-                        <X className="text-red-500" size={32} />
-                      )}
-                    </div>
-                  )}
-
-                  {/* Delete Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteQuestion(q.id);
-                    }}
-                    className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              {questions.map(q => {
+                const colors = SUBJECT_COLORS[q.subject] || SUBJECT_COLORS.matematik;
+                return (
+                  <div
+                    key={q.id}
+                    className={`relative group rounded-xl overflow-hidden border-2 aspect-square cursor-pointer ${
+                      q.is_solved
+                        ? q.could_solve ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
+                        : `${colors.border} ${colors.bg}`
+                    }`}
+                    onClick={() => q.image && setModalImage(q.image)}
                   >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
+                    {/* Meta info */}
+                    <div className="absolute top-1 left-1 z-10 flex flex-col gap-0.5">
+                      <span className="px-1.5 py-0.5 bg-white/90 rounded text-[10px] font-bold text-gray-700">
+                        {q.exam_type?.toUpperCase() || 'TYT'}
+                      </span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${colors.bg} ${colors.text}`}>
+                        {SUBJECT_LABELS[q.subject] || 'Mat'}
+                      </span>
+                    </div>
+
+                    {q.is_solved && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-white/30">
+                        {q.could_solve ? (
+                          <Check className="text-green-500" size={32} />
+                        ) : (
+                          <X className="text-red-500" size={32} />
+                        )}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteQuestion(q.id);
+                      }}
+                      className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </>
