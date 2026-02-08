@@ -7,17 +7,17 @@ import {
 
 // Branş renkleri
 const SUBJECT_COLORS = {
-  turkce: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-300' },
-  matematik: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },
-  geometri: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300' },
-  fizik: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300' },
-  kimya: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-300' },
-  biyoloji: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300' },
-  tarih: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' },
-  cografya: { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-300' },
-  felsefe: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-300' },
-  din: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-300' },
-  edebiyat: { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300' },
+  turkce: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-300', bgSolid: 'bg-orange-500' },
+  matematik: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300', bgSolid: 'bg-blue-500' },
+  geometri: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300', bgSolid: 'bg-indigo-500' },
+  fizik: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300', bgSolid: 'bg-purple-500' },
+  kimya: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-300', bgSolid: 'bg-green-500' },
+  biyoloji: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300', bgSolid: 'bg-emerald-500' },
+  tarih: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', bgSolid: 'bg-amber-500' },
+  cografya: { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-300', bgSolid: 'bg-teal-500' },
+  felsefe: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-300', bgSolid: 'bg-pink-500' },
+  din: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-300', bgSolid: 'bg-yellow-500' },
+  edebiyat: { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300', bgSolid: 'bg-rose-500' },
 };
 
 const SUBJECT_LABELS = {
@@ -197,17 +197,23 @@ export default function QuestionWheel() {
     }
   };
 
-  const giveFeedback = async (couldSolve, difficulty) => {
+  const giveFeedback = async (couldSolve) => {
     if (!selectedQuestion) return;
 
     try {
-      await API.post(`/api/questions/${selectedQuestion.id}/feedback/`, {
-        could_solve: couldSolve,
-        difficulty: difficulty
+      const res = await API.post(`/api/questions/${selectedQuestion.id}/feedback/`, {
+        could_solve: couldSolve
       });
 
       setFeedbackGiven(true);
-      fetchQuestions();
+      await fetchQuestions();
+
+      // Çözüldüyse (silindi) 1.5 sn sonra otomatik sıfırla
+      if (res.data.deleted) {
+        setTimeout(() => {
+          resetSpin();
+        }, 1500);
+      }
     } catch (err) {
       alert('Feedback kaydedilemedi');
     }
@@ -235,51 +241,13 @@ export default function QuestionWheel() {
     }
   };
 
-  // Thumbnail component with fallback
-  const QuestionThumbnail = ({ src, alt, className, onClick }) => {
-    const [imgError, setImgError] = useState(false);
-    const [imgLoading, setImgLoading] = useState(true);
-
-    if (!src || imgError) {
-      return (
-        <div
-          className={`flex flex-col items-center justify-center bg-gray-100 text-gray-400 ${className}`}
-          onClick={onClick}
-        >
-          <AlertCircle size={20} />
-          <span className="text-xs mt-1">Görsel yok</span>
-        </div>
-      );
-    }
-
-    return (
-      <div className={`relative ${className}`} onClick={onClick}>
-        {imgLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-            <Loader2 className="animate-spin text-gray-400" size={20} />
-          </div>
-        )}
-        <img
-          src={src}
-          alt={alt}
-          className={`w-full h-full object-cover ${imgLoading ? 'opacity-0' : 'opacity-100'}`}
-          onLoad={() => setImgLoading(false)}
-          onError={() => {
-            setImgError(true);
-            setImgLoading(false);
-          }}
-        />
-      </div>
-    );
-  };
-
-  // Çark kartı - meta gösterimli
+  // Çark kartı - meta gösterimli (BÜYÜK YAZILAR)
   const WheelCard = ({ item }) => {
     const colors = SUBJECT_COLORS[item.subject] || SUBJECT_COLORS.matematik;
     return (
       <div className={`flex-shrink-0 w-[100px] sm:w-[140px] h-20 sm:h-28 rounded-xl overflow-hidden ${colors.bg} ${colors.border} border-2 flex flex-col items-center justify-center p-2`}>
-        <span className="text-xs font-bold text-gray-600 uppercase">{item.exam_type || 'TYT'}</span>
-        <span className={`text-sm font-semibold ${colors.text} text-center leading-tight`}>
+        <span className="text-sm sm:text-base font-bold text-gray-700 uppercase">{item.exam_type || 'TYT'}</span>
+        <span className={`text-base sm:text-lg font-bold ${colors.text} text-center leading-tight`}>
           {SUBJECT_LABELS[item.subject] || 'Matematik'}
         </span>
       </div>
@@ -294,7 +262,12 @@ export default function QuestionWheel() {
     );
   }
 
-  const unsolvedCount = questions.filter(q => !q.is_solved).length;
+  // Çözülmemiş sorular
+  const unsolvedQuestions = questions.filter(q => !q.is_solved);
+  // Çözemediklerim (is_solved=true ve could_solve=false)
+  const failedQuestions = questions.filter(q => q.is_solved && q.could_solve === false);
+
+  const unsolvedCount = unsolvedQuestions.length;
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
@@ -450,11 +423,11 @@ export default function QuestionWheel() {
         </div>
         <div className="bg-green-50 border border-green-200 rounded-xl p-2 sm:p-3 text-center">
           <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.correct || 0}</p>
-          <p className="text-xs text-green-600">Doğru</p>
+          <p className="text-xs text-green-600">Çözüldü</p>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-xl p-2 sm:p-3 text-center">
           <p className="text-xl sm:text-2xl font-bold text-red-600">{stats.wrong || 0}</p>
-          <p className="text-xs text-red-600">Yanlış</p>
+          <p className="text-xs text-red-600">Çözemedim</p>
         </div>
       </div>
 
@@ -548,9 +521,10 @@ export default function QuestionWheel() {
                 </div>
                 <button
                   onClick={resetSpin}
-                  className="p-2 bg-white/20 rounded-lg text-white hover:bg-white/30 transition-colors"
+                  className="px-3 py-2 bg-white/20 rounded-lg text-white hover:bg-white/30 transition-colors flex items-center gap-2"
                 >
-                  <RotateCcw size={20} />
+                  <RotateCcw size={18} />
+                  <span className="text-sm font-medium">Tekrar Çevir</span>
                 </button>
               </div>
 
@@ -575,14 +549,14 @@ export default function QuestionWheel() {
                     <p className="text-center text-gray-600 font-medium">Çözdün mü?</p>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => giveFeedback(true, null)}
+                        onClick={() => giveFeedback(true)}
                         className="flex-1 py-3 bg-green-100 text-green-700 rounded-xl font-medium hover:bg-green-200 transition-colors flex items-center justify-center gap-2"
                       >
                         <ThumbsUp size={20} />
                         Çözdüm
                       </button>
                       <button
-                        onClick={() => giveFeedback(false, null)}
+                        onClick={() => giveFeedback(false)}
                         className="flex-1 py-3 bg-red-100 text-red-700 rounded-xl font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2"
                       >
                         <ThumbsDown size={20} />
@@ -593,11 +567,12 @@ export default function QuestionWheel() {
                 ) : (
                   <div className="mt-6 text-center py-6 bg-green-50 rounded-xl">
                     <Check className="w-12 h-12 text-green-500 mx-auto mb-2" />
-                    <p className="text-green-700 font-medium">Feedback kaydedildi!</p>
+                    <p className="text-green-700 font-medium">Kaydedildi!</p>
                     <button
                       onClick={resetSpin}
-                      className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors"
+                      className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors flex items-center gap-2 mx-auto"
                     >
+                      <RotateCcw size={18} />
                       Tekrar Çevir
                     </button>
                   </div>
@@ -606,58 +581,91 @@ export default function QuestionWheel() {
             </div>
           )}
 
-          {/* Question List */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-800">Soru Bankam ({questions.length})</h3>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
-              {questions.map(q => {
-                const colors = SUBJECT_COLORS[q.subject] || SUBJECT_COLORS.matematik;
-                return (
-                  <div
-                    key={q.id}
-                    className={`relative group rounded-xl overflow-hidden border-2 aspect-square cursor-pointer ${
-                      q.is_solved
-                        ? q.could_solve ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
-                        : `${colors.border} ${colors.bg}`
-                    }`}
-                    onClick={() => q.image && setModalImage(q.image)}
-                  >
-                    {/* Meta info */}
-                    <div className="absolute top-1 left-1 z-10 flex flex-col gap-0.5">
-                      <span className="px-1.5 py-0.5 bg-white/90 rounded text-[10px] font-bold text-gray-700">
+          {/* Soru Bankam - Bekleyen Sorular */}
+          {unsolvedQuestions.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+              <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
+                <h3 className="font-semibold text-gray-800">Soru Bankam ({unsolvedQuestions.length})</h3>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
+                {unsolvedQuestions.map(q => {
+                  const colors = SUBJECT_COLORS[q.subject] || SUBJECT_COLORS.matematik;
+                  return (
+                    <div
+                      key={q.id}
+                      className={`relative group rounded-xl overflow-hidden border-2 aspect-square cursor-pointer flex flex-col items-center justify-center ${colors.border} ${colors.bg}`}
+                      onClick={() => q.image && setModalImage(q.image)}
+                    >
+                      {/* Meta info - ORTALI VE BÜYÜK */}
+                      <span className="text-base sm:text-lg font-bold text-gray-700">
                         {q.exam_type?.toUpperCase() || 'TYT'}
                       </span>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${colors.bg} ${colors.text}`}>
-                        {SUBJECT_LABELS[q.subject] || 'Mat'}
+                      <span className={`text-sm sm:text-base font-semibold ${colors.text}`}>
+                        {SUBJECT_LABELS[q.subject] || 'Matematik'}
                       </span>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteQuestion(q.id);
+                        }}
+                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
-
-                    {q.is_solved && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-white/30">
-                        {q.could_solve ? (
-                          <Check className="text-green-500" size={32} />
-                        ) : (
-                          <X className="text-red-500" size={32} />
-                        )}
-                      </div>
-                    )}
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteQuestion(q.id);
-                      }}
-                      className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Çözemediklerim */}
+          {failedQuestions.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-red-200 overflow-hidden">
+              <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-red-100 bg-red-50">
+                <h3 className="font-semibold text-red-700 flex items-center gap-2">
+                  <X size={18} />
+                  Çözemediklerim ({failedQuestions.length})
+                </h3>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
+                {failedQuestions.map(q => {
+                  const colors = SUBJECT_COLORS[q.subject] || SUBJECT_COLORS.matematik;
+                  return (
+                    <div
+                      key={q.id}
+                      className={`relative group rounded-xl overflow-hidden border-2 aspect-square cursor-pointer flex flex-col items-center justify-center border-red-300 bg-red-50`}
+                      onClick={() => q.image && setModalImage(q.image)}
+                    >
+                      {/* Üstünde X işareti */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <X className="text-red-300" size={48} />
+                      </div>
+
+                      {/* Meta info */}
+                      <span className="text-base sm:text-lg font-bold text-gray-600 z-10">
+                        {q.exam_type?.toUpperCase() || 'TYT'}
+                      </span>
+                      <span className={`text-sm sm:text-base font-semibold text-red-600 z-10`}>
+                        {SUBJECT_LABELS[q.subject] || 'Matematik'}
+                      </span>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteQuestion(q.id);
+                        }}
+                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
