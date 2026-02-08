@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
-  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator, Target, Compass, FileText
+  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator, Target, Compass, FileText, Sparkles
 } from 'lucide-react';
 
 // Auth Sayfaları
@@ -27,6 +27,8 @@ import RankingCalculator from './pages/RankingCalculator';
 import TopicTracker from './pages/TopicTracker';
 import Today from './pages/Today';
 import CoachExams from './pages/CoachExams';
+import FocusAreas from './pages/FocusAreas';
+import QuestionWheel from './pages/QuestionWheel';
 import API from './api';
 
 // Alan Tipleri
@@ -466,6 +468,8 @@ function App() {
         <Route path="/lessons" element={<ProtectedRoute><OnlineLessons /></ProtectedRoute>} />
         <Route path="/ranking-calculator" element={<ProtectedRoute><RankingCalculator /></ProtectedRoute>} />
         <Route path="/topics" element={<ProtectedRoute><TopicTracker /></ProtectedRoute>} />
+        <Route path="/focus-areas" element={<ProtectedRoute><FocusAreas /></ProtectedRoute>} />
+        <Route path="/question-wheel" element={<ProtectedRoute><QuestionWheel /></ProtectedRoute>} />
 
         {/* ===== 404 ===== */}
         <Route path="*" element={<Navigate to="/login" replace />} />

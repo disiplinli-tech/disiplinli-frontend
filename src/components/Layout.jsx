@@ -2,7 +2,8 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, LogOut, GraduationCap,
   Users, Calendar, MessageCircle, ClipboardList,
-  Settings, BarChart3, Menu, X, Compass, Video, FileText
+  Settings, BarChart3, Menu, X, Compass, Video, FileText,
+  Target, Sparkles
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import API from "../api";
@@ -55,6 +56,8 @@ export default function Layout({ user, onLogout }) {
   const studentMenu = [
     { icon: LayoutDashboard, label: "Genel Bakış", path: "/" },
     { icon: BarChart3, label: "Deneme Sonuçları", path: "/exams" },
+    { icon: Target, label: "Odak Alanlarım", path: "/focus-areas" },
+    { icon: Sparkles, label: "Soru Çarkı", path: "/question-wheel", highlight: true },
     { icon: MessageCircle, label: "Mesajlar", path: "/chat", badge: unreadMessages },
     { icon: ClipboardList, label: "Ödevler", path: "/assignments", badge: pendingAssignments },
     { icon: Calendar, label: "Programım", path: "/schedule" },
