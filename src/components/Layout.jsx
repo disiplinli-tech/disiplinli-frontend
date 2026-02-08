@@ -3,9 +3,9 @@ import {
   LayoutDashboard, BookOpen, LogOut, GraduationCap,
   Users, Calendar, MessageCircle, ClipboardList,
   Settings, BarChart3, Menu, X, Compass, Video, FileText,
-  Target, Sparkles
+  Target, Sparkles, ChevronUp, User, Moon, Sun
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import API from "../api";
 
 export default function Layout({ user, onLogout }) {
@@ -17,6 +17,19 @@ export default function Layout({ user, onLogout }) {
 
   const role = user?.role || localStorage.getItem('role') || 'student';
   const userName = user?.name || localStorage.getItem('user') || 'Kullanıcı';
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
+
+  // Dropdown dışına tıklanınca kapat
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Okunmamış mesaj ve bekleyen ödev sayısını al
   useEffect(() => {
@@ -199,33 +212,96 @@ export default function Layout({ user, onLogout }) {
           })}
         </nav>
 
-        {/* Alt Kısım: Kullanıcı + Çıkış */}
-        <div className="p-3 border-t border-gray-100 bg-gray-50/50">
-          {/* Kullanıcı bilgisi */}
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold
+        {/* Alt Kısım: Kullanıcı Dropdown */}
+        <div className="p-3 border-t border-gray-100 bg-gray-50/50 relative" ref={profileDropdownRef}>
+          {/* Dropdown Menü - Yukarı Açılır */}
+          {profileDropdownOpen && (
+            <div className="absolute bottom-full left-3 right-3 mb-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
+              {/* Profil Bilgisi */}
+              <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-lg
+                    ${role === 'coach'
+                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                      : 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                    }`}>
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-800 truncate">{userName}</p>
+                    <p className="text-xs text-gray-500">
+                      {role === 'coach' ? '🎓 Koç Hesabı' : '📚 Öğrenci Hesabı'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Menü Öğeleri */}
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    navigate('/settings');
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                >
+                  <User size={16} className="text-gray-400" />
+                  Profil Ayarları
+                </button>
+                <button
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    navigate('/settings');
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                >
+                  <Settings size={16} className="text-gray-400" />
+                  Uygulama Ayarları
+                </button>
+              </div>
+
+              {/* Çıkış */}
+              <div className="border-t border-gray-100">
+                <button
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                >
+                  <LogOut size={16} />
+                  Çıkış Yap
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Profil Butonu - Tıkla Aç/Kapa */}
+          <button
+            onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+            className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all
+              ${profileDropdownOpen
+                ? 'bg-gray-100 ring-2 ring-indigo-200'
+                : 'hover:bg-gray-100'
+              }`}
+          >
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold
               ${role === 'coach'
                 ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
                 : 'bg-gradient-to-br from-emerald-500 to-teal-600'
               }`}>
               {userName.charAt(0).toUpperCase()}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-semibold text-gray-700 truncate">{userName}</p>
               <p className="text-[10px] text-gray-400">
                 {role === 'coach' ? 'Koç' : 'Öğrenci'}
               </p>
             </div>
-          </div>
-
-          {/* Çıkış */}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 text-red-500 hover:bg-red-50 
-              rounded-xl transition-colors text-sm font-medium group"
-          >
-            <LogOut size={18} className="group-hover:-translate-x-0.5 transition-transform" />
-            Çıkış Yap
+            <ChevronUp
+              size={16}
+              className={`text-gray-400 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`}
+            />
           </button>
         </div>
       </aside>
