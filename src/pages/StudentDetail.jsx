@@ -6,7 +6,7 @@ import {
   ArrowLeft, Mail, Target, TrendingUp, TrendingDown, Minus,
   Calendar, Award, BarChart3, Trophy, MessageCircle, Plus, X, Save,
   BookOpen, CheckCircle2, Circle, ChevronDown, ChevronUp,
-  Flame, Clock, AlertTriangle, HelpCircle, FileQuestion
+  Flame, Clock, AlertTriangle, HelpCircle, FileQuestion, Star, Sparkles, Activity
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -54,6 +54,10 @@ export default function StudentDetail() {
   const [questionActivity, setQuestionActivity] = useState(null);
   const [activityLoading, setActivityLoading] = useState(false);
 
+  // Günlük Aktivite (Koç görünümü)
+  const [dailyActivity, setDailyActivity] = useState(null);
+  const [dailyActivityLoading, setDailyActivityLoading] = useState(false);
+
   useEffect(() => {
     fetchData();
     fetchGoals();
@@ -62,6 +66,7 @@ export default function StudentDetail() {
     fetchSubjectResults();
     fetchFocusAreas();
     fetchQuestionActivity();
+    fetchDailyActivity();
   }, [id]);
 
   const fetchData = async () => {
@@ -148,6 +153,18 @@ export default function StudentDetail() {
       console.error('Soru aktivitesi yüklenemedi:', err.response?.data || err.message);
     } finally {
       setActivityLoading(false);
+    }
+  };
+
+  const fetchDailyActivity = async () => {
+    setDailyActivityLoading(true);
+    try {
+      const res = await API.get(`/api/coach/student/${id}/daily-activity/`);
+      setDailyActivity(res.data);
+    } catch (err) {
+      console.error('Günlük aktivite yüklenemedi:', err.response?.data || err.message);
+    } finally {
+      setDailyActivityLoading(false);
     }
   };
 
@@ -359,6 +376,7 @@ export default function StudentDetail() {
             <div className="flex min-w-max md:min-w-0">
               {[
                 { key: 'overview', label: 'Genel', icon: BarChart3 },
+                { key: 'activity', label: 'Aktivite', icon: Activity },
                 { key: 'focus', label: 'Odak', icon: Target },
                 { key: 'questions', label: 'Sorular', icon: FileQuestion },
                 { key: 'exams', label: 'Deneme', icon: Award },
@@ -480,6 +498,209 @@ export default function StudentDetail() {
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* Daily Activity - Günlük Aktivite (Koç görünümü) */}
+            {activeTab === 'activity' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800">Günlük Aktivite</h3>
+                    <p className="text-sm text-gray-500">Öğrencinin çalışma disiplini ve aktiviteleri</p>
+                  </div>
+                </div>
+
+                {dailyActivityLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : !dailyActivity ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <Activity size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Aktivite verisi yüklenemedi</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Günlük Hedef Tamamlandı Badge */}
+                    {dailyActivity.points?.daily_complete && (
+                      <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-4 text-white">
+                        <div className="flex items-center justify-center gap-3">
+                          <Star size={24} />
+                          <div className="text-center">
+                            <p className="text-lg font-bold">🎯 Bugünkü Hedefi Tamamladı!</p>
+                            <p className="text-sm opacity-90">50/50 puana ulaştı</p>
+                          </div>
+                          <Star size={24} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ana Metrikler */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {/* Streak */}
+                      <div className={`rounded-xl p-4 ${dailyActivity.streak?.alive ? 'bg-gradient-to-br from-orange-100 to-amber-100 border-2 border-orange-300' : 'bg-gray-50'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Flame size={20} className={dailyActivity.streak?.alive ? 'text-orange-500' : 'text-gray-400'} />
+                          <span className="text-sm text-gray-600">Seri</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-800">{dailyActivity.streak?.current || 0} <span className="text-sm font-normal text-gray-500">gün</span></p>
+                        <p className="text-xs text-gray-500 mt-1">En uzun: {dailyActivity.streak?.longest || 0} gün</p>
+                      </div>
+
+                      {/* Bugünkü Puan */}
+                      <div className={`rounded-xl p-4 ${dailyActivity.points?.daily_complete ? 'bg-gradient-to-br from-green-100 to-emerald-100 border-2 border-green-300' : 'bg-amber-50'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Star size={20} className={dailyActivity.points?.daily_complete ? 'text-green-500' : 'text-amber-500'} />
+                          <span className="text-sm text-gray-600">Bugün</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-800">{dailyActivity.points?.today || 0} <span className="text-sm font-normal text-gray-500">/ {dailyActivity.points?.daily_limit}</span></p>
+                        <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${dailyActivity.points?.daily_complete ? 'bg-green-500' : 'bg-amber-500'}`}
+                            style={{ width: `${Math.min(100, (dailyActivity.points?.today / dailyActivity.points?.daily_limit) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Toplam Puan */}
+                      <div className="bg-indigo-50 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles size={20} className="text-indigo-500" />
+                          <span className="text-sm text-gray-600">Toplam</span>
+                        </div>
+                        <p className="text-2xl font-bold text-indigo-700">{dailyActivity.points?.total || 0}</p>
+                        <p className="text-xs text-gray-500 mt-1">puan</p>
+                      </div>
+
+                      {/* Haftalık Özet */}
+                      <div className="bg-purple-50 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Calendar size={20} className="text-purple-500" />
+                          <span className="text-sm text-gray-600">Bu Hafta</span>
+                        </div>
+                        <p className="text-2xl font-bold text-purple-700">{dailyActivity.summary?.total_days_active || 0} <span className="text-sm font-normal text-gray-500">/ 7 gün</span></p>
+                        <p className="text-xs text-gray-500 mt-1">Ort: {dailyActivity.summary?.avg_points_day || 0} puan/gün</p>
+                      </div>
+                    </div>
+
+                    {/* Haftalık Chart */}
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Haftalık Görünüm</h4>
+                      <div className="flex items-end justify-between gap-2 h-24">
+                        {dailyActivity.week_chart?.map((day, i) => {
+                          const getBarColor = () => {
+                            if (day.status === 'complete') return 'bg-gradient-to-t from-green-400 to-emerald-400';
+                            if (day.status === 'partial') return 'bg-gradient-to-t from-yellow-400 to-amber-400';
+                            return 'bg-gray-200';
+                          };
+                          const heightPct = Math.max(10, (day.points / (dailyActivity.points?.daily_limit || 50)) * 100);
+                          return (
+                            <div key={i} className="flex-1 flex flex-col items-center">
+                              <div
+                                className={`w-full rounded-t-lg transition-all ${getBarColor()}`}
+                                style={{ height: `${heightPct}%` }}
+                                title={`${day.day}: ${day.points} puan`}
+                              />
+                              <span className="text-xs text-gray-500 mt-1">{day.day}</span>
+                              <span className="text-[10px] text-gray-400">{day.points}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex items-center justify-center gap-4 mt-3 text-xs">
+                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-400"></span> Tamamlandı</span>
+                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400"></span> Kısmi</span>
+                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-200"></span> Boş</span>
+                      </div>
+                    </div>
+
+                    {/* Bugünkü Aktiviteler */}
+                    {dailyActivity.today_activities?.length > 0 && (
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Bugün Yapılanlar</h4>
+                        <div className="space-y-2">
+                          {dailyActivity.today_activities.map((act, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">
+                                  {act.action_type === 'study_topic' ? '📘' :
+                                   act.action_type === 'study_review' ? '🔁' :
+                                   act.action_type === 'study_questions' ? '🧠' :
+                                   act.action_type === 'study_exam_analysis' ? '📝' :
+                                   act.action_type === 'wheel_spin' ? '🎡' :
+                                   act.action_type === 'exam_entry' ? '📊' :
+                                   act.action_type === 'focus_interact' ? '🎯' :
+                                   act.action_type === 'login' ? '👋' : '✨'}
+                                </span>
+                                <span className="text-sm text-gray-700">{act.action_label}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-400">{act.time}</span>
+                                <span className="text-sm font-medium text-amber-600">+{act.points}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Manuel Aktivite Durumu */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <h4 className="text-sm font-semibold text-blue-800 mb-3">Manuel Çalışma Aktiviteleri</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {[
+                          { key: 'study_topic', label: 'Konu çalıştı', icon: '📘', points: 10 },
+                          { key: 'study_review', label: 'Tekrar yaptı', icon: '🔁', points: 10 },
+                          { key: 'study_questions', label: 'Soru çözdü', icon: '🧠', points: 20 },
+                          { key: 'study_exam_analysis', label: 'Deneme analizi', icon: '📝', points: 10 },
+                        ].map(item => {
+                          const isActive = dailyActivity.manual_status?.[item.key];
+                          return (
+                            <div
+                              key={item.key}
+                              className={`p-3 rounded-lg text-center ${
+                                isActive ? 'bg-green-100 border-2 border-green-300' : 'bg-white border border-gray-200'
+                              }`}
+                            >
+                              <span className="text-2xl">{item.icon}</span>
+                              <p className={`text-xs mt-1 ${isActive ? 'text-green-700 font-medium' : 'text-gray-500'}`}>
+                                {item.label}
+                              </p>
+                              {isActive && <span className="text-xs text-green-600">✓ +{item.points}</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Son Aktiviteler */}
+                    {dailyActivity.recent_activities?.length > 0 && (
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Son 7 Gün Aktiviteleri</h4>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {dailyActivity.recent_activities.map((act, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-400">{act.date}</span>
+                                <span className="text-sm text-gray-700">{act.action_label}</span>
+                              </div>
+                              <span className="text-sm font-medium text-amber-600">+{act.points}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Koç Notu */}
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                      <p className="text-sm text-amber-800">
+                        💡 <strong>Koç olarak:</strong> Öğrencinin çalışma disiplinini buradan takip edebilirsin.
+                        Streak kırılırsa veya aktivite düşerse motive edici mesajlar gönderebilirsin.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
