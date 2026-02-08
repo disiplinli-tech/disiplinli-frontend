@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import API from '../api';
 import {
   Sparkles, Upload, X, Check, Loader2, Image as ImageIcon,
-  ThumbsUp, ThumbsDown, RotateCcw, Trash2
+  ThumbsUp, ThumbsDown, RotateCcw, Trash2, AlertCircle
 } from 'lucide-react';
 
 export default function QuestionWheel() {
@@ -17,12 +17,18 @@ export default function QuestionWheel() {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [showResult, setShowResult] = useState(false);
 
+  // Modal state
+  const [modalImage, setModalImage] = useState(null);
+
   // Feedback state
   const [feedbackGiven, setFeedbackGiven] = useState(false);
 
   // Refs
   const carouselRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Sabit animasyon süresi (ms)
+  const SPIN_DURATION = 2800;
 
   useEffect(() => {
     fetchQuestions();
@@ -83,20 +89,25 @@ export default function QuestionWheel() {
         return;
       }
 
-      // Backend'den gelen items'ı al
-      let items = res.data.animation_items || [];
+      // Backend'den gelen seçili soru
+      const selected = res.data.selected;
+      setSelectedQuestion(selected);
 
-      // Eğer items az ise, çoğalt (minimum 15 item olsun ki animasyon güzel görünsün)
-      if (items.length < 15) {
-        const originalItems = [...items];
-        while (items.length < 20) {
-          items = [...items, ...originalItems];
-        }
-        items = items.slice(0, 20);
+      // Animasyon için item listesi oluştur
+      // Her zaman en az 25 item olsun (soru sayısından bağımsız)
+      let items = res.data.animation_items || [];
+      const originalItems = items.length > 0 ? [...items] : [selected];
+
+      // 25 item'a tamamla (döngüsel)
+      while (items.length < 25) {
+        items = [...items, ...originalItems];
       }
+      items = items.slice(0, 25);
+
+      // Son item her zaman seçili soru olsun
+      items[items.length - 3] = selected;
 
       setAnimationItems(items);
-      setSelectedQuestion(res.data.selected);
 
       // Reset carousel position
       if (carouselRef.current) {
@@ -104,16 +115,27 @@ export default function QuestionWheel() {
         carouselRef.current.style.transform = 'translateX(0)';
       }
 
-      // Animasyon başlat (bir sonraki frame'de)
+      // Animasyon başlat
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (carouselRef.current) {
-            // Kart genişliği + gap = 160 + 16 = 176px (mobilde daha dar)
-            const cardWidth = window.innerWidth < 640 ? 136 : 176;
-            const targetIndex = items.length - 3; // Sondan 3. kart ortada olsun
+            // Kart genişliği + gap hesapla
+            const isMobile = window.innerWidth < 640;
+            const cardWidth = isMobile ? 100 : 140;
+            const gap = isMobile ? 8 : 12;
+            const itemWidth = cardWidth + gap;
 
-            carouselRef.current.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.3, 1)';
-            carouselRef.current.style.transform = `translateX(-${targetIndex * cardWidth}px)`;
+            // Hedef: sondan 3. kart (seçili soru) ortada olsun
+            const targetIndex = items.length - 3;
+
+            // Container genişliğinin yarısını çıkar (ortalamak için)
+            const containerWidth = carouselRef.current.parentElement?.offsetWidth || 300;
+            const offset = (containerWidth / 2) - (cardWidth / 2);
+
+            const translateX = (targetIndex * itemWidth) - offset;
+
+            carouselRef.current.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(0.15, 0.85, 0.25, 1)`;
+            carouselRef.current.style.transform = `translateX(-${translateX}px)`;
           }
         });
       });
@@ -122,7 +144,7 @@ export default function QuestionWheel() {
       setTimeout(() => {
         setShowResult(true);
         setIsSpinning(false);
-      }, 4200);
+      }, SPIN_DURATION + 400);
 
     } catch (err) {
       console.error('Spin hatası:', err);
@@ -140,7 +162,7 @@ export default function QuestionWheel() {
       });
 
       setFeedbackGiven(true);
-      fetchQuestions(); // Stats güncelle
+      fetchQuestions();
     } catch (err) {
       alert('Feedback kaydedilemedi');
     }
@@ -168,6 +190,44 @@ export default function QuestionWheel() {
     }
   };
 
+  // Thumbnail component with fallback
+  const QuestionThumbnail = ({ src, alt, className, onClick }) => {
+    const [imgError, setImgError] = useState(false);
+    const [imgLoading, setImgLoading] = useState(true);
+
+    if (!src || imgError) {
+      return (
+        <div
+          className={`flex flex-col items-center justify-center bg-gray-100 text-gray-400 ${className}`}
+          onClick={onClick}
+        >
+          <AlertCircle size={20} />
+          <span className="text-xs mt-1">Görsel yok</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`relative ${className}`} onClick={onClick}>
+        {imgLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <Loader2 className="animate-spin text-gray-400" size={20} />
+          </div>
+        )}
+        <img
+          src={src}
+          alt={alt}
+          className={`w-full h-full object-cover ${imgLoading ? 'opacity-0' : 'opacity-100'}`}
+          onLoad={() => setImgLoading(false)}
+          onError={() => {
+            setImgError(true);
+            setImgLoading(false);
+          }}
+        />
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -180,6 +240,27 @@ export default function QuestionWheel() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      {/* Image Modal */}
+      {modalImage && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setModalImage(null)}
+        >
+          <button
+            className="absolute top-4 right-4 p-2 bg-white/20 rounded-full text-white hover:bg-white/30"
+            onClick={() => setModalImage(null)}
+          >
+            <X size={24} />
+          </button>
+          <img
+            src={modalImage}
+            alt="Soru"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -249,26 +330,35 @@ export default function QuestionWheel() {
         <>
           {/* Spin Area */}
           {!showResult ? (
-            <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 rounded-2xl p-4 sm:p-6 mb-6 overflow-hidden">
-              {/* Carousel Container */}
+            <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 rounded-2xl p-4 sm:p-6 mb-6">
+              {/* Carousel Container - TAM OVERFLOW KONTROLÜ */}
               {isSpinning && animationItems.length > 0 ? (
-                <div className="relative h-32 sm:h-40 mb-4 sm:mb-6">
+                <div className="relative h-28 sm:h-36 mb-4 sm:mb-6 overflow-hidden">
                   {/* Indicator Arrow */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                    <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[16px] border-t-yellow-400" />
+                    <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-t-yellow-400" />
                   </div>
 
-                  {/* Carousel Track - OVERFLOW HIDDEN İÇİNDE */}
-                  <div className="overflow-hidden mt-5 mx-auto" style={{ maxWidth: '100%' }}>
+                  {/* Carousel Track */}
+                  <div
+                    className="absolute top-5 left-0 right-0 overflow-hidden"
+                    style={{
+                      transform: 'translateZ(0)',
+                      willChange: 'transform'
+                    }}
+                  >
                     <div
                       ref={carouselRef}
-                      className="flex gap-4"
-                      style={{ transform: 'translateX(0)' }}
+                      className="flex gap-2 sm:gap-3"
+                      style={{
+                        transform: 'translateX(0)',
+                        willChange: 'transform'
+                      }}
                     >
                       {animationItems.map((item, idx) => (
                         <div
                           key={`${item.id}-${idx}`}
-                          className="flex-shrink-0 w-[120px] sm:w-[160px] h-24 sm:h-32 rounded-xl overflow-hidden bg-white/20 border-2 border-white/30 flex items-center justify-center"
+                          className="flex-shrink-0 w-[100px] sm:w-[140px] h-20 sm:h-28 rounded-xl overflow-hidden bg-white/20 border-2 border-white/30 flex items-center justify-center"
                         >
                           {item.image ? (
                             <img
@@ -276,18 +366,24 @@ export default function QuestionWheel() {
                               alt="Soru"
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = '';
                                 e.target.style.display = 'none';
+                                e.target.nextSibling && (e.target.nextSibling.style.display = 'flex');
                               }}
                             />
-                          ) : (
-                            <ImageIcon className="text-white/40" size={32} />
-                          )}
+                          ) : null}
+                          <div
+                            className={`w-full h-full items-center justify-center bg-white/10 ${item.image ? 'hidden' : 'flex'}`}
+                          >
+                            <ImageIcon className="text-white/40" size={28} />
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
+
+                  {/* Edge Gradients */}
+                  <div className="absolute top-5 left-0 w-12 h-full bg-gradient-to-r from-purple-900 to-transparent z-10 pointer-events-none" />
+                  <div className="absolute top-5 right-0 w-12 h-full bg-gradient-to-l from-purple-900 to-transparent z-10 pointer-events-none" />
                 </div>
               ) : (
                 <div className="text-center py-6 sm:py-8">
@@ -333,12 +429,21 @@ export default function QuestionWheel() {
 
               {/* Question Image */}
               <div className="p-4">
-                {selectedQuestion?.image && (
+                {selectedQuestion?.image ? (
                   <img
                     src={selectedQuestion.image}
                     alt="Soru"
-                    className="w-full max-h-96 object-contain rounded-xl border border-gray-200"
+                    className="w-full max-h-96 object-contain rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => setModalImage(selectedQuestion.image)}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
                   />
+                ) : (
+                  <div className="w-full h-48 flex flex-col items-center justify-center bg-gray-100 rounded-xl text-gray-400">
+                    <AlertCircle size={40} />
+                    <span className="mt-2">Görsel yüklenemedi</span>
+                  </div>
                 )}
 
                 {/* Feedback Section */}
@@ -405,30 +510,22 @@ export default function QuestionWheel() {
               {questions.map(q => (
                 <div
                   key={q.id}
-                  className={`relative group rounded-xl overflow-hidden border-2 aspect-square ${
+                  className={`relative group rounded-xl overflow-hidden border-2 aspect-square cursor-pointer ${
                     q.is_solved
                       ? q.could_solve ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
                       : 'border-gray-200 hover:border-purple-300'
                   }`}
+                  onClick={() => q.image && setModalImage(q.image)}
                 >
-                  {q.image ? (
-                    <img
-                      src={q.image}
-                      alt="Soru"
-                      className={`w-full h-full object-cover ${q.is_solved ? 'opacity-50' : ''}`}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                      <ImageIcon size={24} />
-                    </div>
-                  )}
+                  <QuestionThumbnail
+                    src={q.image}
+                    alt="Soru"
+                    className={`w-full h-full ${q.is_solved ? 'opacity-50' : ''}`}
+                  />
 
                   {/* Solved Overlay */}
                   {q.is_solved && (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       {q.could_solve ? (
                         <Check className="text-green-500" size={32} />
                       ) : (
@@ -439,18 +536,14 @@ export default function QuestionWheel() {
 
                   {/* Delete Button */}
                   <button
-                    onClick={() => deleteQuestion(q.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteQuestion(q.id);
+                    }}
                     className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Trash2 size={14} />
                   </button>
-
-                  {/* Unsolved Indicator */}
-                  {!q.is_solved && !q.image && (
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">
-                      Soru
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
