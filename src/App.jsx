@@ -243,7 +243,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
         {menuItems.map((item, index) => {
           // Divider (ayırıcı çizgi) - daha görünür
           if (item.type === 'divider') {
-            return <div key={`divider-${index}`} className="my-3 border-t-2 border-gray-200" />;
+            return <div key={`divider-${index}`} className="my-4 mx-2 border-t-2 border-gray-300 border-dashed" />;
           }
 
           // Header (grup başlığı)
