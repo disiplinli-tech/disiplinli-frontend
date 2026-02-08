@@ -114,8 +114,10 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
     { icon: Target, label: 'Konu Takibi', path: '/topics' },
+    { type: 'header', label: 'Odak & Pratik' },
     { icon: Compass, label: 'Odak Alanlarım', path: '/focus-areas' },
     { icon: Sparkles, label: 'Soru Çarkı', path: '/question-wheel', highlight: true },
+    { type: 'divider' },
     { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
@@ -242,6 +244,18 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
           // Divider (ayırıcı çizgi) - daha görünür
           if (item.type === 'divider') {
             return <div key={`divider-${index}`} className="my-3 border-t-2 border-gray-200" />;
+          }
+
+          // Header (grup başlığı)
+          if (item.type === 'header') {
+            if (collapsed) return null;
+            return (
+              <div key={`header-${index}`} className="pt-4 pb-1 px-3">
+                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
+                  {item.label}
+                </span>
+              </div>
+            );
           }
 
           const Icon = item.icon;
