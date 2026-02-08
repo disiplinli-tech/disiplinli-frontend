@@ -14,8 +14,8 @@ import {
 // ==================== KOÇ DASHBOARD ====================
 function CoachDashboard({ user, stats }) {
   const [copied, setCopied] = useState(false);
-  const [sendingReminder, setSendingReminder] = useState(false);
-  const [reminderSent, setReminderSent] = useState(false);
+  const [sendingReminderId, setSendingReminderId] = useState(null); // Hangi öğrenciye gönderiliyor
+  const [reminderSentIds, setReminderSentIds] = useState([]); // Hangi öğrencilere gönderildi
   const navigate = useNavigate();
 
   const copyInviteCode = () => {
@@ -30,20 +30,17 @@ function CoachDashboard({ user, stats }) {
   const criticalCount = stats?.critical_count || 0;
   const warningCount = stats?.warning_count || 0;
 
-  // İnaktif öğrencilere toplu hatırlatma gönder
-  const handleSendReminders = async () => {
-    if (inactiveStudents.length === 0) return;
-
-    setSendingReminder(true);
+  // Tek öğrenciye hatırlatma gönder
+  const handleSendReminder = async (studentId, e) => {
+    e.stopPropagation();
+    setSendingReminderId(studentId);
     try {
-      const studentIds = inactiveStudents.map(s => s.id);
-      await API.post('/api/send-reminder/', { student_ids: studentIds });
-      setReminderSent(true);
-      setTimeout(() => setReminderSent(false), 3000);
+      await API.post('/api/send-reminder/', { student_ids: [studentId] });
+      setReminderSentIds(prev => [...prev, studentId]);
     } catch (err) {
       alert('Hatırlatma gönderilemedi: ' + (err.response?.data?.error || err.message));
     } finally {
-      setSendingReminder(false);
+      setSendingReminderId(null);
     }
   };
 
@@ -133,68 +130,6 @@ function CoachDashboard({ user, stats }) {
           </p>
         </div>
 
-        {/* 🚨 İNAKTİF ÖĞRENCİ UYARISI - En üstte göster */}
-        {(criticalCount > 0 || warningCount > 0) && (
-          <div className={`rounded-2xl p-5 ${criticalCount > 0 ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-yellow-500 to-amber-500'} text-white`}>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle size={24} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg">
-                  {criticalCount > 0 ? '⚠️ Dikkat! İnaktif Öğrenciler' : '📢 Takip Gerektiren Öğrenciler'}
-                </h3>
-                <p className="text-sm opacity-90 mt-1">
-                  {criticalCount > 0 && <span className="font-semibold">{criticalCount} öğrenci 2+ gündür giriş yapmadı. </span>}
-                  {warningCount > 0 && <span>{warningCount} öğrenci dün giriş yapmadı.</span>}
-                </p>
-
-                {/* İnaktif öğrenci listesi */}
-                {inactiveStudents.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2 items-center">
-                    {inactiveStudents.slice(0, 5).map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => navigate(`/student/${s.id}`)}
-                        className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                      >
-                        <span>{s.name}</span>
-                        <span className="opacity-75">({s.activity_status?.days_inactive}g)</span>
-                      </button>
-                    ))}
-                    {inactiveStudents.length > 5 && (
-                      <span className="px-3 py-1.5 text-sm opacity-75">+{inactiveStudents.length - 5} daha</span>
-                    )}
-
-                    {/* Hatırlatma Gönder Butonu */}
-                    <button
-                      onClick={handleSendReminders}
-                      disabled={sendingReminder || reminderSent}
-                      className="ml-auto bg-white text-red-600 hover:bg-white/90 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 disabled:opacity-70"
-                    >
-                      {sendingReminder ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                          Gönderiliyor...
-                        </>
-                      ) : reminderSent ? (
-                        <>
-                          <Check size={16} />
-                          Gönderildi!
-                        </>
-                      ) : (
-                        <>
-                          <Send size={16} />
-                          Hatırlatma Gönder
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Davet Kodu */}
         {stats?.invite_code && (
@@ -282,8 +217,9 @@ function CoachDashboard({ user, stats }) {
           </div>
 
           {/* Tablo Header - Yeni Sütunlar */}
-          <div className="hidden lg:grid gap-2 px-5 py-3 bg-gray-50 text-xs font-medium text-gray-500" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr 0.7fr 1.2fr'}}>
+          <div className="hidden lg:grid gap-2 px-5 py-3 bg-gray-50 text-xs font-medium text-gray-500" style={{gridTemplateColumns: '2fr 0.8fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr 0.7fr 1.2fr'}}>
             <div>ÖĞRENCİ</div>
+            <div className="text-center"></div>
             <div className="text-center">TYT ORT</div>
             <div className="text-center">TYT SIRA</div>
             <div className="text-center">AYT ORT</div>
@@ -338,13 +274,30 @@ function CoachDashboard({ user, stats }) {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {/* Mobilde hatırlat butonu */}
+                        {(isCritical || isWarning) && !reminderSentIds.includes(student.id) && (
+                          <button
+                            onClick={(e) => handleSendReminder(student.id, e)}
+                            disabled={sendingReminderId === student.id}
+                            className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+                          >
+                            {sendingReminderId === student.id ? (
+                              <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Bell size={12} />
+                            )}
+                          </button>
+                        )}
+                        {reminderSentIds.includes(student.id) && (
+                          <Check size={14} className="text-green-600" />
+                        )}
                         <RiskBadge level={riskLevel} />
                         <ChevronRight size={16} className="text-gray-400" />
                       </div>
                     </div>
 
                     {/* Desktop Layout - Yeni Tablo */}
-                    <div className="hidden lg:grid gap-2 items-center" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr 0.7fr 1.2fr'}}>
+                    <div className="hidden lg:grid gap-2 items-center" style={{gridTemplateColumns: '2fr 0.8fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr 0.7fr 1.2fr'}}>
                       {/* Öğrenci İsim + Alan */}
                       <div className="flex items-center gap-2">
                         <div className="relative">
@@ -361,6 +314,30 @@ function CoachDashboard({ user, stats }) {
                             {student.field_type_display || student.exam_goal_type || 'SAY'}
                           </p>
                         </div>
+                      </div>
+
+                      {/* Hatırlat Butonu - Sadece inaktif öğrenciler için */}
+                      <div className="flex justify-center">
+                        {(isCritical || isWarning) ? (
+                          reminderSentIds.includes(student.id) ? (
+                            <span className="text-xs text-green-600 flex items-center gap-1">
+                              <Check size={12} /> Gönderildi
+                            </span>
+                          ) : (
+                            <button
+                              onClick={(e) => handleSendReminder(student.id, e)}
+                              disabled={sendingReminderId === student.id}
+                              className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+                            >
+                              {sendingReminderId === student.id ? (
+                                <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Bell size={12} />
+                              )}
+                              Hatırlat
+                            </button>
+                          )
+                        ) : null}
                       </div>
 
                       {/* TYT Ortalama */}
