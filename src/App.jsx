@@ -114,6 +114,8 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
     { icon: Target, label: 'Konu Takibi', path: '/topics' },
+    { icon: Compass, label: 'Odak Alanlarım', path: '/focus-areas' },
+    { icon: Sparkles, label: 'Soru Çarkı', path: '/question-wheel', highlight: true },
     { icon: Video, label: 'Online Dersler', path: '/lessons' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
