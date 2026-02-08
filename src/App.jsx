@@ -339,7 +339,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white flex flex-col">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white flex flex-col overflow-y-auto">
             {sidebarContent}
           </aside>
         </div>
