@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import API from '../api';
 import {
   Sparkles, Upload, X, Check, Loader2, Image as ImageIcon,
-  ThumbsUp, ThumbsDown, RotateCcw, Trash2, ChevronLeft
+  ThumbsUp, ThumbsDown, RotateCcw, Trash2
 } from 'lucide-react';
+
+// Backend URL
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://web-production-fe7c.up.railway.app';
 
 export default function QuestionWheel() {
   const [questions, setQuestions] = useState([]);
@@ -27,6 +30,13 @@ export default function QuestionWheel() {
   useEffect(() => {
     fetchQuestions();
   }, []);
+
+  // Görsel URL'ini düzelt
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${BACKEND_URL}${imagePath}`;
+  };
 
   const fetchQuestions = async () => {
     try {
@@ -83,16 +93,40 @@ export default function QuestionWheel() {
         return;
       }
 
-      setAnimationItems(res.data.animation_items || []);
+      // Backend'den gelen items'ı al
+      let items = res.data.animation_items || [];
+
+      // Eğer items az ise, çoğalt (minimum 15 item olsun ki animasyon güzel görünsün)
+      if (items.length < 15) {
+        const originalItems = [...items];
+        while (items.length < 20) {
+          items = [...items, ...originalItems];
+        }
+        items = items.slice(0, 20);
+      }
+
+      setAnimationItems(items);
       setSelectedQuestion(res.data.selected);
 
-      // Animasyon başlat
-      setTimeout(() => {
-        if (carouselRef.current) {
-          carouselRef.current.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.3, 1)';
-          carouselRef.current.style.transform = `translateX(-${(res.data.animation_items.length - 3) * 200}px)`;
-        }
-      }, 100);
+      // Reset carousel position
+      if (carouselRef.current) {
+        carouselRef.current.style.transition = 'none';
+        carouselRef.current.style.transform = 'translateX(0)';
+      }
+
+      // Animasyon başlat (bir sonraki frame'de)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (carouselRef.current) {
+            // Kart genişliği + gap = 160 + 16 = 176px (mobilde daha dar)
+            const cardWidth = window.innerWidth < 640 ? 136 : 176;
+            const targetIndex = items.length - 3; // Sondan 3. kart ortada olsun
+
+            carouselRef.current.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.3, 1)';
+            carouselRef.current.style.transform = `translateX(-${targetIndex * cardWidth}px)`;
+          }
+        });
+      });
 
       // Animasyon bitince sonucu göster
       setTimeout(() => {
@@ -170,7 +204,7 @@ export default function QuestionWheel() {
 
         <label className="px-4 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors flex items-center gap-2 cursor-pointer">
           {uploading ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-          Soru Yükle
+          <span className="hidden sm:inline">Soru</span> Yükle
           <input
             ref={fileInputRef}
             type="file"
@@ -182,21 +216,21 @@ export default function QuestionWheel() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-purple-600">{stats.total || 0}</p>
+      <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6">
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-2 sm:p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-purple-600">{stats.total || 0}</p>
           <p className="text-xs text-purple-600">Toplam</p>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-blue-600">{stats.unsolved || 0}</p>
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-2 sm:p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.unsolved || 0}</p>
           <p className="text-xs text-blue-600">Bekleyen</p>
         </div>
-        <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-green-600">{stats.correct || 0}</p>
+        <div className="bg-green-50 border border-green-200 rounded-xl p-2 sm:p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.correct || 0}</p>
           <p className="text-xs text-green-600">Doğru</p>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-red-600">{stats.wrong || 0}</p>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-2 sm:p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-red-600">{stats.wrong || 0}</p>
           <p className="text-xs text-red-600">Yanlış</p>
         </div>
       </div>
@@ -225,17 +259,17 @@ export default function QuestionWheel() {
         <>
           {/* Spin Area */}
           {!showResult ? (
-            <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 rounded-2xl p-6 mb-6 overflow-hidden">
+            <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 rounded-2xl p-4 sm:p-6 mb-6 overflow-hidden">
               {/* Carousel Container */}
               {isSpinning && animationItems.length > 0 ? (
-                <div className="relative h-48 mb-6">
+                <div className="relative h-32 sm:h-40 mb-4 sm:mb-6">
                   {/* Indicator Arrow */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                    <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[20px] border-t-yellow-400" />
+                    <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[16px] border-t-yellow-400" />
                   </div>
 
-                  {/* Carousel Track */}
-                  <div className="overflow-hidden mt-6">
+                  {/* Carousel Track - OVERFLOW HIDDEN İÇİNDE */}
+                  <div className="overflow-hidden mt-5 mx-auto" style={{ maxWidth: '100%' }}>
                     <div
                       ref={carouselRef}
                       className="flex gap-4"
@@ -244,31 +278,34 @@ export default function QuestionWheel() {
                       {animationItems.map((item, idx) => (
                         <div
                           key={`${item.id}-${idx}`}
-                          className="flex-shrink-0 w-48 h-36 rounded-xl overflow-hidden bg-white/10 border-2 border-white/20"
+                          className="flex-shrink-0 w-[120px] sm:w-[160px] h-24 sm:h-32 rounded-xl overflow-hidden bg-white/10 border-2 border-white/30"
                         >
                           {item.image ? (
                             <img
-                              src={item.image}
+                              src={getImageUrl(item.image)}
                               alt="Soru"
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-white/50">
-                              <ImageIcon size={40} />
-                            </div>
-                          )}
+                          ) : null}
+                          <div className="w-full h-full items-center justify-center text-white/50 hidden">
+                            <span className="text-sm">Soru</span>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="text-yellow-400" size={48} />
+                <div className="text-center py-6 sm:py-8">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="text-yellow-400" size={40} />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Çarkı Çevir!</h3>
-                  <p className="text-white/70 mb-6">{unsolvedCount} adet çözülmemiş sorun var</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Çarkı Çevir!</h3>
+                  <p className="text-white/70 mb-4 sm:mb-6">{unsolvedCount} adet çözülmemiş sorun var</p>
                 </div>
               )}
 
@@ -276,16 +313,16 @@ export default function QuestionWheel() {
               <button
                 onClick={spinWheel}
                 disabled={isSpinning || unsolvedCount === 0}
-                className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 rounded-xl font-bold text-lg hover:from-yellow-300 hover:to-orange-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 sm:py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 rounded-xl font-bold text-base sm:text-lg hover:from-yellow-300 hover:to-orange-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSpinning ? (
                   <>
-                    <Loader2 className="animate-spin" size={24} />
+                    <Loader2 className="animate-spin" size={22} />
                     Çevriliyor...
                   </>
                 ) : (
                   <>
-                    <Sparkles size={24} />
+                    <Sparkles size={22} />
                     ÇEVİR!
                   </>
                 )}
@@ -294,8 +331,8 @@ export default function QuestionWheel() {
           ) : (
             // Result Screen
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-white">Senin Sorun!</h3>
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                <h3 className="text-base sm:text-lg font-bold text-white">Senin Sorun!</h3>
                 <button
                   onClick={resetSpin}
                   className="p-2 bg-white/20 rounded-lg text-white hover:bg-white/30 transition-colors"
@@ -308,7 +345,7 @@ export default function QuestionWheel() {
               <div className="p-4">
                 {selectedQuestion?.image && (
                   <img
-                    src={selectedQuestion.image}
+                    src={getImageUrl(selectedQuestion.image)}
                     alt="Soru"
                     className="w-full max-h-96 object-contain rounded-xl border border-gray-200"
                   />
@@ -371,10 +408,10 @@ export default function QuestionWheel() {
 
           {/* Question List */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100">
+            <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100">
               <h3 className="font-semibold text-gray-800">Soru Bankam ({questions.length})</h3>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 p-3 sm:p-4">
               {questions.map(q => (
                 <div
                   key={q.id}
@@ -384,12 +421,19 @@ export default function QuestionWheel() {
                       : 'border-gray-200 hover:border-purple-300'
                   }`}
                 >
-                  {q.image && (
+                  {q.image ? (
                     <img
-                      src={q.image}
+                      src={getImageUrl(q.image)}
                       alt="Soru"
                       className={`w-full h-full object-cover ${q.is_solved ? 'opacity-50' : ''}`}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
                     />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                      <ImageIcon size={24} />
+                    </div>
                   )}
 
                   {/* Solved Overlay */}
@@ -411,10 +455,10 @@ export default function QuestionWheel() {
                     <Trash2 size={14} />
                   </button>
 
-                  {/* Spin Count */}
-                  {q.spin_count > 0 && (
-                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/50 text-white text-xs rounded">
-                      {q.spin_count}x
+                  {/* Unsolved Indicator */}
+                  {!q.is_solved && !q.image && (
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">
+                      Soru
                     </div>
                   )}
                 </div>
