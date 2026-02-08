@@ -5,7 +5,8 @@ import { formatRanking } from "../utils/formatters";
 import {
   TrendingUp, Target, Award, Calendar, MessageCircle,
   ChevronRight, Trophy, Zap, BarChart3, CheckCircle, Users,
-  Copy, Check, Eye, Bell, X, Edit2, Save, AlertTriangle, AlertCircle, Mail, Send
+  Copy, Check, Eye, Bell, X, Edit2, Save, AlertTriangle, AlertCircle, Mail, Send,
+  Flame, Star, Sparkles
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
@@ -423,8 +424,9 @@ function StudentDashboard({ user, stats, onRefresh }) {
   const [obpInput, setObpInput] = useState(stats?.obp?.toString() || '');
   const [saving, setSaving] = useState(false);
   const [weeklyGoals, setWeeklyGoals] = useState([]);
+  const [dailyProgress, setDailyProgress] = useState(null);
 
-  // Haftalık hedefleri yükle
+  // Haftalık hedefleri ve günlük progress yükle
   useEffect(() => {
     const fetchGoals = async () => {
       try {
@@ -434,7 +436,16 @@ function StudentDashboard({ user, stats, onRefresh }) {
         console.log('Hedefler yüklenemedi');
       }
     };
+    const fetchDailyProgress = async () => {
+      try {
+        const res = await API.get('/api/daily-progress/');
+        setDailyProgress(res.data);
+      } catch (err) {
+        console.log('Günlük progress yüklenemedi');
+      }
+    };
     fetchGoals();
+    fetchDailyProgress();
   }, []);
 
   // Tüm denemelerin ORTALAMASINA göre sıralama hesapla
@@ -757,6 +768,75 @@ function StudentDashboard({ user, stats, onRefresh }) {
               </div>
             </div>
           </div>
+
+          {/* 🔥 Günlük Progress Kartı */}
+          {dailyProgress && (
+            <div className="p-4 border-b border-gray-100">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  {/* Streak */}
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${dailyProgress.streak?.alive ? 'bg-gradient-to-br from-orange-400 to-red-500' : 'bg-gray-200'}`}>
+                      <Flame className={dailyProgress.streak?.alive ? 'text-white' : 'text-gray-400'} size={24} />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-800">{dailyProgress.streak?.current || 0} <span className="text-sm font-normal text-gray-500">gün seri</span></p>
+                      <p className="text-xs text-gray-500">En uzun: {dailyProgress.streak?.longest || 0} gün</p>
+                    </div>
+                  </div>
+
+                  {/* Günlük Puan */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
+                      <Star className="text-white" size={24} />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-800">{dailyProgress.points?.today || 0} <span className="text-sm font-normal text-gray-500">/ {dailyProgress.points?.daily_limit}</span></p>
+                      <p className="text-xs text-gray-500">Bugünkü puan</p>
+                    </div>
+                  </div>
+
+                  {/* Toplam Puan */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
+                      <Sparkles className="text-white" size={24} />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-800">{dailyProgress.points?.total || 0}</p>
+                      <p className="text-xs text-gray-500">Toplam puan</p>
+                    </div>
+                  </div>
+
+                  {/* Haftalık Mini Chart */}
+                  <div className="hidden md:flex items-end gap-1 h-10">
+                    {dailyProgress.week_chart?.map((day, i) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <div
+                          className={`w-6 rounded-t transition-all ${day.active ? 'bg-gradient-to-t from-amber-400 to-orange-400' : 'bg-gray-200'}`}
+                          style={{ height: `${Math.max(4, (day.points / dailyProgress.points?.daily_limit) * 40)}px` }}
+                        />
+                        <span className="text-[10px] text-gray-400 mt-1">{day.day}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bugünkü Progress Bar */}
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                    <span>Bugünkü ilerleme</span>
+                    <span>{dailyProgress.points?.today || 0} / {dailyProgress.points?.daily_limit} puan</span>
+                  </div>
+                  <div className="h-2 bg-amber-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all"
+                      style={{ width: `${Math.min(100, ((dailyProgress.points?.today || 0) / dailyProgress.points?.daily_limit) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Özet Kartları - TYT ve AYT */}
           <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">

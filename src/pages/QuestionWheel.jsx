@@ -191,6 +191,16 @@ export default function QuestionWheel() {
         setIsSpinning(false);
       }, SPIN_DURATION + 400);
 
+      // Aktivite kaydet - çark döndürüldü
+      try {
+        await API.post('/api/activity/record/', {
+          action_type: 'wheel_spin',
+          metadata: { subject: selected?.subject, exam_type: selected?.exam_type }
+        });
+      } catch (e) {
+        // Aktivite kaydı başarısız olsa da devam et
+      }
+
     } catch (err) {
       console.error('Spin hatası:', err);
       setIsSpinning(false);
