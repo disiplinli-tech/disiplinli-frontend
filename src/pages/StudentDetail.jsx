@@ -299,17 +299,53 @@ export default function StudentDetail() {
         {/* Öğrenci Bilgi Kartı */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 md:px-6 py-4 md:py-5">
-            <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/20 flex items-center justify-center text-white text-xl md:text-2xl font-bold flex-shrink-0">
-                {student.name?.charAt(0).toUpperCase() || 'Ö'}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/20 flex items-center justify-center text-white text-xl md:text-2xl font-bold flex-shrink-0">
+                  {student.name?.charAt(0).toUpperCase() || 'Ö'}
+                </div>
+                <div className="text-white min-w-0 flex-1">
+                  <h1 className="text-lg md:text-2xl font-bold truncate">{student.name}</h1>
+                  <p className="text-indigo-100 flex items-center gap-1.5 mt-0.5 md:mt-1 text-xs md:text-sm truncate">
+                    <Mail size={12} className="flex-shrink-0" />
+                    <span className="truncate">{student.email}</span>
+                  </p>
+                </div>
               </div>
-              <div className="text-white min-w-0 flex-1">
-                <h1 className="text-lg md:text-2xl font-bold truncate">{student.name}</h1>
-                <p className="text-indigo-100 flex items-center gap-1.5 mt-0.5 md:mt-1 text-xs md:text-sm truncate">
-                  <Mail size={12} className="flex-shrink-0" />
-                  <span className="truncate">{student.email}</span>
-                </p>
+              {/* Diploma Notu & Hedef Bilgisi */}
+              <div className="hidden md:flex items-center gap-3">
+                {/* Diploma Notu */}
+                <div className="bg-white/10 rounded-xl px-4 py-2 text-white text-center">
+                  <p className="text-xs opacity-80">Diploma Notu</p>
+                  <p className="text-lg font-bold">{student.diploma_notu ? student.diploma_notu.toFixed(2) : '-'}</p>
+                </div>
+                {/* Alan */}
+                <div className="bg-white/10 rounded-xl px-4 py-2 text-white text-center">
+                  <p className="text-xs opacity-80">Alan</p>
+                  <p className="text-lg font-bold">{student.exam_goal_type || 'SAY'}</p>
+                </div>
+                {/* Hedef Sıralama */}
+                {student.target_ranking && (
+                  <div className="bg-white/10 rounded-xl px-4 py-2 text-white text-center">
+                    <p className="text-xs opacity-80">Hedef</p>
+                    <p className="text-lg font-bold">{formatRanking(student.target_ranking)}</p>
+                  </div>
+                )}
               </div>
+            </div>
+            {/* Mobil görünüm için diploma ve hedef bilgisi */}
+            <div className="flex md:hidden items-center gap-2 mt-3 flex-wrap">
+              <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-lg">
+                📊 Diploma: {student.diploma_notu ? student.diploma_notu.toFixed(2) : '-'}
+              </span>
+              <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-lg">
+                📚 {student.exam_goal_type || 'SAY'}
+              </span>
+              {student.target_ranking && (
+                <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-lg">
+                  🎯 {formatRanking(student.target_ranking)}
+                </span>
+              )}
             </div>
           </div>
           
