@@ -428,7 +428,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
     streak: { current: 0, longest: 0, alive: false },
     points: { today: 0, total: 0, daily_limit: 50, daily_complete: false },
     week_chart: [],
-    manual_status: {}
+    today: { manual_status: {} }
   });
   const [dailyProgressLoading, setDailyProgressLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState({});
@@ -447,11 +447,9 @@ function StudentDashboard({ user, stats, onRefresh }) {
     const fetchDailyProgress = async () => {
       try {
         const res = await API.get('/api/daily-progress/');
-        console.log('Daily progress response:', res.data);
-        console.log('Manual status:', res.data.manual_status);
         setDailyProgress(res.data);
       } catch (err) {
-        console.log('Günlük progress yüklenemedi:', err);
+        console.log('Günlük progress yüklenemedi');
       } finally {
         setDailyProgressLoading(false);
       }
@@ -937,7 +935,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     onClick={() => toggleActivity('study_topic')}
                     disabled={activityLoading.study_topic}
                     className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                      dailyProgress.manual_status?.study_topic
+                      dailyProgress.today?.manual_status?.study_topic
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-600'
                     }`}
@@ -945,10 +943,10 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     {activityLoading.study_topic ? (
                       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <BookOpen size={24} className={dailyProgress.manual_status?.study_topic ? 'text-blue-500' : 'text-gray-400'} />
+                      <BookOpen size={24} className={dailyProgress.today?.manual_status?.study_topic ? 'text-blue-500' : 'text-gray-400'} />
                     )}
                     <span className="text-sm font-medium">Konu çalıştım</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_topic ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.today?.manual_status?.study_topic ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
                       +10 puan
                     </span>
                   </button>
@@ -958,7 +956,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     onClick={() => toggleActivity('study_review')}
                     disabled={activityLoading.study_review}
                     className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                      dailyProgress.manual_status?.study_review
+                      dailyProgress.today?.manual_status?.study_review
                         ? 'border-purple-500 bg-purple-50 text-purple-700'
                         : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-600'
                     }`}
@@ -966,10 +964,10 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     {activityLoading.study_review ? (
                       <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <RefreshCw size={24} className={dailyProgress.manual_status?.study_review ? 'text-purple-500' : 'text-gray-400'} />
+                      <RefreshCw size={24} className={dailyProgress.today?.manual_status?.study_review ? 'text-purple-500' : 'text-gray-400'} />
                     )}
                     <span className="text-sm font-medium">Tekrar yaptım</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_review ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.today?.manual_status?.study_review ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500'}`}>
                       +10 puan
                     </span>
                   </button>
@@ -979,7 +977,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     onClick={() => toggleActivity('study_questions')}
                     disabled={activityLoading.study_questions}
                     className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                      dailyProgress.manual_status?.study_questions
+                      dailyProgress.today?.manual_status?.study_questions
                         ? 'border-green-500 bg-green-50 text-green-700'
                         : 'border-gray-200 hover:border-green-300 hover:bg-green-50 text-gray-600'
                     }`}
@@ -987,10 +985,10 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     {activityLoading.study_questions ? (
                       <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <Brain size={24} className={dailyProgress.manual_status?.study_questions ? 'text-green-500' : 'text-gray-400'} />
+                      <Brain size={24} className={dailyProgress.today?.manual_status?.study_questions ? 'text-green-500' : 'text-gray-400'} />
                     )}
                     <span className="text-sm font-medium">Soru çözdüm</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_questions ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.today?.manual_status?.study_questions ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
                       +20 puan
                     </span>
                   </button>
@@ -1000,7 +998,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     onClick={() => toggleActivity('study_exam_analysis')}
                     disabled={activityLoading.study_exam_analysis}
                     className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                      dailyProgress.manual_status?.study_exam_analysis
+                      dailyProgress.today?.manual_status?.study_exam_analysis
                         ? 'border-orange-500 bg-orange-50 text-orange-700'
                         : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-gray-600'
                     }`}
@@ -1008,10 +1006,10 @@ function StudentDashboard({ user, stats, onRefresh }) {
                     {activityLoading.study_exam_analysis ? (
                       <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <FileText size={24} className={dailyProgress.manual_status?.study_exam_analysis ? 'text-orange-500' : 'text-gray-400'} />
+                      <FileText size={24} className={dailyProgress.today?.manual_status?.study_exam_analysis ? 'text-orange-500' : 'text-gray-400'} />
                     )}
                     <span className="text-sm font-medium">Deneme analizi</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.manual_status?.study_exam_analysis ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dailyProgress.today?.manual_status?.study_exam_analysis ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'}`}>
                       +10 puan
                     </span>
                   </button>
