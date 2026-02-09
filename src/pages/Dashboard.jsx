@@ -447,9 +447,11 @@ function StudentDashboard({ user, stats, onRefresh }) {
     const fetchDailyProgress = async () => {
       try {
         const res = await API.get('/api/daily-progress/');
+        console.log('Daily progress response:', res.data);
+        console.log('Manual status:', res.data.manual_status);
         setDailyProgress(res.data);
       } catch (err) {
-        console.log('Günlük progress yüklenemedi');
+        console.log('Günlük progress yüklenemedi:', err);
       } finally {
         setDailyProgressLoading(false);
       }
