@@ -3,7 +3,7 @@ import API from '../api';
 import { formatRanking, formatDate } from '../utils/formatters';
 import {
   Trophy, Target, TrendingUp, Calendar, BookOpen, User,
-  GraduationCap, Clock, AlertCircle, RefreshCw, Link, Loader2, Award, BarChart3
+  GraduationCap, Clock, AlertCircle, RefreshCw, Link, Loader2, Award, BarChart3, Eye, MessageSquare
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -16,8 +16,13 @@ export default function ParentDashboard() {
   const [linkLoading, setLinkLoading] = useState(false);
   const [linkError, setLinkError] = useState('');
 
+  // Yeni state'ler - Koç notları ve haftalık özet
+  const [coachNotes, setCoachNotes] = useState([]);
+  const [weeklySummary, setWeeklySummary] = useState(null);
+
   useEffect(() => {
     fetchData();
+    fetchExtraData(); // Koç notları ve haftalık özet
   }, []);
 
   const fetchData = async () => {
@@ -37,6 +42,20 @@ export default function ParentDashboard() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Koç notları ve haftalık özeti yükle
+  const fetchExtraData = async () => {
+    try {
+      const [notesRes, summaryRes] = await Promise.all([
+        API.get('/api/parent/coach-notes/').catch(() => ({ data: { notes: [] } })),
+        API.get('/api/parent/weekly-summary/').catch(() => ({ data: null }))
+      ]);
+      setCoachNotes(notesRes.data.notes || []);
+      setWeeklySummary(summaryRes.data);
+    } catch (err) {
+      console.log('Ekstra veli verileri yüklenemedi');
     }
   };
 
@@ -371,6 +390,73 @@ export default function ParentDashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Koç Takip Ediyor Badge + Haftalık Özet + Koç Notları - YENİ */}
+      <div className="grid lg:grid-cols-3 gap-6 mb-6">
+        {/* Koç Takip Ediyor Badge */}
+        {(data.coach_name || weeklySummary?.coach_tracking) && (
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-5 text-white shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Eye size={24} />
+              </div>
+              <div>
+                <p className="font-semibold text-lg">👀 Koç düzenli takip ediyor</p>
+                <p className="text-sm text-emerald-100">
+                  {weeklySummary?.coach_name || data.coach_name || 'Koçunuz'} öğrencinizin ilerlemesini izliyor
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Haftalık Özet - Bu Hafta */}
+        {weeklySummary?.summary && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+              📊 Bu Hafta
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-xl">
+                <span className="text-sm text-gray-600">✔ Çalıştığı gün</span>
+                <span className="font-bold text-green-700">{weeklySummary.summary.days_active} / 7</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
+                <span className="text-sm text-gray-600">✔ Tahmini soru</span>
+                <span className="font-bold text-blue-700">~{weeklySummary.summary.questions_solved}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
+                <span className="text-sm text-gray-600">✔ Deneme</span>
+                <span className="font-bold text-purple-700">{weeklySummary.summary.exams_count}</span>
+              </div>
+              {weeklySummary.summary.current_streak > 0 && (
+                <div className="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
+                  <span className="text-sm text-gray-600">🔥 Seri</span>
+                  <span className="font-bold text-orange-700">{weeklySummary.summary.current_streak} gün</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Koç Notları */}
+        {coachNotes.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <MessageSquare size={18} className="text-indigo-500" />
+              Koçun Notları
+            </h3>
+            <div className="space-y-3">
+              {coachNotes.slice(0, 3).map((note, index) => (
+                <div key={note.id || index} className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border-l-4 border-indigo-400">
+                  <p className="text-sm text-gray-700 italic">"{note.content}"</p>
+                  <p className="text-xs text-gray-400 mt-2">{note.week_label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Son Denemeler */}
