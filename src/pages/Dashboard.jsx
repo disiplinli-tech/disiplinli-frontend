@@ -424,7 +424,13 @@ function StudentDashboard({ user, stats, onRefresh }) {
   const [obpInput, setObpInput] = useState(stats?.obp?.toString() || '');
   const [saving, setSaving] = useState(false);
   const [weeklyGoals, setWeeklyGoals] = useState([]);
-  const [dailyProgress, setDailyProgress] = useState(null);
+  const [dailyProgress, setDailyProgress] = useState({
+    streak: { current: 0, longest: 0, alive: false },
+    points: { today: 0, total: 0, daily_limit: 50, daily_complete: false },
+    week_chart: [],
+    manual_status: {}
+  });
+  const [dailyProgressLoading, setDailyProgressLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState({});
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -444,6 +450,8 @@ function StudentDashboard({ user, stats, onRefresh }) {
         setDailyProgress(res.data);
       } catch (err) {
         console.log('Günlük progress yüklenemedi');
+      } finally {
+        setDailyProgressLoading(false);
       }
     };
     fetchGoals();
@@ -801,8 +809,7 @@ function StudentDashboard({ user, stats, onRefresh }) {
           </div>
 
           {/* 🔥 Günlük Progress Kartı */}
-          {dailyProgress && (
-            <div className="p-4 border-b border-gray-100">
+          <div className="p-4 border-b border-gray-100">
               {/* Konfeti Animasyonu */}
               {showConfetti && (
                 <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
@@ -1012,7 +1019,6 @@ function StudentDashboard({ user, stats, onRefresh }) {
                 </p>
               </div>
             </div>
-          )}
 
           {/* Özet Kartları - TYT ve AYT */}
           <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
