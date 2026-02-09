@@ -392,56 +392,46 @@ export default function ParentDashboard() {
         </div>
       </div>
 
-      {/* Koç Takip Ediyor Badge + Haftalık Özet + Koç Notları - YENİ */}
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        {/* Koç Takip Ediyor Badge */}
-        {(data.coach_name || weeklySummary?.coach_tracking) && (
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-5 text-white shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <Eye size={24} />
-              </div>
-              <div>
-                <p className="font-semibold text-lg">👀 Koç düzenli takip ediyor</p>
-                <p className="text-sm text-emerald-100">
-                  {weeklySummary?.coach_name || data.coach_name || 'Koçunuz'} öğrencinizin ilerlemesini izliyor
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Haftalık Özet - Bu Hafta */}
-        {weeklySummary?.summary && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+      {/* Haftalık Özet + Koç Notları - Yan Yana */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Haftalık Özet - Bu Hafta (Her zaman göster) */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-gray-800 flex items-center gap-2">
               📊 Bu Hafta
             </h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-xl">
-                <span className="text-sm text-gray-600">✔ Çalıştığı gün</span>
-                <span className="font-bold text-green-700">{weeklySummary.summary.days_active} / 7</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
-                <span className="text-sm text-gray-600">✔ Tahmini soru</span>
-                <span className="font-bold text-blue-700">~{weeklySummary.summary.questions_solved}</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
-                <span className="text-sm text-gray-600">✔ Deneme</span>
-                <span className="font-bold text-purple-700">{weeklySummary.summary.exams_count}</span>
-              </div>
-              {weeklySummary.summary.current_streak > 0 && (
-                <div className="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
-                  <span className="text-sm text-gray-600">🔥 Seri</span>
-                  <span className="font-bold text-orange-700">{weeklySummary.summary.current_streak} gün</span>
-                </div>
-              )}
-            </div>
+            {/* Koç takip badge - küçük ve sade */}
+            {data.coach_name && (
+              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full flex items-center gap-1">
+                <Eye size={12} />
+                Koç takipte
+              </span>
+            )}
           </div>
-        )}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-xl">
+              <span className="text-sm text-gray-600">✔ Çalıştığı gün</span>
+              <span className="font-bold text-green-700">{weeklySummary?.summary?.days_active || 0} / 7</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
+              <span className="text-sm text-gray-600">✔ Tahmini soru</span>
+              <span className="font-bold text-blue-700">~{weeklySummary?.summary?.questions_solved || 0}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
+              <span className="text-sm text-gray-600">✔ Deneme</span>
+              <span className="font-bold text-purple-700">{weeklySummary?.summary?.exams_count || 0}</span>
+            </div>
+            {(weeklySummary?.summary?.current_streak || 0) > 0 && (
+              <div className="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
+                <span className="text-sm text-gray-600">🔥 Seri</span>
+                <span className="font-bold text-orange-700">{weeklySummary.summary.current_streak} gün</span>
+              </div>
+            )}
+          </div>
+        </div>
 
-        {/* Koç Notları */}
-        {coachNotes.length > 0 && (
+        {/* Koç Notları - Sadece not varsa göster */}
+        {coachNotes.length > 0 ? (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
               <MessageSquare size={18} className="text-indigo-500" />
@@ -454,6 +444,21 @@ export default function ParentDashboard() {
                   <p className="text-xs text-gray-400 mt-2">{note.week_label}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        ) : (
+          /* Koç notu yoksa bilgi kutusu */
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-5 border border-indigo-100">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="text-indigo-500" size={20} />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-800 mb-1">Koç Notları</h4>
+                <p className="text-gray-600 text-sm">
+                  Koç, öğrenciniz hakkında haftalık değerlendirme yazdığında burada görünecek.
+                </p>
+              </div>
             </div>
           </div>
         )}
