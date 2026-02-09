@@ -49,13 +49,21 @@ export default function ParentDashboard() {
   const fetchExtraData = async () => {
     try {
       const [notesRes, summaryRes] = await Promise.all([
-        API.get('/api/parent/coach-notes/').catch(() => ({ data: { notes: [] } })),
-        API.get('/api/parent/weekly-summary/').catch(() => ({ data: null }))
+        API.get('/api/parent/coach-notes/').catch((e) => {
+          console.log('Coach notes error:', e.response?.data || e.message);
+          return { data: { notes: [] } };
+        }),
+        API.get('/api/parent/weekly-summary/').catch((e) => {
+          console.log('Weekly summary error:', e.response?.data || e.message);
+          return { data: null };
+        })
       ]);
+      console.log('Coach notes response:', notesRes.data);
+      console.log('Weekly summary response:', summaryRes.data);
       setCoachNotes(notesRes.data.notes || []);
       setWeeklySummary(summaryRes.data);
     } catch (err) {
-      console.log('Ekstra veli verileri yüklenemedi');
+      console.log('Ekstra veli verileri yüklenemedi:', err);
     }
   };
 
