@@ -6,7 +6,8 @@ import {
   ArrowLeft, Mail, Target, TrendingUp, TrendingDown, Minus,
   Calendar, Award, BarChart3, Trophy, MessageCircle, Plus, X, Save,
   BookOpen, CheckCircle2, Circle, ChevronDown, ChevronUp,
-  Flame, Clock, AlertTriangle, HelpCircle, FileQuestion, Star, Sparkles, Activity
+  Flame, Clock, AlertTriangle, HelpCircle, FileQuestion, Star, Sparkles, Activity,
+  MessageSquarePlus, Send
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -58,6 +59,12 @@ export default function StudentDetail() {
   const [dailyActivity, setDailyActivity] = useState(null);
   const [dailyActivityLoading, setDailyActivityLoading] = useState(false);
 
+  // Koç Notu (Veli için)
+  const [coachNotes, setCoachNotes] = useState([]);
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [noteContent, setNoteContent] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+
   useEffect(() => {
     fetchData();
     fetchGoals();
@@ -67,6 +74,7 @@ export default function StudentDetail() {
     fetchFocusAreas();
     fetchQuestionActivity();
     fetchDailyActivity();
+    fetchCoachNotes();
   }, [id]);
 
   const fetchData = async () => {
@@ -165,6 +173,39 @@ export default function StudentDetail() {
       console.error('Günlük aktivite yüklenemedi:', err.response?.data || err.message);
     } finally {
       setDailyActivityLoading(false);
+    }
+  };
+
+  const fetchCoachNotes = async () => {
+    try {
+      const res = await API.get(`/api/coach/student/${id}/notes/`);
+      setCoachNotes(res.data.notes || []);
+      // Son notu forma yükle
+      if (res.data.notes?.length > 0) {
+        setNoteContent(res.data.notes[0].content || '');
+      }
+    } catch (err) {
+      console.log('Koç notları yüklenemedi');
+    }
+  };
+
+  const handleSaveNote = async () => {
+    if (!noteContent.trim()) {
+      alert('Not içeriği boş olamaz');
+      return;
+    }
+    setSavingNote(true);
+    try {
+      await API.post(`/api/coach/student/${id}/notes/`, {
+        content: noteContent,
+        is_visible_to_parent: true
+      });
+      setShowNoteModal(false);
+      fetchCoachNotes();
+    } catch (err) {
+      alert('Not kaydedilemedi: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setSavingNote(false);
     }
   };
 
@@ -331,6 +372,14 @@ export default function StudentDetail() {
                     <p className="text-lg font-bold">{formatRanking(student.target_ranking)}</p>
                   </div>
                 )}
+                {/* Veli Notu Yaz Butonu */}
+                <button
+                  onClick={() => setShowNoteModal(true)}
+                  className="bg-white/20 hover:bg-white/30 rounded-xl px-4 py-2 text-white transition-colors flex items-center gap-2"
+                >
+                  <MessageSquarePlus size={18} />
+                  <span className="text-sm font-medium">Veli Notu</span>
+                </button>
               </div>
             </div>
             {/* Mobil görünüm için diploma ve hedef bilgisi */}
@@ -1445,6 +1494,73 @@ export default function StudentDetail() {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Koç Notu Modal */}
+      {showNoteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800">📝 Veliye Not Yaz</h3>
+              <button onClick={() => setShowNoteModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-500 mb-3">
+                Bu not <strong>{student.name}</strong> öğrencisinin velisi tarafından görülebilir.
+                Haftalık kısa bir değerlendirme yazın.
+              </p>
+              <textarea
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                placeholder="Örn: Bu hafta motivasyon dalgalıydı ama tekrar disiplini toparlandı..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                rows={4}
+                maxLength={500}
+              />
+              <p className="text-xs text-gray-400 mt-1 text-right">
+                {noteContent.length}/500 karakter
+              </p>
+            </div>
+
+            {/* Önceki notlar */}
+            {coachNotes.length > 0 && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-xl">
+                <p className="text-xs text-gray-500 mb-2">Son not ({coachNotes[0]?.week_start}):</p>
+                <p className="text-sm text-gray-600 italic">"{coachNotes[0]?.content}"</p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowNoteModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleSaveNote}
+                disabled={savingNote || !noteContent.trim()}
+                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {savingNote ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Send size={18} />
+                    Kaydet
+                  </>
+                )}
+              </button>
+            </div>
+
+            <p className="text-xs text-amber-600 mt-4 text-center">
+              💡 Not bu haftaya kaydedilir ve veliye görünür olur.
+            </p>
           </div>
         </div>
       )}

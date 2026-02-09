@@ -1287,6 +1287,30 @@ function ParentDashboard({ user, stats }) {
   const weeklyGoals = stats?.weekly_goals || [];
   const coach = stats?.coach || null;
 
+  // Yeni state'ler - Koç notları ve haftalık özet
+  const [coachNotes, setCoachNotes] = useState([]);
+  const [weeklySummary, setWeeklySummary] = useState(null);
+  const [loadingNotes, setLoadingNotes] = useState(true);
+
+  // Koç notları ve haftalık özeti yükle
+  useEffect(() => {
+    const fetchParentData = async () => {
+      try {
+        const [notesRes, summaryRes] = await Promise.all([
+          API.get('/api/parent/coach-notes/').catch(() => ({ data: { notes: [] } })),
+          API.get('/api/parent/weekly-summary/').catch(() => ({ data: null }))
+        ]);
+        setCoachNotes(notesRes.data.notes || []);
+        setWeeklySummary(summaryRes.data);
+      } catch (err) {
+        console.log('Veli verileri yüklenemedi');
+      } finally {
+        setLoadingNotes(false);
+      }
+    };
+    fetchParentData();
+  }, []);
+
   // Aktivite durumu
   const getActivityStatus = () => {
     if (!student.last_activity) return { text: 'Henüz giriş yapmadı', color: 'gray', icon: '⏳' };
@@ -1427,6 +1451,21 @@ function ParentDashboard({ user, stats }) {
 
           {/* Sağ Kolon */}
           <div className="space-y-6">
+            {/* Koç Takip Ediyor Badge */}
+            {(coach || weeklySummary?.coach_tracking) && (
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-4 text-white shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Eye size={20} />
+                  </div>
+                  <div>
+                    <p className="font-semibold">👀 Koç düzenli takip ediyor</p>
+                    <p className="text-sm opacity-90">Öğrencinizin ilerlemesi izleniyor</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Koç Bilgisi */}
             {coach && (
               <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-5 border border-indigo-100">
@@ -1436,8 +1475,54 @@ function ParentDashboard({ user, stats }) {
                   </div>
                   <div>
                     <p className="text-sm text-indigo-800 font-medium">Öğrencinin Koçu</p>
-                    <p className="text-indigo-600 font-semibold">{coach}</p>
+                    <p className="text-indigo-600 font-semibold">{weeklySummary?.coach_name || coach}</p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* 📊 Haftalık Özet - YENİ */}
+            {weeklySummary?.summary && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  📊 Bu Hafta
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-xl">
+                    <span className="text-sm text-gray-600">✔ Çalıştığı gün</span>
+                    <span className="font-bold text-green-700">{weeklySummary.summary.days_active} / 7</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
+                    <span className="text-sm text-gray-600">✔ Tahmini soru</span>
+                    <span className="font-bold text-blue-700">~{weeklySummary.summary.questions_solved}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
+                    <span className="text-sm text-gray-600">✔ Deneme</span>
+                    <span className="font-bold text-purple-700">{weeklySummary.summary.exams_count}</span>
+                  </div>
+                  {weeklySummary.summary.current_streak > 0 && (
+                    <div className="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
+                      <span className="text-sm text-gray-600">🔥 Seri</span>
+                      <span className="font-bold text-orange-700">{weeklySummary.summary.current_streak} gün</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 📝 Koç Notları - YENİ */}
+            {coachNotes.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  📝 Koçun Notları
+                </h3>
+                <div className="space-y-3">
+                  {coachNotes.map((note, index) => (
+                    <div key={note.id || index} className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border-l-4 border-indigo-400">
+                      <p className="text-sm text-gray-700 italic">"{note.content}"</p>
+                      <p className="text-xs text-gray-400 mt-2">{note.week_label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
