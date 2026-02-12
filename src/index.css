@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global reset */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+}
+
 /* Mobile only: prevent horizontal overflow */
 @media (max-width: 767px) {
   html, body, #root {

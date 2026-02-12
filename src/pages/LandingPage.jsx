@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BookOpen, Target, Users, TrendingUp, Calendar, MessageCircle,
-  ChevronRight, Star, Sparkles, Award, Clock, CheckCircle,
-  ArrowRight, Play, Zap, Shield, BarChart3, Brain
+  ChevronRight, Sparkles, Award, Clock,
+  ArrowRight, Zap, Shield, BarChart3, Brain
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -20,7 +20,7 @@ export default function LandingPage() {
     {
       icon: Target,
       title: 'Kişiselleştirilmiş Hedefler',
-      description: 'Yapay zeka destekli hedef belirleme ve takip sistemi ile hayalinizdeki üniversiteye ulaşın.',
+      description: 'Hedef belirleme ve takip sistemi ile hayalinizdeki üniversiteye ulaşın.',
       gradient: 'from-violet-500 to-purple-600'
     },
     {
@@ -49,45 +49,18 @@ export default function LandingPage() {
     },
     {
       icon: Zap,
-      title: 'Soru Çarkı',
-      description: 'Gamification ile öğrenmeyi eğlenceli hale getirin, puan toplayın.',
+      title: 'Puanlaştırma Sistemi',
+      description: 'Puan toplama sistemi ile öğrenmeyi eğlenceli hale getirin.',
       gradient: 'from-indigo-500 to-violet-500'
     }
   ];
 
-  const stats = [
-    { value: '10K+', label: 'Çözülen Soru' },
-    { value: '500+', label: 'Aktif Öğrenci' },
-    { value: '50+', label: 'Uzman Koç' },
-    { value: '%94', label: 'Memnuniyet' }
-  ];
+  // Stats kaldırıldı - gerçek veri olmadan gösterilmemeli
 
-  const testimonials = [
-    {
-      name: 'Elif Yılmaz',
-      role: 'Tıp Fakültesi Öğrencisi',
-      image: '👩‍🎓',
-      text: 'KoçumNet sayesinde TYT\'de 112 net yaptım. Konu takip sistemi muhteşem!',
-      university: 'Hacettepe Üniversitesi'
-    },
-    {
-      name: 'Ahmet Kaya',
-      role: 'Mühendislik Öğrencisi',
-      image: '👨‍🎓',
-      text: 'Koçumla sürekli iletişim haliydik. Bu beni çok motive etti.',
-      university: 'ODTÜ'
-    },
-    {
-      name: 'Zeynep Demir',
-      role: 'Hukuk Öğrencisi',
-      image: '👩‍⚖️',
-      text: 'Deneme analizleri sayesinde zayıf yönlerimi gördüm ve geliştirdim.',
-      university: 'Ankara Üniversitesi'
-    }
-  ];
+  // Testimonials kaldırıldı - henüz gerçek kullanıcı yorumu yok
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden m-0 p-0">
       {/* Animated Background - Hidden on mobile for performance */}
       <div className="fixed inset-0 pointer-events-none hidden md:block">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[120px] animate-pulse" />
@@ -117,7 +90,7 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Özellikler</a>
               <a href="#how-it-works" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Nasıl Çalışır</a>
-              <a href="#testimonials" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Başarı Hikayeleri</a>
+              <a href="#why-us" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Neden Biz</a>
             </div>
 
             {/* CTA Buttons */}
@@ -149,7 +122,7 @@ export default function LandingPage() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full">
                 <Sparkles size={16} className="text-amber-400" />
-                <span className="text-sm text-gray-300">YKS 2025 için hazırlan</span>
+                <span className="text-sm text-gray-300">YKS 2026 ve 2027 için hazırlan</span>
               </div>
 
               {/* Headline */}
@@ -169,8 +142,8 @@ export default function LandingPage() {
 
               {/* Description */}
               <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
-                Türkiye'nin en gelişmiş YKS koçluk platformu ile hedeflerine ulaş.
-                Kişiselleştirilmiş çalışma planları, uzman koç desteği ve akıllı analiz araçları.
+                Modern YKS koçluk platformu ile hedeflerine ulaş.
+                Kişiselleştirilmiş çalışma planları, koç desteği ve akıllı analiz araçları.
               </p>
 
               {/* CTA Buttons */}
@@ -183,24 +156,14 @@ export default function LandingPage() {
                   Hemen Başla
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="group px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-semibold
-                  hover:bg-white/10 transition-all flex items-center gap-2"
+                <button
+                  onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
+                  className="group px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-semibold
+                    hover:bg-white/10 transition-all flex items-center gap-2"
                 >
-                  <Play size={20} className="text-indigo-400" />
-                  Nasıl Çalışır?
+                  <ChevronRight size={20} className="text-indigo-400" />
+                  Özellikleri Keşfet
                 </button>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-4 gap-4 md:flex md:flex-wrap md:gap-8 pt-8 border-t border-white/10">
-                {stats.map((stat, i) => (
-                  <div key={i} className="text-center">
-                    <p className="text-xl md:text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                      {stat.value}
-                    </p>
-                    <p className="text-xs md:text-sm text-gray-500 mt-1">{stat.label}</p>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -261,13 +224,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Trusted By */}
+      {/* Platform Özellikleri Özet */}
       <section className="py-12 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-6">
-          <p className="text-center text-gray-500 text-sm mb-8">Türkiye'nin önde gelen eğitim kurumları güveniyor</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 opacity-50">
-            {['🏛️ Koç Üniversitesi', '🎓 Sabancı', '📚 Bilkent', '🌟 ODTÜ', '🏆 İTÜ'].map((uni, i) => (
-              <span key={i} className="text-lg font-semibold text-gray-400">{uni}</span>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            {[
+              { icon: '📊', text: 'Deneme Analizi' },
+              { icon: '📅', text: 'Haftalık Program' },
+              { icon: '💬', text: 'Koç İletişimi' },
+              { icon: '📚', text: 'Konu Takibi' },
+              { icon: '🎯', text: 'Hedef Sıralama' }
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-gray-400">
+                <span className="text-xl">{item.icon}</span>
+                <span className="text-sm font-medium">{item.text}</span>
+              </div>
             ))}
           </div>
         </div>
@@ -362,43 +333,44 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="py-24 px-6">
+      {/* Neden KoçumNet? */}
+      <section id="why-us" className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                Başarı Hikayeleri
+                Neden KoçumNet?
               </span>
             </h2>
             <p className="text-gray-400 text-lg">
-              Binlerce öğrenci KoçumNet ile hayallerine ulaştı.
+              YKS yolculuğunda yanında olacak profesyonel bir platform.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+            {[
+              {
+                icon: Shield,
+                title: 'Güvenli & Gizli',
+                description: 'Tüm verileriniz güvenle saklanır. Kişisel bilgileriniz üçüncü taraflarla paylaşılmaz.'
+              },
+              {
+                icon: Clock,
+                title: 'Zaman Tasarrufu',
+                description: 'Otomatik analiz ve raporlama ile manuel işlemlere veda edin.'
+              },
+              {
+                icon: TrendingUp,
+                title: 'Sürekli Gelişim',
+                description: 'Platform sürekli güncellenir ve yeni özellikler eklenir.'
+              }
+            ].map((item, i) => (
               <div key={i} className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-2xl p-6">
-                {/* Stars */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} size={16} className="text-amber-400 fill-amber-400" />
-                  ))}
+                <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-5">
+                  <item.icon size={26} className="text-white" />
                 </div>
-
-                {/* Quote */}
-                <p className="text-gray-300 mb-6 leading-relaxed">"{t.text}"</p>
-
-                {/* Author */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-2xl">
-                    {t.image}
-                  </div>
-                  <div>
-                    <p className="font-semibold">{t.name}</p>
-                    <p className="text-sm text-indigo-400">{t.university}</p>
-                  </div>
-                </div>
+                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                <p className="text-gray-400 leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
@@ -418,7 +390,7 @@ export default function LandingPage() {
                 Hayallerine Bir Adım Daha Yaklaş
               </h2>
               <p className="text-indigo-100 text-lg mb-8 max-w-2xl mx-auto">
-                Hemen ücretsiz hesabını oluştur ve Türkiye'nin en gelişmiş YKS koçluk platformunu deneyimle.
+                Hemen ücretsiz hesabını oluştur ve modern YKS koçluk platformunu deneyimle.
               </p>
               <button
                 onClick={() => navigate('/register')}
@@ -451,7 +423,7 @@ export default function LandingPage() {
             </div>
 
             <p className="text-sm text-gray-500">
-              © 2025 KoçumNet. Tüm hakları saklıdır.
+              © 2026 KoçumNet. Tüm hakları saklıdır.
             </p>
           </div>
         </div>
