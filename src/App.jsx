@@ -12,6 +12,9 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import KullaniciSozlesmesi from './pages/KullaniciSozlesmesi';
 
+// Landing Page
+import LandingPage from './pages/LandingPage';
+
 // Ana Sayfalar
 import Dashboard from './pages/Dashboard';
 import ParentDashboard from './pages/Parentdashboard';
@@ -462,11 +465,11 @@ function App() {
         } />
         <Route path="/kullanici-sozlesmesi" element={<KullaniciSozlesmesi />} />
 
-        {/* ===== ANA SAYFA ===== */}
+        {/* ===== ANA SAYFA - LANDING PAGE ===== */}
         <Route path="/" element={
-          localStorage.getItem('token') 
-            ? <Navigate to="/dashboard" replace /> 
-            : <Navigate to="/login" replace />
+          localStorage.getItem('token')
+            ? <Navigate to="/dashboard" replace />
+            : <LandingPage />
         } />
         
         {/* ===== PROTECTED ROUTES ===== */}
