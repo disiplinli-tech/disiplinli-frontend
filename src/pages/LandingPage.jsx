@@ -88,12 +88,14 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 pointer-events-none">
+      {/* Animated Background - Hidden on mobile for performance */}
+      <div className="fixed inset-0 pointer-events-none hidden md:block">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
+      {/* Simple gradient for mobile */}
+      <div className="fixed inset-0 pointer-events-none md:hidden bg-gradient-to-b from-purple-900/20 via-transparent to-indigo-900/20" />
 
       {/* Navbar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -190,13 +192,13 @@ export default function LandingPage() {
               </div>
 
               {/* Stats */}
-              <div className="flex flex-wrap gap-8 pt-8 border-t border-white/10">
+              <div className="grid grid-cols-4 gap-4 md:flex md:flex-wrap md:gap-8 pt-8 border-t border-white/10">
                 {stats.map((stat, i) => (
                   <div key={i} className="text-center">
-                    <p className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    <p className="text-xl md:text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                       {stat.value}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">{stat.label}</p>
                   </div>
                 ))}
               </div>
