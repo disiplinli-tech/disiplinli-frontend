@@ -166,8 +166,12 @@ export default function Schedule({ user }) {
     return STUDENT_COLORS[index % STUDENT_COLORS.length];
   };
 
-  const filteredSchedule = selectedStudent === "mine"
-    ? schedule.filter(p => !p.student_id) // Koçun kendi planları (student_id yok)
+  // Öğrenci için: tüm planları göster (backend zaten sadece kendi planlarını döner)
+  // Koç için: seçime göre filtrele
+  const filteredSchedule = !isCoach
+    ? schedule // Öğrenci tüm planlarını görür
+    : selectedStudent === "mine"
+    ? schedule.filter(p => !p.student_id) // Koçun kendi planları
     : selectedStudent === "all"
     ? schedule
     : schedule.filter(p => p.student_id === parseInt(selectedStudent));
