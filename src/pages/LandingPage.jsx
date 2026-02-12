@@ -224,20 +224,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Platform Özellikleri Özet */}
-      <section className="py-12 border-y border-white/5">
+      {/* Platform Özellikleri Özet - Premium Strip */}
+      <section className="py-16 border-y border-white/5 bg-gradient-to-r from-indigo-950/30 via-purple-950/20 to-indigo-950/30">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-4">
             {[
-              { icon: '📊', text: 'Deneme Analizi' },
-              { icon: '📅', text: 'Haftalık Program' },
-              { icon: '💬', text: 'Koç İletişimi' },
-              { icon: '📚', text: 'Konu Takibi' },
-              { icon: '🎯', text: 'Hedef Sıralama' }
+              { icon: BarChart3, text: 'Deneme Analizi', gradient: 'from-blue-500 to-cyan-500' },
+              { icon: Calendar, text: 'Haftalık Program', gradient: 'from-violet-500 to-purple-500' },
+              { icon: MessageCircle, text: 'Koç İletişimi', gradient: 'from-orange-500 to-amber-500' },
+              { icon: Brain, text: 'Konu Takibi', gradient: 'from-emerald-500 to-teal-500' },
+              { icon: Target, text: 'Hedef Sıralama', gradient: 'from-pink-500 to-rose-500' }
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-gray-400">
-                <span className="text-xl">{item.icon}</span>
-                <span className="text-sm font-medium">{item.text}</span>
+              <div key={i} className="group flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all cursor-default">
+                <div className={`w-12 h-12 bg-gradient-to-br ${item.gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                  <item.icon size={22} className="text-white" />
+                </div>
+                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors text-center">{item.text}</span>
               </div>
             ))}
           </div>
