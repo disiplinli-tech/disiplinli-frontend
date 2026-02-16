@@ -82,7 +82,7 @@ export default function LandingPage() {
                 <BookOpen className="text-white" size={22} />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                KoçumNet
+                Disiplinli
               </span>
             </div>
 
@@ -335,13 +335,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Neden KoçumNet? */}
+      {/* Neden Disiplinli? */}
       <section id="why-us" className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                Neden KoçumNet?
+                Neden Disiplinli?
               </span>
             </h2>
             <p className="text-gray-400 text-lg">
@@ -415,7 +415,7 @@ export default function LandingPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <BookOpen className="text-white" size={20} />
               </div>
-              <span className="font-bold text-lg">KoçumNet</span>
+              <span className="font-bold text-lg">Disiplinli</span>
             </div>
 
             <div className="flex items-center gap-6 text-sm text-gray-400">
@@ -425,7 +425,7 @@ export default function LandingPage() {
             </div>
 
             <p className="text-sm text-gray-500">
-              © 2026 KoçumNet. Tüm hakları saklıdır.
+              © 2026 Disiplinli. Tüm hakları saklıdır.
             </p>
           </div>
         </div>

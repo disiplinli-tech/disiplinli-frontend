@@ -159,7 +159,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
           </div>
           {!collapsed && (
             <div>
-              <h1 className="font-bold text-gray-800">KoçumNet</h1>
+              <h1 className="font-bold text-gray-800">Disiplinli</h1>
               <p className="text-xs text-gray-400">YKS Koçluk</p>
             </div>
           )}
@@ -376,7 +376,7 @@ function Layout({ children }) {
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
               <BookOpen className="text-white" size={16} />
             </div>
-            <span className="font-bold text-gray-800">KoçumNet</span>
+            <span className="font-bold text-gray-800">Disiplinli</span>
           </div>
           <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">
             {userName.charAt(0).toUpperCase()}

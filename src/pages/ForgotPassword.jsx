@@ -246,7 +246,7 @@ export default function ForgotPassword() {
 
         {/* Footer */}
         <p className="text-center text-gray-400 text-sm mt-6">
-          © 2026 KoçumNet - Tüm hakları saklıdır
+          © 2026 Disiplinli - Tüm hakları saklıdır
         </p>
       </div>
     </div>

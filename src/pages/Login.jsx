@@ -56,7 +56,7 @@ export default function Login({ setUser }) {
           <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
             <BookOpen className="text-white w-7 h-7 md:w-8 md:h-8" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">KoçumNet</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Disiplinli</h1>
           <p className="text-gray-500 mt-1 md:mt-2 text-sm md:text-base">YKS Koçluk Platformu</p>
         </div>
         
@@ -160,7 +160,7 @@ export default function Login({ setUser }) {
 
         {/* Footer */}
         <p className="text-center text-gray-400 text-sm mt-6">
-          © 2026 KoçumNet - Tüm hakları saklıdır
+          © 2026 Disiplinli - Tüm hakları saklıdır
         </p>
       </div>
     </div>

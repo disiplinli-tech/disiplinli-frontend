@@ -12,7 +12,7 @@ export default function KullaniciSozlesmesi() {
               <BookOpen className="text-white" size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">KoçumNet</h1>
+              <h1 className="text-2xl font-bold text-gray-800">Disiplinli</h1>
               <p className="text-gray-500">Kullanıcı Sözleşmesi ve Gizlilik Politikası</p>
             </div>
           </div>
@@ -32,7 +32,7 @@ export default function KullaniciSozlesmesi() {
           {/* Giriş */}
           <section>
             <p className="text-gray-600 leading-relaxed">
-              Bu Kullanıcı Sözleşmesi ("Sözleşme"), KoçumNet platformunu ("Platform") kullanan
+              Bu Kullanıcı Sözleşmesi ("Sözleşme"), Disiplinli platformunu ("Platform") kullanan
               tüm kullanıcılar ("Kullanıcı") ile Platform sahibi arasındaki hak ve yükümlülükleri
               düzenlemektedir. Platformu kullanarak bu sözleşmeyi kabul etmiş sayılırsınız.
             </p>
@@ -50,7 +50,7 @@ export default function KullaniciSozlesmesi() {
               <h2 className="text-xl font-bold text-gray-800">1. Tanımlar</h2>
             </div>
             <div className="space-y-3 text-gray-600 pl-4 border-l-2 border-indigo-100">
-              <p><strong>Platform:</strong> KoçumNet web uygulaması ve ilgili tüm hizmetler.</p>
+              <p><strong>Platform:</strong> Disiplinli web uygulaması ve ilgili tüm hizmetler.</p>
               <p><strong>Koç:</strong> Öğrencilere YKS hazırlık sürecinde rehberlik eden eğitimci kullanıcılar.</p>
               <p><strong>Öğrenci:</strong> YKS'ye hazırlanan ve Platform üzerinden koçluk hizmeti alan kullanıcılar.</p>
               <p><strong>Veli:</strong> Öğrencinin durumunu takip eden ebeveyn kullanıcılar.</p>
@@ -66,7 +66,7 @@ export default function KullaniciSozlesmesi() {
               <h2 className="text-xl font-bold text-gray-800">2. Hizmet Kapsamı</h2>
             </div>
             <div className="space-y-3 text-gray-600">
-              <p>KoçumNet aşağıdaki hizmetleri sunmaktadır:</p>
+              <p>Disiplinli aşağıdaki hizmetleri sunmaktadır:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Koç-öğrenci eşleştirme ve iletişim platformu</li>
                 <li>Deneme sınavı sonuçları takibi ve analizi</li>
@@ -163,13 +163,13 @@ export default function KullaniciSozlesmesi() {
             <h2 className="text-xl font-bold text-gray-800 mb-4">5. Sorumluluk Reddi</h2>
             <div className="space-y-3 text-gray-600">
               <p>
-                KoçumNet, sunulan hizmetlerin kesintisiz veya hatasız olacağını garanti etmez.
+                Disiplinli, sunulan hizmetlerin kesintisiz veya hatasız olacağını garanti etmez.
                 Platform üzerinden sağlanan sıralama tahminleri ve analizler yalnızca bilgilendirme
                 amaçlıdır ve kesin sonuç garantisi içermez.
               </p>
               <p>
                 Kullanıcıların Platform üzerindeki etkileşimlerinden doğan sorunlardan
-                KoçumNet sorumlu tutulamaz.
+                Disiplinli sorumlu tutulamaz.
               </p>
             </div>
           </section>
@@ -179,7 +179,7 @@ export default function KullaniciSozlesmesi() {
             <h2 className="text-xl font-bold text-gray-800 mb-4">6. Fikri Mülkiyet</h2>
             <p className="text-gray-600">
               Platform üzerindeki tüm içerik, tasarım, logo, yazılım ve diğer materyaller
-              KoçumNet'in fikri mülkiyetindedir. İzinsiz kopyalama, dağıtma veya değiştirme yasaktır.
+              Disiplinli'in fikri mülkiyetindedir. İzinsiz kopyalama, dağıtma veya değiştirme yasaktır.
             </p>
           </section>
 
@@ -187,7 +187,7 @@ export default function KullaniciSozlesmesi() {
           <section>
             <h2 className="text-xl font-bold text-gray-800 mb-4">7. Sözleşme Değişiklikleri</h2>
             <p className="text-gray-600">
-              KoçumNet, bu sözleşmeyi önceden bildirimde bulunmaksızın değiştirme hakkını saklı tutar.
+              Disiplinli, bu sözleşmeyi önceden bildirimde bulunmaksızın değiştirme hakkını saklı tutar.
               Değişiklikler Platform üzerinden yayınlandığı anda yürürlüğe girer. Kullanıcıların
               sözleşmeyi düzenli olarak kontrol etmeleri önerilir.
             </p>
@@ -201,7 +201,7 @@ export default function KullaniciSozlesmesi() {
             </p>
             <div className="mt-3 bg-indigo-50 rounded-xl p-4">
               <p className="text-indigo-700">
-                <strong>E-posta:</strong> destek@kocumnet.com
+                <strong>E-posta:</strong> destek@disiplinli.com
               </p>
             </div>
           </section>
@@ -228,7 +228,7 @@ export default function KullaniciSozlesmesi() {
 
         {/* Footer */}
         <p className="text-center text-white/70 text-sm mt-6">
-          © 2026 KoçumNet - Tüm hakları saklıdır
+          © 2026 Disiplinli - Tüm hakları saklıdır
         </p>
       </div>
     </div>

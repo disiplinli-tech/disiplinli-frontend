@@ -41,7 +41,7 @@ function KvkkModal({ isOpen, onClose }) {
           {/* Giriş */}
           <section>
             <p className="text-gray-600 text-sm leading-relaxed">
-              KoçumNet'e hoş geldin! 🎓 Platformumuzu kullanmadan önce bilmen gereken birkaç şey var.
+              Disiplinli'e hoş geldin! 🎓 Platformumuzu kullanmadan önce bilmen gereken birkaç şey var.
               Merak etme, uzun ve sıkıcı değil!
             </p>
             <p className="text-gray-400 text-xs mt-2">Son güncelleme: Şubat 2025</p>
@@ -51,7 +51,7 @@ function KvkkModal({ isOpen, onClose }) {
           <section>
             <h3 className="font-semibold text-gray-800 mb-3">🎯 Ne Yapıyoruz?</h3>
             <p className="text-sm text-gray-600 mb-3">
-              KoçumNet, YKS'ye hazırlanan öğrencilere online koçluk hizmeti sunan bir platform. Burada:
+              Disiplinli, YKS'ye hazırlanan öğrencilere online koçluk hizmeti sunan bir platform. Burada:
             </p>
             <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
               <li>Online dersler ve koçluk seansları</li>
@@ -64,7 +64,7 @@ function KvkkModal({ isOpen, onClose }) {
             {/* Kritik Uyarı - GİB için önemli */}
             <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 mt-4">
               <p className="text-sm text-amber-800">
-                📌 <strong>Not:</strong> KoçumNet bir aracı kurum değildir.
+                📌 <strong>Not:</strong> Disiplinli bir aracı kurum değildir.
               </p>
             </div>
           </section>
@@ -91,7 +91,7 @@ function KvkkModal({ isOpen, onClose }) {
                 <li>✅ Adın, e-postan ve deneme sonuçların bizde kalıyor</li>
                 <li>✅ Kimseyle paylaşmıyoruz, satmıyoruz</li>
                 <li>✅ İstediğin zaman hesabını silebilirsin</li>
-                <li>✅ Soruların için: destek@kocumnet.com</li>
+                <li>✅ Soruların için: destek@disiplinli.com</li>
               </ul>
             </div>
           </section>
@@ -108,7 +108,7 @@ function KvkkModal({ isOpen, onClose }) {
           <section>
             <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100 text-center">
               <p className="text-sm text-indigo-700">
-                Soruların için <strong>destek@kocumnet.com</strong> adresine yazabilirsin.
+                Soruların için <strong>destek@disiplinli.com</strong> adresine yazabilirsin.
               </p>
               <p className="text-indigo-600 font-medium mt-2">Kolay gelsin! 💪</p>
             </div>
@@ -133,7 +133,7 @@ function KvkkModal({ isOpen, onClose }) {
 /* ================== ESKİ DETAYLI KVKK METNİ (Yasal Referans) ==================
    Aşağıdaki metin yasal uyumluluk için saklanmıştır. Gerektiğinde ayrı bir sayfa olarak kullanılabilir.
 
-   Veri Sorumlusu: [İSİM SOYISIM] - destek@kocumnet.com
+   Veri Sorumlusu: [İSİM SOYISIM] - destek@disiplinli.com
    6698 sayılı KVKK kapsamında bilgilendirme
 
    Toplanan Veriler: Ad, soyad, e-posta, deneme sonuçları, çalışma programı
@@ -237,7 +237,7 @@ export default function Register() {
             <BookOpen className="text-white" size={32} />
           </div>
           <h1 className="text-3xl font-bold text-gray-800">Kayıt Ol</h1>
-          <p className="text-gray-500 mt-2">KoçumNet'e hoş geldin!</p>
+          <p className="text-gray-500 mt-2">Disiplinli'e hoş geldin!</p>
         </div>
 
         {/* Error */}
@@ -464,7 +464,7 @@ export default function Register() {
 
         {/* Footer */}
         <p className="text-center text-gray-400 text-xs mt-6">
-          © 2026 KoçumNet - Tüm hakları saklıdır
+          © 2026 Disiplinli - Tüm hakları saklıdır
         </p>
       </div>
 

@@ -121,7 +121,7 @@ export default function Layout({ user, onLogout }) {
               flex items-center justify-center text-white shadow-lg shadow-indigo-200">
               <GraduationCap size={20} />
             </div>
-            <span className="text-lg font-bold tracking-tight text-gray-800">KoçumNet</span>
+            <span className="text-lg font-bold tracking-tight text-gray-800">Disiplinli</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-gray-600">
             <X size={20} />
@@ -407,5 +407,5 @@ function getPageTitle(pathname, role) {
     return 'Öğrenci Detay';
   }
 
-  return titles[pathname] || 'KoçumNet';
+  return titles[pathname] || 'Disiplinli';
 }
