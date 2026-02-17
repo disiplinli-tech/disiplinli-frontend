@@ -195,13 +195,13 @@ export default function LandingPage() {
                       </div>
                     ))}
                   </div>
-                  <span className="text-sm text-surface-500"><strong className="text-surface-700">15+</strong> uzman koç</span>
+                  <span className="text-sm text-surface-500"><strong className="text-surface-700">5+</strong> Veli Yorumu</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={14} className="text-amber-400 fill-amber-400" />
                   ))}
-                  <span className="text-sm text-surface-500 ml-1"><strong className="text-surface-700">4.9</strong>/5</span>
+                  <span className="text-sm text-surface-500 ml-1"><strong className="text-surface-700">5</strong>/5</span>
                 </div>
               </div>
             </div>
