@@ -4,7 +4,7 @@ import {
   BookOpen, ChevronRight, ArrowRight, Calendar, BarChart3,
   ClipboardList, Users, MessageCircle, CheckCircle2, Layers,
   Star, TrendingUp, Clock, Compass, Menu, X, Play,
-  Phone, GraduationCap, Target, Shield, Zap, Heart
+  Phone, GraduationCap, Target, Shield, Zap, Heart, Send
 } from 'lucide-react';
 
 // ─── Scroll fade-in hook ────────────────────────────────
@@ -70,17 +70,14 @@ export default function LandingPage() {
           : 'bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between relative">
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-warm-500 rounded-xl flex items-center justify-center shadow-md">
-                <BookOpen className="text-white" size={20} />
-              </div>
-              <span className="text-xl font-display font-bold text-surface-900">Disiplinli</span>
+            <div className="flex items-center">
+              <span className="text-xl font-display font-bold text-surface-900">Disiplinli.com</span>
             </div>
 
-            {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-8">
+            {/* Desktop nav — centered with slight left offset */}
+            <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-[55%]">
               {[
                 ['Nasıl Çalışır', '#how-it-works'],
                 ['Paketler', '#pricing'],
@@ -106,7 +103,7 @@ export default function LandingPage() {
                 className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
                   hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.03] active:scale-[0.98]"
               >
-                Ücretsiz Başla
+                Satın Al
               </button>
             </div>
 
@@ -137,7 +134,7 @@ export default function LandingPage() {
               </button>
               <button onClick={() => navigate('/register')}
                 className="py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold">
-                Ücretsiz Başla
+                Satın Al
               </button>
             </div>
           </div>
@@ -154,18 +151,18 @@ export default function LandingPage() {
             <div className="space-y-7">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-full animate-fade-up">
                 <GraduationCap size={16} className="text-primary-500" />
-                <span className="text-sm text-primary-700 font-medium">YKS 2026 & 2027 Koçluk</span>
+                <span className="text-sm text-primary-700 font-medium">Öğrenciye çalışma disiplini ve sınavları kazandıran sistem.</span>
               </div>
 
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.1] animate-fade-up-d1">
                 <span className="text-surface-900">Sana Özel </span>
                 <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">
-                  Bire Bir Koçluk
+                  Çalışma Sistemi
                 </span>
               </h1>
 
               <p className="text-lg text-surface-500 max-w-lg leading-relaxed animate-fade-up-d2">
-                Uzman akademik koçlar, kişiselleştirilmiş çalışma planları ve haftalık takip ile hedefine ulaş. İşini şansa bırakma.
+                Disiplinli, öğrencilere sadece rehberlik değil — ölçülebilir ilerleme sağlayan bir çalışma sistemidir. Kişiselleştirilmiş çalışma planları ve düzenli takip ile hedefine ulaş, gerektiğinde özel ders ile tamamlayarak işini şansa bırakma.
               </p>
 
               <div className="flex flex-wrap items-center gap-4 animate-fade-up-d3">
@@ -520,10 +517,10 @@ export default function LandingPage() {
           <div className="text-center max-w-3xl mx-auto mb-14">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-100 rounded-full mb-5">
               <Star size={16} className="text-amber-500" />
-              <span className="text-sm text-amber-700 font-medium">Öğrenci Deneyimleri</span>
+              <span className="text-sm text-amber-700 font-medium">Kullanıcı Deneyimleri</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900">
-              Öğrencilerimiz <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">ne diyor?</span>
+              Disiplinli kullananlar <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">ne diyor?</span>
             </h2>
           </div>
 
@@ -531,23 +528,23 @@ export default function LandingPage() {
             {[
               {
                 quote: 'Daha önce hiç bu kadar düzenli çalışamamıştım. Koçum sayesinde her gün ne yapacağımı biliyorum ve netlerde ciddi artış var.',
-                name: 'Elif Y.',
+                name: 'Melisa H.',
                 detail: 'TYT Öğrencisi • +32 Net Artış',
-                avatar: 'EY',
+                avatar: 'MH',
                 color: 'bg-primary-500'
               },
               {
                 quote: 'Haftalık görüşmeler çok faydalı. Eksiklerimi görüyorum ve hemen aksiyon alıyorum. Artık motive olmak için dışarıdan bir şey aramıyorum.',
-                name: 'Burak K.',
+                name: 'Mehmet A. Ç.',
                 detail: 'AYT Sayısal',
-                avatar: 'BK',
+                avatar: 'MÇ',
                 color: 'bg-warm-500'
               },
               {
                 quote: 'Veli paneli ile çocuğumun gelişimini takip edebiliyorum. İlk kez gerçekten güvenebileceğim bir sistem bulduk.',
-                name: 'Ayşe T.',
+                name: 'Ayşe Ç.',
                 detail: 'Veli',
-                avatar: 'AT',
+                avatar: 'AÇ',
                 color: 'bg-emerald-500'
               }
             ].map((item, i) => (
@@ -572,12 +569,11 @@ export default function LandingPage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <div className="mt-14 grid grid-cols-3 gap-6 max-w-3xl mx-auto">
             {[
-              { value: '500+', label: 'Aktif Öğrenci' },
-              { value: '%92', label: 'Memnuniyet' },
-              { value: '15+', label: 'Uzman Koç' },
-              { value: '10K+', label: 'Tamamlanan Görev' }
+              { value: '10+', label: 'Aktif Öğrenci' },
+              { value: '%100', label: 'Memnuniyet' },
+              { value: '500+', label: 'Tamamlanan Görev' }
             ].map((stat, i) => (
               <div key={i} className="text-center bg-white rounded-2xl py-5 border border-surface-100 shadow-card">
                 <p className="text-2xl md:text-3xl font-bold font-display bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">
@@ -737,8 +733,8 @@ export default function LandingPage() {
                         </>
                       ) : (
                         <>
-                          <Phone size={18} />
-                          Beni Arayın
+                          <Send size={18} />
+                          Gönder
                         </>
                       )}
                     </button>
@@ -761,11 +757,8 @@ export default function LandingPage() {
       <footer className="border-t border-surface-100 py-10 px-6 bg-surface-50">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-warm-500 rounded-xl flex items-center justify-center">
-                <BookOpen className="text-white" size={20} />
-              </div>
-              <span className="font-display font-bold text-lg text-surface-800">Disiplinli</span>
+            <div className="flex items-center">
+              <span className="font-display font-bold text-lg text-surface-800">Disiplinli.com</span>
             </div>
 
             <div className="flex items-center gap-6 text-sm text-surface-400">
