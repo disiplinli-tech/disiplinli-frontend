@@ -43,6 +43,9 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
 
+  // ─── Hedefini Seç State ──────
+  const [selectedGoal, setSelectedGoal] = useState('');
+
   // ─── Sizi Arayalım Form State ──────
   const [callForm, setCallForm] = useState({ name: '', phone: '', role: '' });
   const [callFormStatus, setCallFormStatus] = useState('idle'); // idle | sending | sent | error
@@ -80,7 +83,7 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-[55%]">
               {[
                 ['Nasıl Çalışır', '#how-it-works'],
-                ['Paketler', '#pricing'],
+                ['Planlar', '#pricing'],
                 ['Referanslar', '#testimonials'],
                 ['İletişim', '#contact']
               ].map(([label, href]) => (
@@ -98,13 +101,13 @@ export default function LandingPage() {
               >
                 Giriş Yap
               </button>
-              <button
-                onClick={() => navigate('/register')}
+              <a
+                href="#contact"
                 className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
                   hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.03] active:scale-[0.98]"
               >
-                Satın Al
-              </button>
+                Bilgi Alın
+              </a>
             </div>
 
             {/* Mobile hamburger */}
@@ -119,7 +122,7 @@ export default function LandingPage() {
           <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-surface-100 px-6 py-6 space-y-4 shadow-lg">
             {[
               ['Nasıl Çalışır', '#how-it-works'],
-              ['Paketler', '#pricing'],
+              ['Planlar', '#pricing'],
               ['Referanslar', '#testimonials'],
               ['İletişim', '#contact']
             ].map(([label, href]) => (
@@ -132,10 +135,10 @@ export default function LandingPage() {
               <button onClick={() => navigate('/login')} className="py-3 text-surface-600 text-sm font-medium">
                 Giriş Yap
               </button>
-              <button onClick={() => navigate('/register')}
-                className="py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold">
-                Satın Al
-              </button>
+              <a href="#contact" onClick={() => setMobileMenu(false)}
+                className="py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold text-center block">
+                Bilgi Alın
+              </a>
             </div>
           </div>
         )}
@@ -151,7 +154,7 @@ export default function LandingPage() {
             <div className="space-y-7">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-full animate-fade-up">
                 <GraduationCap size={16} className="text-primary-500" />
-                <span className="text-sm text-primary-700 font-medium">Öğrenciye çalışma disiplini ve sınavları kazandıran sistem.</span>
+                <span className="text-sm text-primary-700 font-medium">Sınav, okul veya bireysel hedefler için sürdürülebilir çalışma sistemi.</span>
               </div>
 
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.1] animate-fade-up-d1">
@@ -162,7 +165,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-lg text-surface-500 max-w-lg leading-relaxed animate-fade-up-d2">
-                Disiplinli, öğrencilere sadece rehberlik değil — ölçülebilir ilerleme sağlayan bir çalışma sistemidir. Kişiselleştirilmiş çalışma planları ve düzenli takip ile hedefine ulaş, gerektiğinde özel ders ile tamamlayarak işini şansa bırakma.
+                Disiplinli, motivasyona değil sisteme dayanan bir çalışma yapısı sunar. Kişiselleştirilmiş plan, düzenli takip ve ölçülebilir ilerleme ile hedefine ulaş — gerektiğinde özel ders desteğiyle eksiklerini kapat.
               </p>
 
               <div className="flex flex-wrap items-center gap-4 animate-fade-up-d3">
@@ -340,7 +343,7 @@ export default function LandingPage() {
               {
                 step: '03',
                 icon: BarChart3,
-                title: 'Haftalık Takip & Rehberlik',
+                title: 'Haftalık Takip & Koçluk',
                 desc: 'Koçun ilerlemeyi takip ediyor, performans analizi yapıyor ve seni doğru yönlendiriyor.',
                 gradient: 'from-warm-500 to-warm-600'
               },
@@ -348,7 +351,7 @@ export default function LandingPage() {
                 step: '04',
                 icon: BookOpen,
                 title: 'Özel Ders',
-                desc: 'Hangi konuda eksik olduğuna göre özelleştirilmiş özel ders ile eksikliklerini kapat.',
+                desc: 'Gerekirse, eksik olduğun konulara özel birebir ders ile açıklarını kapat.',
                 gradient: 'from-warm-600 to-red-500'
               }
             ].map((item, i) => (
@@ -376,6 +379,50 @@ export default function LandingPage() {
 
 
       {/* ═══════════════════════════════════════════════════
+           SEGMENTATION — Hedefini Seç
+         ═══════════════════════════════════════════════════ */}
+      <Section className="py-12 md:py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-full mb-5">
+              <Target size={16} className="text-primary-500" />
+              <span className="text-sm text-primary-700 font-medium">Kişiselleştir</span>
+            </div>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900 mb-3">
+              Hedefini <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">seç</span>
+            </h2>
+            <p className="text-surface-500 text-lg">Paketlerimiz seçtiğin hedefe göre şekillenir.</p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {[
+              { key: 'ortaokul', label: 'Ortaokul', icon: '📚' },
+              { key: 'lise', label: 'Lise', icon: '🎓' },
+              { key: 'lgs', label: 'LGS', icon: '🎯' },
+              { key: 'yks', label: 'YKS', icon: '🏆' },
+              { key: 'bireysel', label: 'Mezun / Bireysel', icon: '🚀' }
+            ].map((goal) => (
+              <button
+                key={goal.key}
+                onClick={() => setSelectedGoal(goal.key === selectedGoal ? '' : goal.key)}
+                className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 text-center cursor-pointer
+                  ${selectedGoal === goal.key
+                    ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/10 scale-[1.03]'
+                    : 'border-surface-100 bg-white hover:border-primary-200 hover:shadow-card'
+                  }`}
+              >
+                <div className="text-2xl mb-2">{goal.icon}</div>
+                <p className={`text-sm font-semibold transition-colors ${
+                  selectedGoal === goal.key ? 'text-primary-700' : 'text-surface-700'
+                }`}>{goal.label}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+
+      {/* ═══════════════════════════════════════════════════
            PRICING
          ═══════════════════════════════════════════════════ */}
       <Section id="pricing" className="py-12 md:py-16 px-6">
@@ -383,29 +430,57 @@ export default function LandingPage() {
           <div className="text-center max-w-3xl mx-auto mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-warm-50 border border-warm-100 rounded-full mb-5">
               <Zap size={16} className="text-warm-500" />
-              <span className="text-sm text-warm-700 font-medium">Paketler</span>
+              <span className="text-sm text-warm-700 font-medium">Planlar</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900 mb-3">
-              Sana uygun <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">paketi seç</span>
+              İhtiyacına uygun <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">planı seç</span>
             </h2>
-            <p className="text-surface-500 text-lg">İhtiyacına göre başla, istediğin zaman yükselt.</p>
+            <p className="text-surface-500 text-lg">Her plan aynı sistemi kullanır. Fark, koçluk ve ders desteğinin yoğunluğunda.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {/* ── Koçluk ── */}
+            {/* ── Core ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Koçluk</h3>
-                <p className="text-sm text-surface-400">Birebir akademik koç desteği</p>
-              </div>
-              <div className="mb-5">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-primary-600">₺3.449</span>
-                  <span className="text-surface-400 text-sm">/ 4 Hafta</span>
-                </div>
+                <div className="inline-block px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-full mb-3">Core</div>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Sistem</h3>
+                <p className="text-sm text-surface-400">Kendi kendine ilerlemek isteyenler için temel yapı</p>
               </div>
               <ul className="space-y-3 mb-7 flex-1">
                 {[
+                  'Haftalık deneme sınavları',
+                  'Detaylı deneme analiz raporu',
+                  'Net takip sistemi',
+                  'İlerleme göstergeleri',
+                  'Kişisel çalışma planı'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
+                    <CheckCircle2 size={18} className="text-emerald-500 mt-0.5 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <a href="#contact"
+                className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
+                  hover:bg-surface-100 transition-all text-center block"
+              >
+                Bilgi Alın
+              </a>
+            </div>
+
+            {/* ── Plus (Featured) ── */}
+            <div className="pricing-card pricing-featured relative bg-white rounded-3xl p-7 border-2 border-primary-200 flex flex-col">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full shadow-md">
+                <span className="text-xs font-bold text-white">En Popüler</span>
+              </div>
+              <div className="mb-5 mt-2">
+                <div className="inline-block px-3 py-1 bg-primary-50 text-primary-600 text-xs font-bold rounded-full mb-3">Plus</div>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Sistem + Koçluk</h3>
+                <p className="text-sm text-surface-400">Birebir koç desteğiyle sistemi en verimli şekilde kullan</p>
+              </div>
+              <ul className="space-y-3 mb-7 flex-1">
+                {[
+                  'Core planındaki her şey',
                   'Birebir akademik koç',
                   'Haftalık görüşme & takip',
                   'Kişiselleştirilmiş program',
@@ -418,86 +493,41 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => navigate('/register')}
-                className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
-                  hover:bg-surface-100 transition-all"
-              >
-                Hemen Başla
-              </button>
-            </div>
-
-            {/* ── Koçluk + Deneme (Featured) ── */}
-            <div className="pricing-card pricing-featured relative bg-white rounded-3xl p-7 border-2 border-primary-200 flex flex-col">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full shadow-md">
-                <span className="text-xs font-bold text-white">En Popüler</span>
-              </div>
-              <div className="mb-5 mt-2">
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Koçluk + Deneme</h3>
-                <p className="text-sm text-surface-400">Koçluk ve haftalık deneme paketi</p>
-              </div>
-              <div className="mb-5">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-primary-600">₺4.399</span>
-                  <span className="text-surface-400 text-sm">/ 4 Hafta</span>
-                </div>
-              </div>
-              <ul className="space-y-3 mb-7 flex-1">
-                {[
-                  'Koçluk paketindeki her şey',
-                  'Haftalık deneme sınavları',
-                  'Detaylı deneme analizi',
-                  'Net artış takibi',
-                  'Online ders desteği',
-                  'Veli bilgilendirme paneli'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
-                    <CheckCircle2 size={18} className="text-primary-500 mt-0.5 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={() => navigate('/register')}
+              <a href="#contact"
                 className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
-                  hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center block"
               >
-                Koç ile Başla
-              </button>
+                Bilgi Alın
+              </a>
             </div>
 
-            {/* ── Deneme Kulübü ── */}
+            {/* ── Pro ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Deneme Kulübü</h3>
-                <p className="text-sm text-surface-400">Sadece haftalık deneme paketi</p>
-              </div>
-              <div className="mb-5">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-primary-600">₺1.199</span>
-                  <span className="text-surface-400 text-sm">/ 4 Hafta</span>
-                </div>
+                <div className="inline-block px-3 py-1 bg-warm-50 text-warm-600 text-xs font-bold rounded-full mb-3">Pro</div>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Sistem + Koçluk + Özel Ders</h3>
+                <p className="text-sm text-surface-400">Tam destek — koçluk, özel ders ve sistem bir arada</p>
               </div>
               <ul className="space-y-3 mb-7 flex-1">
                 {[
-                  'Haftalık deneme sınavları',
-                  'Deneme analiz raporu',
-                  'Net takip sistemi',
-                  'İlerleme göstergeleri'
+                  'Plus planındaki her şey',
+                  'Birebir özel ders desteği',
+                  'Konuya özel eksik kapatma',
+                  'Online ders desteği',
+                  'Veli bilgilendirme'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
-                    <CheckCircle2 size={18} className="text-primary-500 mt-0.5 shrink-0" />
+                    <CheckCircle2 size={18} className="text-warm-500 mt-0.5 shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => navigate('/register')}
+              <a href="#contact"
                 className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
-                  hover:bg-surface-100 transition-all"
+                  hover:bg-surface-100 transition-all text-center block"
               >
-                Denemeye Başla
-              </button>
+                Bilgi Alın
+              </a>
             </div>
           </div>
         </div>
@@ -536,7 +566,7 @@ export default function LandingPage() {
                 color: 'bg-warm-500'
               },
               {
-                quote: 'Daha önce hep kontrol etmek zorunda hissediyordum. Şimdi sürecin doğru ilerlediğini bilmek içimi çok rahatlatıyor.',
+                quote: 'Çocuğumun ne yaptığını değil, nasıl ilerlediğini görebiliyorum. İlk kez gerçekten içim rahat.',
                 name: 'Ayşe Ç.',
                 detail: 'Veli',
                 avatar: 'AÇ',
@@ -606,7 +636,9 @@ export default function LandingPage() {
                 {[
                   { icon: CheckCircle2, text: 'Tamamen ücretsiz tanıtım görüşmesi' },
                   { icon: Shield, text: 'Bilgilerin gizli tutulur' },
-                  { icon: Clock, text: '24 saat içinde geri dönüş' }
+                  { icon: Clock, text: '24 saat içinde geri dönüş' },
+                  { icon: Heart, text: 'Zorunluluk yok, sadece tanışma' },
+                  { icon: Compass, text: 'Sana özel yol haritası' }
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <item.icon size={20} className="text-primary-500 shrink-0" />
@@ -763,12 +795,12 @@ export default function LandingPage() {
 
               {/* ── Ürünler ── */}
               <div className="space-y-4">
-                <h4 className="font-semibold text-white text-sm">Ürünler</h4>
+                <h4 className="font-semibold text-white text-sm">Planlar</h4>
                 <ul className="space-y-2.5">
                   {[
-                    ['Koçluk', '#pricing'],
-                    ['Deneme Kulübü', '#pricing'],
-                    ['Koçluk + Deneme', '#pricing']
+                    ['Core', '#pricing'],
+                    ['Plus', '#pricing'],
+                    ['Pro', '#pricing']
                   ].map(([label, href]) => (
                     <li key={label}>
                       <a href={href} className="text-sm text-surface-400 hover:text-white transition-colors">{label}</a>
