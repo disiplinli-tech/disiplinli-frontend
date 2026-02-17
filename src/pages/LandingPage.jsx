@@ -384,23 +384,18 @@ export default function LandingPage() {
       <Section className="py-12 md:py-16 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-full mb-5">
-              <Target size={16} className="text-primary-500" />
-              <span className="text-sm text-primary-700 font-medium">Kişiselleştir</span>
-            </div>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900 mb-3">
               Hedefini <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">seç</span>
             </h2>
             <p className="text-surface-500 text-lg">Paketlerimiz seçtiğin hedefe göre şekillenir.</p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { key: 'ortaokul', label: 'Ortaokul', icon: '📚' },
               { key: 'lise', label: 'Lise', icon: '🎓' },
               { key: 'lgs', label: 'LGS', icon: '🎯' },
-              { key: 'yks', label: 'YKS', icon: '🏆' },
-              { key: 'bireysel', label: 'Mezun / Bireysel', icon: '🚀' }
+              { key: 'yks', label: 'YKS', icon: '🏆' }
             ].map((goal) => (
               <button
                 key={goal.key}
@@ -425,13 +420,10 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            PRICING
          ═══════════════════════════════════════════════════ */}
+      {selectedGoal && (
       <Section id="pricing" className="py-12 md:py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-warm-50 border border-warm-100 rounded-full mb-5">
-              <Zap size={16} className="text-warm-500" />
-              <span className="text-sm text-warm-700 font-medium">Planlar</span>
-            </div>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900 mb-3">
               İhtiyacına uygun <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">planı seç</span>
             </h2>
@@ -532,6 +524,7 @@ export default function LandingPage() {
           </div>
         </div>
       </Section>
+      )}
 
 
       {/* ═══════════════════════════════════════════════════
