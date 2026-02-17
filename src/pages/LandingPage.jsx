@@ -144,7 +144,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            HERO
          ═══════════════════════════════════════════════════ */}
-      <section className="relative pt-28 md:pt-36 pb-16 md:pb-24 px-6">
+      <section className="relative pt-28 md:pt-32 pb-10 md:pb-14 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left — Text */}
@@ -263,9 +263,9 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            PROBLEM → SOLUTION BRIDGE
          ═══════════════════════════════════════════════════ */}
-      <Section className="py-20 md:py-28 px-6">
+      <Section className="py-12 md:py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="text-center max-w-3xl mx-auto mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 text-surface-900">
               Çalışıyorsun ama <span className="bg-gradient-to-r from-warm-500 to-warm-600 gradient-text">ilerleme yok mu?</span>
             </h2>
@@ -306,7 +306,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-8">
             <div className="inline-flex items-center gap-3 px-6 py-3 bg-primary-50 rounded-2xl">
               <Heart size={18} className="text-primary-500" />
               <p className="text-primary-700 font-medium">
@@ -321,9 +321,9 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            HOW IT WORKS
          ═══════════════════════════════════════════════════ */}
-      <Section id="how-it-works" className="py-20 md:py-28 px-6 bg-surface-50/60">
+      <Section id="how-it-works" className="py-12 md:py-16 px-6 bg-surface-50/60">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-full mb-5">
               <Layers size={16} className="text-primary-500" />
               <span className="text-sm text-primary-700 font-medium">Nasıl Çalışır?</span>
@@ -383,9 +383,9 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            PRICING
          ═══════════════════════════════════════════════════ */}
-      <Section id="pricing" className="py-20 md:py-28 px-6">
+      <Section id="pricing" className="py-12 md:py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="text-center max-w-3xl mx-auto mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-warm-50 border border-warm-100 rounded-full mb-5">
               <Zap size={16} className="text-warm-500" />
               <span className="text-sm text-warm-700 font-medium">Paketler</span>
@@ -512,9 +512,9 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            TESTIMONIALS
          ═══════════════════════════════════════════════════ */}
-      <Section id="testimonials" className="py-20 md:py-28 px-6 bg-surface-50/60">
+      <Section id="testimonials" className="py-12 md:py-16 px-6 bg-surface-50/60">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="text-center max-w-3xl mx-auto mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-100 rounded-full mb-5">
               <Star size={16} className="text-amber-500" />
               <span className="text-sm text-amber-700 font-medium">Kullanıcı Deneyimleri</span>
@@ -569,7 +569,7 @@ export default function LandingPage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-14 grid grid-cols-3 gap-6 max-w-3xl mx-auto">
+          <div className="mt-10 grid grid-cols-3 gap-6 max-w-3xl mx-auto">
             {[
               { value: '10+', label: 'Aktif Öğrenci' },
               { value: '%100', label: 'Memnuniyet' },
@@ -590,7 +590,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            SIZI ARAYALIM — CONTACT FORM
          ═══════════════════════════════════════════════════ */}
-      <Section id="contact" className="py-20 md:py-28 px-6">
+      <Section id="contact" className="py-12 md:py-16 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
 
