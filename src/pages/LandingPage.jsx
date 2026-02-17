@@ -275,31 +275,19 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: Compass,
                 title: 'Nereden başlayacağını bilmiyorsun',
-                desc: 'Hangi konuya ne kadar zaman ayıracağın belirsiz. Plan yok, yön yok.',
-                color: 'text-warm-500',
-                bg: 'bg-warm-50'
+                desc: 'Hangi konuya ne kadar zaman ayıracağın belirsiz. Plan yok, yön yok.'
               },
               {
-                icon: Clock,
                 title: 'Motivasyon gelip gidiyor',
-                desc: 'İyi başlıyorsun ama birkaç gün sonra her şey bozuluyor.',
-                color: 'text-amber-500',
-                bg: 'bg-amber-50'
+                desc: 'İyi başlıyorsun ama birkaç gün sonra her şey bozuluyor.'
               },
               {
-                icon: Users,
                 title: 'Yalnız çalışmak zor',
-                desc: 'Eksiklerini fark etmek, düzeltmek ve takibini yapmak kendi başına çok zor.',
-                color: 'text-primary-500',
-                bg: 'bg-primary-50'
+                desc: 'Eksiklerini fark etmek, düzeltmek ve takibini yapmak kendi başına çok zor.'
               }
             ].map((item, i) => (
               <div key={i} className="bg-white rounded-2xl p-7 border border-surface-100 shadow-card hover:shadow-card-hover transition-all duration-300 group">
-                <div className={`w-14 h-14 ${item.bg} rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
-                  <item.icon size={26} className={item.color} />
-                </div>
                 <h3 className="text-lg font-semibold mb-2 text-surface-800">{item.title}</h3>
                 <p className="text-surface-500 leading-relaxed text-[15px]">{item.desc}</p>
               </div>
@@ -329,11 +317,11 @@ export default function LandingPage() {
               <span className="text-sm text-primary-700 font-medium">Nasıl Çalışır?</span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900">
-              3 adımda hedefine <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">ulaş</span>
+              4 adımda hedefine <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">ulaş</span>
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {[
               {
                 step: '01',
@@ -355,22 +343,29 @@ export default function LandingPage() {
                 title: 'Haftalık Takip & Rehberlik',
                 desc: 'Koçun ilerlemeyi takip ediyor, performans analizi yapıyor ve seni doğru yönlendiriyor.',
                 gradient: 'from-warm-500 to-warm-600'
+              },
+              {
+                step: '04',
+                icon: BookOpen,
+                title: 'Özel Ders',
+                desc: 'Hangi konuda eksik olduğuna göre özelleştirilmiş özel ders ile eksikliklerini kapat.',
+                gradient: 'from-warm-600 to-red-500'
               }
             ].map((item, i) => (
               <div key={i} className="relative group">
-                <div className="bg-white rounded-2xl p-8 border border-surface-100 shadow-card hover:shadow-card-hover transition-all duration-300 text-center
-                  group-hover:-translate-y-1">
-                  <div className="text-5xl font-bold text-surface-100 mb-4 font-display">{item.step}</div>
-                  <div className={`w-16 h-16 bg-gradient-to-br ${item.gradient} rounded-2xl flex items-center justify-center mx-auto mb-5
+                <div className="bg-white rounded-2xl p-6 border border-surface-100 shadow-card hover:shadow-card-hover transition-all duration-300 text-center
+                  group-hover:-translate-y-1 h-full flex flex-col">
+                  <div className="text-4xl font-bold text-surface-100 mb-3 font-display">{item.step}</div>
+                  <div className={`w-14 h-14 bg-gradient-to-br ${item.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4
                     shadow-lg group-hover:scale-110 transition-transform`}>
-                    <item.icon size={28} className="text-white" />
+                    <item.icon size={24} className="text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-3 font-display text-surface-800">{item.title}</h3>
-                  <p className="text-surface-500 leading-relaxed text-[15px]">{item.desc}</p>
+                  <h3 className="text-base font-semibold mb-2 font-display text-surface-800">{item.title}</h3>
+                  <p className="text-surface-500 leading-relaxed text-sm flex-1">{item.desc}</p>
                 </div>
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-5 transform -translate-y-1/2 z-10">
-                    <ChevronRight size={20} className="text-primary-300" />
+                {i < 3 && (
+                  <div className="hidden md:block absolute top-1/2 -right-3.5 transform -translate-y-1/2 z-10">
+                    <ChevronRight size={18} className="text-primary-300" />
                   </div>
                 )}
               </div>
