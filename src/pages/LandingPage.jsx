@@ -419,7 +419,9 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            PRICING
          ═══════════════════════════════════════════════════ */}
-      {selectedGoal && (
+      {selectedGoal && (() => {
+        const goalLabel = { ortaokul: 'Ortaokul', lise: 'Lise', lgs: 'LGS', yks: 'YKS' }[selectedGoal];
+        return (
       <Section id="pricing" className="py-12 md:py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-10">
@@ -430,11 +432,10 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {/* ── Core ── */}
+            {/* ── Disiplinli [Hedef] ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
-                <div className="inline-block px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-full mb-3">Core</div>
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Sistem</h3>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Disiplinli {goalLabel}</h3>
                 <p className="text-sm text-surface-400">Kendi kendine ilerlemek isteyenler için temel yapı</p>
               </div>
               <ul className="space-y-3 mb-7 flex-1">
@@ -465,8 +466,7 @@ export default function LandingPage() {
                 <span className="text-xs font-bold text-white">En Popüler</span>
               </div>
               <div className="mb-5 mt-2">
-                <div className="inline-block px-3 py-1 bg-primary-50 text-primary-600 text-xs font-bold rounded-full mb-3">Plus</div>
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Sistem + Koçluk</h3>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Disiplinli Plus {goalLabel}</h3>
                 <p className="text-sm text-surface-400">Birebir koç desteğiyle sistemi en verimli şekilde kullan</p>
               </div>
               <ul className="space-y-3 mb-7 flex-1">
@@ -495,8 +495,7 @@ export default function LandingPage() {
             {/* ── Pro ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
-                <div className="inline-block px-3 py-1 bg-warm-50 text-warm-600 text-xs font-bold rounded-full mb-3">Pro</div>
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Sistem + Koçluk + Özel Ders</h3>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Disiplinli Pro {goalLabel}</h3>
                 <p className="text-sm text-surface-400">Tam destek — koçluk, özel ders ve sistem bir arada</p>
               </div>
               <ul className="space-y-3 mb-7 flex-1">
@@ -523,7 +522,7 @@ export default function LandingPage() {
           </div>
         </div>
       </Section>
-      )}
+      );})()}
 
 
       {/* ═══════════════════════════════════════════════════
