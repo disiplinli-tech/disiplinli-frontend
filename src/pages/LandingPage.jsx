@@ -754,101 +754,103 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            FOOTER
          ═══════════════════════════════════════════════════ */}
-      <footer className="border-t border-surface-100 bg-surface-50">
-        <div className="max-w-7xl mx-auto px-6 py-14">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+      <div className="px-4 md:px-8 pb-4 md:pb-8">
+        <footer className="bg-surface-900 rounded-2xl md:rounded-3xl overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 md:px-10 py-14">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
 
-            {/* ── Marka ── */}
-            <div className="col-span-2 md:col-span-1 space-y-4">
-              <span className="font-display font-bold text-xl text-surface-900">Disiplinli.com</span>
-              <p className="text-sm text-surface-400 leading-relaxed max-w-xs">
-                Öğrenciye çalışma disiplini ve sınavları kazandıran sistem.
-              </p>
-            </div>
+              {/* ── Marka ── */}
+              <div className="col-span-2 md:col-span-1 space-y-4">
+                <span className="font-display font-bold text-xl text-white">Disiplinli.com</span>
+                <p className="text-sm text-surface-400 leading-relaxed max-w-xs">
+                  Öğrenciye çalışma disiplini ve sınavları kazandıran sistem.
+                </p>
+              </div>
 
-            {/* ── Ürünler ── */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-surface-800 text-sm">Ürünler</h4>
-              <ul className="space-y-2.5">
-                {[
-                  ['Koçluk', '#pricing'],
-                  ['Deneme Kulübü', '#pricing'],
-                  ['Koçluk + Deneme', '#pricing']
-                ].map(([label, href]) => (
-                  <li key={label}>
-                    <a href={href} className="text-sm text-surface-400 hover:text-surface-700 transition-colors">{label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {/* ── Ürünler ── */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-white text-sm">Ürünler</h4>
+                <ul className="space-y-2.5">
+                  {[
+                    ['Koçluk', '#pricing'],
+                    ['Deneme Kulübü', '#pricing'],
+                    ['Koçluk + Deneme', '#pricing']
+                  ].map(([label, href]) => (
+                    <li key={label}>
+                      <a href={href} className="text-sm text-surface-400 hover:text-white transition-colors">{label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* ── Sözleşme ve Koşullar ── */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-surface-800 text-sm">Sözleşme ve Koşullar</h4>
-              <ul className="space-y-2.5">
-                {[
-                  ['Kullanım Şartları', '/kullanici-sozlesmesi'],
-                  ['Gizlilik Sözleşmesi', '#'],
-                  ['İptal ve İade Koşulları', '#']
-                ].map(([label, href]) => (
-                  <li key={label}>
-                    <a href={href} className="text-sm text-surface-400 hover:text-surface-700 transition-colors">{label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {/* ── Sözleşme ve Koşullar ── */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-white text-sm">Sözleşme ve Koşullar</h4>
+                <ul className="space-y-2.5">
+                  {[
+                    ['Kullanım Şartları', '/kullanici-sozlesmesi'],
+                    ['Gizlilik Sözleşmesi', '#'],
+                    ['İptal ve İade Koşulları', '#']
+                  ].map(([label, href]) => (
+                    <li key={label}>
+                      <a href={href} className="text-sm text-surface-400 hover:text-white transition-colors">{label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* ── Disiplinli + Sosyal Medya ── */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-surface-800 text-sm">Disiplinli</h4>
-              <ul className="space-y-2.5">
-                {[
-                  ['Bize Ulaşın', '#contact'],
-                  ['Nasıl Çalışır?', '#how-it-works']
-                ].map(([label, href]) => (
-                  <li key={label}>
-                    <a href={href} className="text-sm text-surface-400 hover:text-surface-700 transition-colors">{label}</a>
-                  </li>
-                ))}
-              </ul>
+              {/* ── Disiplinli + Sosyal Medya ── */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-white text-sm">Disiplinli</h4>
+                <ul className="space-y-2.5">
+                  {[
+                    ['Bize Ulaşın', '#contact'],
+                    ['Nasıl Çalışır?', '#how-it-works']
+                  ].map(([label, href]) => (
+                    <li key={label}>
+                      <a href={href} className="text-sm text-surface-400 hover:text-white transition-colors">{label}</a>
+                    </li>
+                  ))}
+                </ul>
 
-              <h4 className="font-semibold text-surface-800 text-sm pt-2">Bizi Takip Edin</h4>
-              <div className="flex items-center gap-3">
-                {/* Instagram */}
-                <a href="https://www.instagram.com/disiplinlicom" target="_blank" rel="noopener noreferrer"
-                  className="w-9 h-9 bg-surface-100 hover:bg-surface-200 rounded-lg flex items-center justify-center transition-colors group"
-                  title="Instagram"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-surface-500 group-hover:text-surface-700">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                  </svg>
-                </a>
-                {/* TikTok */}
-                <a href="https://www.tiktok.com/@disiplinlicom" target="_blank" rel="noopener noreferrer"
-                  className="w-9 h-9 bg-surface-100 hover:bg-surface-200 rounded-lg flex items-center justify-center transition-colors group"
-                  title="TikTok"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-surface-500 group-hover:text-surface-700">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.98a8.22 8.22 0 0 0 4.76 1.52V7.05a4.84 4.84 0 0 1-1-.36z"/>
-                  </svg>
-                </a>
+                <h4 className="font-semibold text-white text-sm pt-2">Bizi Takip Edin</h4>
+                <div className="flex items-center gap-3">
+                  {/* Instagram */}
+                  <a href="https://www.instagram.com/disiplinlicom" target="_blank" rel="noopener noreferrer"
+                    className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors group"
+                    title="Instagram"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-surface-400 group-hover:text-white">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                    </svg>
+                  </a>
+                  {/* TikTok */}
+                  <a href="https://www.tiktok.com/@disiplinlicom" target="_blank" rel="noopener noreferrer"
+                    className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors group"
+                    title="TikTok"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-surface-400 group-hover:text-white">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.2a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.98a8.22 8.22 0 0 0 4.76 1.52V7.05a4.84 4.84 0 0 1-1-.36z"/>
+                    </svg>
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* ── Alt çizgi ── */}
-          <div className="border-t border-surface-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-surface-400">
-              destek@disiplinli.com
-            </p>
-            <p className="text-sm text-surface-300">
-              Copyright © 2026 Disiplinli. Tüm hakları saklıdır.
-            </p>
+            {/* ── Alt çizgi ── */}
+            <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-surface-400">
+                destek@disiplinli.com
+              </p>
+              <p className="text-sm text-surface-500">
+                Copyright © 2026 Disiplinli. Tüm hakları saklıdır.
+              </p>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
 
 
       {/* ═══════════════════════════════════════════════════
