@@ -37,20 +37,15 @@ function Section({ children, className = '', id }) {
   );
 }
 
-// ─── WhatsApp SVG Icon ──────────────────────────────────
-function WhatsAppIcon({ size = 28 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="white">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-    </svg>
-  );
-}
-
 // ─── Main Landing Page ──────────────────────────────────
 export default function LandingPage() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+
+  // ─── Sizi Arayalım Form State ──────
+  const [callForm, setCallForm] = useState({ name: '', phone: '', role: '' });
+  const [callFormStatus, setCallFormStatus] = useState('idle'); // idle | sending | sent | error
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -597,43 +592,162 @@ export default function LandingPage() {
 
 
       {/* ═══════════════════════════════════════════════════
-           FINAL CTA
+           SIZI ARAYALIM — CONTACT FORM
          ═══════════════════════════════════════════════════ */}
       <Section id="contact" className="py-20 md:py-28 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800" />
-            <div className="absolute top-0 right-0 w-80 h-80 bg-warm-500/20 rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 left-0 w-60 h-60 bg-primary-400/20 rounded-full blur-[80px]" />
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
 
-            <div className="relative px-8 py-14 md:px-16 md:py-20 text-center">
-              <h2 className="font-display text-3xl md:text-4xl font-bold mb-5 text-white">
+            {/* Left — Motivasyon Yazısı */}
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-warm-50 border border-warm-100 rounded-full">
+                <Phone size={16} className="text-warm-500" />
+                <span className="text-sm text-warm-700 font-medium">Ücretsiz Görüşme</span>
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900 leading-tight">
                 Hedefine ulaşmak için
-                <br />ilk adımı bugün at.
+                <br /><span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">ilk adımı bugün at.</span>
               </h2>
-              <p className="text-primary-100 text-lg mb-9 max-w-2xl mx-auto leading-relaxed">
-                Ücretsiz tanıtım görüşmeni yap, koçunu tanı ve sana özel planını al.
+              <p className="text-surface-500 text-lg leading-relaxed max-w-md">
+                Formu doldur, seni arayalım. Ücretsiz tanıtım görüşmesinde koçunu tanı ve sana özel planını al.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  onClick={() => navigate('/register')}
-                  className="group px-8 py-4 bg-white text-primary-700 rounded-2xl font-bold text-lg
-                    hover:shadow-2xl hover:shadow-white/20 transition-all hover:scale-[1.03] active:scale-[0.98]
-                    inline-flex items-center gap-2"
-                >
-                  Ücretsiz Başla
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-                <a
-                  href="https://wa.me/905XXXXXXXXX"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-8 py-4 bg-white/10 border border-white/20 text-white rounded-2xl font-semibold text-base
-                    hover:bg-white/20 transition-all inline-flex items-center gap-2"
-                >
-                  <Phone size={18} />
-                  WhatsApp ile Ulaş
-                </a>
+              <div className="flex flex-col gap-4 pt-2">
+                {[
+                  { icon: CheckCircle2, text: 'Tamamen ücretsiz tanıtım görüşmesi' },
+                  { icon: Shield, text: 'Bilgilerin gizli tutulur' },
+                  { icon: Clock, text: '24 saat içinde geri dönüş' }
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <item.icon size={20} className="text-primary-500 shrink-0" />
+                    <span className="text-surface-600 text-[15px]">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right — Form Kartı */}
+            <div className="relative">
+              <div className="absolute -top-6 -right-6 w-40 h-40 bg-primary-200/30 rounded-full blur-[60px]" />
+              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-warm-200/30 rounded-full blur-[50px]" />
+
+              <div className="relative bg-white rounded-3xl p-8 md:p-10 border border-surface-100 shadow-pricing">
+                <div className="text-center mb-8">
+                  <h3 className="font-display text-xl font-bold text-surface-900 mb-1">Sizi Arayalım</h3>
+                  <p className="text-sm text-surface-400">Bilgilerini bırak, sana ulaşalım</p>
+                </div>
+
+                {callFormStatus === 'sent' ? (
+                  <div className="text-center py-8 space-y-4">
+                    <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 size={32} className="text-emerald-500" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-surface-900">Talebiniz Alındı!</h4>
+                    <p className="text-surface-500 text-sm max-w-xs mx-auto">
+                      En kısa sürede sizi arayacağız. Teşekkürler!
+                    </p>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!callForm.name || !callForm.phone || !callForm.role) return;
+                      setCallFormStatus('sending');
+                      try {
+                        // TODO: Backend endpoint entegrasyonu
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        setCallFormStatus('sent');
+                      } catch {
+                        setCallFormStatus('error');
+                      }
+                    }}
+                    className="space-y-5"
+                  >
+                    {/* Ad Soyad */}
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-2">Ad Soyad</label>
+                      <input
+                        type="text"
+                        placeholder="Adınız ve soyadınız"
+                        value={callForm.name}
+                        onChange={(e) => setCallForm(prev => ({ ...prev, name: e.target.value }))}
+                        required
+                        className="w-full px-4 py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-surface-800 placeholder-surface-400
+                          focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all text-sm"
+                      />
+                    </div>
+
+                    {/* Veliyim / Öğrenciyim Toggle */}
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-2">Ben bir...</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setCallForm(prev => ({ ...prev, role: 'veli' }))}
+                          className={`py-3.5 rounded-xl text-sm font-semibold transition-all border-2 ${
+                            callForm.role === 'veli'
+                              ? 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm'
+                              : 'bg-surface-50 border-surface-200 text-surface-500 hover:border-surface-300'
+                          }`}
+                        >
+                          <Users size={18} className="inline mr-2 -mt-0.5" />
+                          Veliyim
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCallForm(prev => ({ ...prev, role: 'ogrenci' }))}
+                          className={`py-3.5 rounded-xl text-sm font-semibold transition-all border-2 ${
+                            callForm.role === 'ogrenci'
+                              ? 'bg-warm-50 border-warm-500 text-warm-700 shadow-sm'
+                              : 'bg-surface-50 border-surface-200 text-surface-500 hover:border-surface-300'
+                          }`}
+                        >
+                          <GraduationCap size={18} className="inline mr-2 -mt-0.5" />
+                          Öğrenciyim
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Telefon */}
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 mb-2">Telefon Numarası</label>
+                      <input
+                        type="tel"
+                        placeholder="05XX XXX XX XX"
+                        value={callForm.phone}
+                        onChange={(e) => setCallForm(prev => ({ ...prev, phone: e.target.value }))}
+                        required
+                        className="w-full px-4 py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-surface-800 placeholder-surface-400
+                          focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all text-sm"
+                      />
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                      type="submit"
+                      disabled={callFormStatus === 'sending' || !callForm.name || !callForm.phone || !callForm.role}
+                      className="w-full py-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl font-semibold text-base
+                        hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.01] active:scale-[0.99]
+                        disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100
+                        flex items-center justify-center gap-2"
+                    >
+                      {callFormStatus === 'sending' ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Gönderiliyor...
+                        </>
+                      ) : (
+                        <>
+                          <Phone size={18} />
+                          Beni Arayın
+                        </>
+                      )}
+                    </button>
+
+                    {callFormStatus === 'error' && (
+                      <p className="text-center text-sm text-red-500">Bir hata oluştu. Lütfen tekrar deneyin.</p>
+                    )}
+                  </form>
+                )}
               </div>
             </div>
           </div>
@@ -669,16 +783,16 @@ export default function LandingPage() {
 
 
       {/* ═══════════════════════════════════════════════════
-           FLOATING WHATSAPP BUTTON
+           FLOATING CALL CTA BUTTON
          ═══════════════════════════════════════════════════ */}
       <a
-        href="https://wa.me/905XXXXXXXXX"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="whatsapp-float"
-        title="WhatsApp ile iletişime geç"
+        href="#contact"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-primary-600 to-primary-500 rounded-full
+          flex items-center justify-center shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40
+          hover:scale-110 active:scale-95 transition-all"
+        title="Sizi Arayalım"
       >
-        <WhatsAppIcon size={28} />
+        <Phone size={24} className="text-white" />
       </a>
     </div>
   );
