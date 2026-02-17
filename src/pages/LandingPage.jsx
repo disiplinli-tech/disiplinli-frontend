@@ -392,22 +392,21 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { key: 'ortaokul', label: 'Ortaokul', icon: '📚' },
-              { key: 'lise', label: 'Lise', icon: '🎓' },
-              { key: 'lgs', label: 'LGS', icon: '🎯' },
-              { key: 'yks', label: 'YKS', icon: '🏆' }
+              { key: 'ortaokul', label: 'Ortaokul' },
+              { key: 'lise', label: 'Lise' },
+              { key: 'lgs', label: 'LGS' },
+              { key: 'yks', label: 'YKS' }
             ].map((goal) => (
               <button
                 key={goal.key}
                 onClick={() => setSelectedGoal(goal.key === selectedGoal ? '' : goal.key)}
-                className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 text-center cursor-pointer
+                className={`group relative py-5 px-6 rounded-2xl border-2 transition-all duration-300 text-center cursor-pointer
                   ${selectedGoal === goal.key
                     ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/10 scale-[1.03]'
                     : 'border-surface-100 bg-white hover:border-primary-200 hover:shadow-card'
                   }`}
               >
-                <div className="text-2xl mb-2">{goal.icon}</div>
-                <p className={`text-sm font-semibold transition-colors ${
+                <p className={`text-lg font-bold transition-colors ${
                   selectedGoal === goal.key ? 'text-primary-700' : 'text-surface-700'
                 }`}>{goal.label}</p>
               </button>
