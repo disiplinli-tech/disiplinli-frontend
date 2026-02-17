@@ -321,7 +321,7 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             {[
               {
                 step: '01',
@@ -536,21 +536,21 @@ export default function LandingPage() {
                 color: 'bg-warm-500'
               },
               {
-                quote: 'Veli paneli ile çocuğumun gelişimini takip edebiliyorum. İlk kez gerçekten güvenebileceğim bir sistem bulduk.',
+                quote: 'Daha önce hep kontrol etmek zorunda hissediyordum. Şimdi sürecin doğru ilerlediğini bilmek içimi çok rahatlatıyor.',
                 name: 'Ayşe Ç.',
                 detail: 'Veli',
                 avatar: 'AÇ',
                 color: 'bg-emerald-500'
               }
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl p-7 border border-surface-100 shadow-card hover:shadow-card-hover transition-all duration-300">
+              <div key={i} className="bg-white rounded-2xl p-7 border border-surface-100 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col">
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, s) => (
                     <Star key={s} size={16} className="text-amber-400 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-surface-600 leading-relaxed mb-6 text-[15px]">"{item.quote}"</p>
-                <div className="flex items-center gap-3">
+                <p className="text-surface-600 leading-relaxed mb-6 text-[15px] flex-1">"{item.quote}"</p>
+                <div className="flex items-center gap-3 mt-auto">
                   <div className={`w-10 h-10 ${item.color} rounded-full flex items-center justify-center`}>
                     <span className="text-xs font-bold text-white">{item.avatar}</span>
                   </div>
