@@ -754,9 +754,8 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            FOOTER
          ═══════════════════════════════════════════════════ */}
-      <div className="px-4 md:px-8 pb-4 md:pb-8">
-        <footer className="bg-surface-900 rounded-2xl md:rounded-3xl overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 md:px-10 py-14">
+      <footer className="bg-surface-900">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-14">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
 
               {/* ── Marka ── */}
@@ -848,9 +847,8 @@ export default function LandingPage() {
                 Copyright © 2026 Disiplinli. Tüm hakları saklıdır.
               </p>
             </div>
-          </div>
-        </footer>
-      </div>
+        </div>
+      </footer>
 
 
       {/* ═══════════════════════════════════════════════════
