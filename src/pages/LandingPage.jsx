@@ -471,53 +471,92 @@ export default function LandingPage() {
           },
           lise: {
             core: {
-              name: `Disiplinli ${goalLabel}`,
-              subtitle: 'Kendi kendine ilerlemek isteyenler için temel yapı',
+              name: 'Disiplinli Lise',
+              subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
+              aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
               price: null,
               features: [
-                'Haftalık deneme sınavları',
-                'Detaylı deneme analiz raporu',
-                'Net takip sistemi',
-                'İlerleme göstergeleri',
-                'Kişisel çalışma planı'
+                'Yakında detaylar paylaşılacak'
               ]
             },
             plus: {
-              name: `Disiplinli Plus ${goalLabel}`,
-              subtitle: 'Birebir koç desteğiyle sistemi en verimli şekilde kullan',
+              name: 'Disiplinli Plus Lise',
+              subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
+              aim: 'Düzenli takip ile disiplin ve not artışı.',
               price: null,
               features: [
-                'Core planındaki her şey',
-                'Birebir akademik koç',
-                'Haftalık görüşme & takip',
-                'Kişiselleştirilmiş program',
-                'Eksik analizi raporu',
-                'Koç ile mesajlaşma'
+                'Yakında detaylar paylaşılacak'
               ]
             },
             pro: {
-              name: `Disiplinli Pro ${goalLabel}`,
-              subtitle: 'Tam destek — koçluk, özel ders ve sistem bir arada',
+              name: 'Disiplinli Premium Lise',
+              subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
+              aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
               price: null,
               features: [
-                'Plus planındaki her şey',
-                'Birebir özel ders desteği',
-                'Konuya özel eksik kapatma',
-                'Online ders desteği',
-                'Veli bilgilendirme'
+                'Yakında detaylar paylaşılacak'
+              ]
+            }
+          },
+          lgs: {
+            core: {
+              name: 'Disiplinli LGS',
+              subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
+              aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
+              price: null,
+              features: [
+                'Yakında detaylar paylaşılacak'
+              ]
+            },
+            plus: {
+              name: 'Disiplinli Plus LGS',
+              subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
+              aim: 'Düzenli takip ile disiplin ve not artışı.',
+              price: null,
+              features: [
+                'Yakında detaylar paylaşılacak'
+              ]
+            },
+            pro: {
+              name: 'Disiplinli Premium LGS',
+              subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
+              aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
+              price: null,
+              features: [
+                'Yakında detaylar paylaşılacak'
+              ]
+            }
+          },
+          yks: {
+            core: {
+              name: 'Disiplinli YKS',
+              subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
+              aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
+              price: null,
+              features: [
+                'Yakında detaylar paylaşılacak'
+              ]
+            },
+            plus: {
+              name: 'Disiplinli Plus YKS',
+              subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
+              aim: 'Düzenli takip ile disiplin ve not artışı.',
+              price: null,
+              features: [
+                'Yakında detaylar paylaşılacak'
+              ]
+            },
+            pro: {
+              name: 'Disiplinli Premium YKS',
+              subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
+              aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
+              price: null,
+              features: [
+                'Yakında detaylar paylaşılacak'
               ]
             }
           }
         };
-        // LGS ve YKS şimdilik Lise ile aynı yapıyı kullanıyor
-        planData.lgs = { ...planData.lise };
-        planData.lgs.core = { ...planData.lise.core, name: `Disiplinli ${goalLabel}` };
-        planData.lgs.plus = { ...planData.lise.plus, name: `Disiplinli Plus ${goalLabel}` };
-        planData.lgs.pro = { ...planData.lise.pro, name: `Disiplinli Pro ${goalLabel}` };
-        planData.yks = { ...planData.lise };
-        planData.yks.core = { ...planData.lise.core, name: `Disiplinli ${goalLabel}` };
-        planData.yks.plus = { ...planData.lise.plus, name: `Disiplinli Plus ${goalLabel}` };
-        planData.yks.pro = { ...planData.lise.pro, name: `Disiplinli Pro ${goalLabel}` };
 
         const plans = planData[selectedGoal];
 
