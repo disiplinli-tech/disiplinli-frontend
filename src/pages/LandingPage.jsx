@@ -330,7 +330,7 @@ export default function LandingPage() {
               {
                 step: '01',
                 icon: ClipboardList,
-                title: 'Ücretsiz Eksik Analizi',
+                title: 'Ücretsiz Ön Görüşme',
                 desc: 'Mevcut durumunu değerlendiriyoruz. Güçlü ve zayıf yönlerini belirleyip sana özel bir harita çıkarıyoruz.',
                 gradient: 'from-primary-500 to-primary-600'
               },
