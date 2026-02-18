@@ -596,22 +596,16 @@ export default function LandingPage() {
               {plans.core.aim && (
                 <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.core.aim}</p>
               )}
-              {plans.core.price ? (
-                <button
-                  onClick={() => navigate('/checkout', { state: { plan: plans.core, goal: selectedGoal, goalLabel } })}
-                  className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
-                    hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
-                >
-                  Satın Al
-                </button>
-              ) : (
-                <a href="#contact"
-                  className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
-                    hover:bg-surface-100 transition-all text-center block"
-                >
-                  Bilgi Alın
-                </a>
-              )}
+              <button
+                onClick={() => plans.core.price
+                  ? navigate('/checkout', { state: { plan: plans.core, goal: selectedGoal, goalLabel } })
+                  : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+                }
+                className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
+                  hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
+              >
+                Satın Al
+              </button>
             </div>
 
             {/* ── Plus ── */}
@@ -639,22 +633,16 @@ export default function LandingPage() {
               {plans.plus.aim && (
                 <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.plus.aim}</p>
               )}
-              {plans.plus.price ? (
-                <button
-                  onClick={() => navigate('/checkout', { state: { plan: plans.plus, goal: selectedGoal, goalLabel } })}
-                  className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
-                    hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
-                >
-                  Satın Al
-                </button>
-              ) : (
-                <a href="#contact"
-                  className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
-                    hover:bg-surface-100 transition-all text-center block"
-                >
-                  Bilgi Alın
-                </a>
-              )}
+              <button
+                onClick={() => plans.plus.price
+                  ? navigate('/checkout', { state: { plan: plans.plus, goal: selectedGoal, goalLabel } })
+                  : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+                }
+                className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
+                  hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
+              >
+                Satın Al
+              </button>
             </div>
 
             {/* ── Pro / Premium (Featured + Glow) ── */}
@@ -703,22 +691,16 @@ export default function LandingPage() {
                 {plans.pro.aim && (
                   <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.pro.aim}</p>
                 )}
-                {plans.pro.price ? (
-                  <button
-                    onClick={() => navigate('/checkout', { state: { plan: plans.pro, goal: selectedGoal, goalLabel } })}
-                    className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
-                      hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center cursor-pointer"
-                  >
-                    Satın Al
-                  </button>
-                ) : (
-                  <a href="#contact"
-                    className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
-                      hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center block"
-                  >
-                    Bilgi Alın
-                  </a>
-                )}
+                <button
+                  onClick={() => plans.pro.price
+                    ? navigate('/checkout', { state: { plan: plans.pro, goal: selectedGoal, goalLabel } })
+                    : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                  className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
+                    hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center cursor-pointer"
+                >
+                  Satın Al
+                </button>
               </div>
             </div>
           </div>
