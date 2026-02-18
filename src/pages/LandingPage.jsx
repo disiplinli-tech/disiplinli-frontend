@@ -107,7 +107,7 @@ export default function LandingPage() {
                 className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
                   hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.03] active:scale-[0.98]"
               >
-                Bilgi Alın
+                Paket Seç
               </a>
             </div>
 
@@ -138,7 +138,7 @@ export default function LandingPage() {
               </button>
               <a href="#contact" onClick={() => setMobileMenu(false)}
                 className="py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold text-center block">
-                Bilgi Alın
+                Paket Seç
               </a>
             </div>
           </div>
