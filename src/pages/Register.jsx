@@ -161,8 +161,6 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('student');
-  const [studentCode, setStudentCode] = useState('');
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
   const [showKvkk, setShowKvkk] = useState(false);
   const [error, setError] = useState('');
@@ -197,7 +195,6 @@ export default function Register() {
     if (!phone.trim()) return setError('Telefon numarası zorunludur.');
     if (!email.trim()) return setError('E-posta zorunludur.');
     if (!password || password.length < 6) return setError('Şifre en az 6 karakter olmalıdır.');
-    if (role === 'parent' && !studentCode.trim()) return setError('Veli Davet Kodu zorunludur.');
     if (!kvkkAccepted) return setError('Gizlilik ve Kullanım Koşullarını kabul etmelisin.');
 
     setLoading(true);
@@ -207,14 +204,10 @@ export default function Register() {
         email: email.toLowerCase().trim(),
         password,
         phone: phone.trim(),
-        role,
+        role: 'student',
         goal: selectedGoal,
         plan: selectedPlan,
       };
-
-      if (role === 'parent') {
-        payload.student_code = studentCode.toUpperCase().trim();
-      }
 
       const res = await API.post('/api/register/', payload);
 
@@ -485,27 +478,6 @@ export default function Register() {
               )}
 
               <form onSubmit={handleRegister} className="space-y-4">
-                {/* Hesap Türü */}
-                <div>
-                  <label className="block text-sm font-semibold text-surface-700 mb-2">Hesap Türü</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { key: 'student', label: 'Öğrenci', icon: GraduationCap },
-                      { key: 'parent', label: 'Veli', icon: Users }
-                    ].map(({ key, label, icon: Icon }) => (
-                      <button key={key} type="button" onClick={() => { setRole(key); setStudentCode(''); setError(''); }}
-                        className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 font-semibold text-sm transition-all
-                          ${role === key
-                            ? 'border-primary-500 bg-primary-50 text-primary-700'
-                            : 'border-surface-200 text-surface-500 hover:border-surface-300'
-                          }`}>
-                        <Icon size={16} />
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Ad Soyad */}
                 <div>
                   <label className="block text-sm font-semibold text-surface-700 mb-1.5">Ad Soyad</label>
@@ -549,20 +521,6 @@ export default function Register() {
                     </button>
                   </div>
                 </div>
-
-                {/* Veli Davet Kodu (sadece veli için) */}
-                {role === 'parent' && (
-                  <div>
-                    <label className="block text-sm font-semibold text-surface-700 mb-1.5">Veli Davet Kodu</label>
-                    <div className="relative group">
-                      <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-500 transition-colors" size={17} />
-                      <input type="text" placeholder="Öğrencinizden aldığınız kod" value={studentCode}
-                        onChange={e => setStudentCode(e.target.value.toUpperCase())} required maxLength={10}
-                        className="w-full pl-10 pr-4 py-3 border border-surface-200 rounded-xl bg-surface-50 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white outline-none transition-all text-surface-800 placeholder:text-surface-400 text-sm uppercase" />
-                    </div>
-                    <p className="text-xs text-surface-400 mt-1">Öğrencinizin hesabından alabileceğiniz davet kodunu girin.</p>
-                  </div>
-                )}
 
                 {/* KVKK */}
                 <div className="flex items-start gap-2 pt-1">
