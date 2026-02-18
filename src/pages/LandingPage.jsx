@@ -531,7 +531,7 @@ export default function LandingPage() {
             <p className="text-surface-500 text-lg">Her plan aynı sistemi kullanır. Fark, koçluk ve ders desteğinin yoğunluğunda.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto pt-4">
             {/* ── Core Plan ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
@@ -557,12 +557,22 @@ export default function LandingPage() {
               {plans.core.aim && (
                 <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.core.aim}</p>
               )}
-              <a href="#contact"
-                className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
-                  hover:bg-surface-100 transition-all text-center block"
-              >
-                Bilgi Alın
-              </a>
+              {plans.core.price ? (
+                <button
+                  onClick={() => navigate('/checkout', { state: { plan: plans.core, goal: selectedGoal, goalLabel } })}
+                  className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
+                    hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
+                >
+                  Satın Al
+                </button>
+              ) : (
+                <a href="#contact"
+                  className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
+                    hover:bg-surface-100 transition-all text-center block"
+                >
+                  Bilgi Alın
+                </a>
+              )}
             </div>
 
             {/* ── Plus ── */}
@@ -590,22 +600,29 @@ export default function LandingPage() {
               {plans.plus.aim && (
                 <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.plus.aim}</p>
               )}
-              <a href="#contact"
-                className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
-                  hover:bg-surface-100 transition-all text-center block"
-              >
-                Bilgi Alın
-              </a>
+              {plans.plus.price ? (
+                <button
+                  onClick={() => navigate('/checkout', { state: { plan: plans.plus, goal: selectedGoal, goalLabel } })}
+                  className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
+                    hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
+                >
+                  Satın Al
+                </button>
+              ) : (
+                <a href="#contact"
+                  className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
+                    hover:bg-surface-100 transition-all text-center block"
+                >
+                  Bilgi Alın
+                </a>
+              )}
             </div>
 
             {/* ── Pro / Premium (Featured + Glow) ── */}
-            <div className="pricing-card pricing-featured relative bg-white rounded-3xl p-7 flex flex-col overflow-hidden"
-              style={{
-                border: '2px solid transparent',
-                backgroundClip: 'padding-box',
-              }}
+            <div className="pricing-card pricing-featured relative bg-white rounded-3xl flex flex-col"
+              style={{ padding: 0 }}
             >
-              {/* Animated glow border */}
+              {/* Animated glow border wrapper */}
               <div className="absolute -inset-[2px] rounded-3xl z-0 overflow-hidden">
                 <div
                   className="absolute inset-[-50%] animate-glow-spin"
@@ -617,12 +634,14 @@ export default function LandingPage() {
               {/* White inner background */}
               <div className="absolute inset-[2px] rounded-[22px] bg-white z-[1]" />
 
+              {/* En Popüler badge — dışarıda, kartın üstünde */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-[3] px-5 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full shadow-lg shadow-primary-300/40">
+                <span className="text-xs font-bold text-white whitespace-nowrap">En Popüler</span>
+              </div>
+
               {/* Content on top */}
-              <div className="relative z-[2] flex flex-col flex-1">
-                <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-b-xl shadow-md">
-                  <span className="text-xs font-bold text-white">En Popüler</span>
-                </div>
-                <div className="mb-5 mt-6">
+              <div className="relative z-[2] flex flex-col flex-1 p-7 pt-8">
+                <div className="mb-5">
                   <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{plans.pro.name}</h3>
                   <p className="text-sm text-surface-400">{plans.pro.subtitle}</p>
                 </div>
