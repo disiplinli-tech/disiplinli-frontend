@@ -59,6 +59,7 @@ export default {
         'fade-up-d3': 'fadeUp 0.7s ease-out 0.45s forwards',
         'pulse-soft': 'pulseSoft 4s ease-in-out infinite',
         'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+        'glow-spin': 'glowSpin 3s linear infinite',
       },
       keyframes: {
         float: {
@@ -76,6 +77,10 @@ export default {
         bounceGentle: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },
+        },
+        glowSpin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         },
       },
       boxShadow: {

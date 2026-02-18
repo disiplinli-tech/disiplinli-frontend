@@ -565,19 +565,16 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* ── Plus (Featured) ── */}
-            <div className="pricing-card pricing-featured relative bg-white rounded-3xl p-7 border-2 border-primary-200 flex flex-col">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full shadow-md">
-                <span className="text-xs font-bold text-white">En Popüler</span>
-              </div>
-              <div className="mb-5 mt-2">
+            {/* ── Plus ── */}
+            <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
+              <div className="mb-5">
                 <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{plans.plus.name}</h3>
                 <p className="text-sm text-surface-400">{plans.plus.subtitle}</p>
               </div>
               {plans.plus.price && (
                 <div className="mb-5">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-display font-bold text-primary-600">{plans.plus.price}₺</span>
+                    <span className="text-3xl font-display font-bold text-surface-900">{plans.plus.price}₺</span>
                     <span className="text-sm text-surface-400">/ay</span>
                   </div>
                 </div>
@@ -594,44 +591,77 @@ export default function LandingPage() {
                 <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.plus.aim}</p>
               )}
               <a href="#contact"
-                className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
-                  hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center block"
-              >
-                Bilgi Alın
-              </a>
-            </div>
-
-            {/* ── Pro / Premium ── */}
-            <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
-              <div className="mb-5">
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{plans.pro.name}</h3>
-                <p className="text-sm text-surface-400">{plans.pro.subtitle}</p>
-              </div>
-              {plans.pro.price && (
-                <div className="mb-5">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-display font-bold text-surface-900">{plans.pro.price}₺</span>
-                    <span className="text-sm text-surface-400">/ay</span>
-                  </div>
-                </div>
-              )}
-              <ul className="space-y-3 mb-5 flex-1">
-                {plans.pro.features.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
-                    <CheckCircle2 size={18} className="text-warm-500 mt-0.5 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              {plans.pro.aim && (
-                <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.pro.aim}</p>
-              )}
-              <a href="#contact"
                 className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
                   hover:bg-surface-100 transition-all text-center block"
               >
                 Bilgi Alın
               </a>
+            </div>
+
+            {/* ── Pro / Premium (Featured + Glow) ── */}
+            <div className="pricing-card pricing-featured relative bg-white rounded-3xl p-7 flex flex-col overflow-hidden"
+              style={{
+                border: '2px solid transparent',
+                backgroundClip: 'padding-box',
+              }}
+            >
+              {/* Animated glow border */}
+              <div className="absolute -inset-[2px] rounded-3xl z-0 overflow-hidden">
+                <div
+                  className="absolute inset-[-50%] animate-glow-spin"
+                  style={{
+                    background: 'conic-gradient(from 0deg, #f97316, #fbbf24, #fb923c, #ea580c, #f59e0b, #f97316)',
+                  }}
+                />
+              </div>
+              {/* White inner background */}
+              <div className="absolute inset-[2px] rounded-[22px] bg-white z-[1]" />
+
+              {/* Content on top */}
+              <div className="relative z-[2] flex flex-col flex-1">
+                <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-b-xl shadow-md">
+                  <span className="text-xs font-bold text-white">En Popüler</span>
+                </div>
+                <div className="mb-5 mt-6">
+                  <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{plans.pro.name}</h3>
+                  <p className="text-sm text-surface-400">{plans.pro.subtitle}</p>
+                </div>
+                {plans.pro.price && (
+                  <div className="mb-5">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-display font-bold text-primary-600">{plans.pro.price}₺</span>
+                      <span className="text-sm text-surface-400">/ay</span>
+                    </div>
+                  </div>
+                )}
+                <ul className="space-y-3 mb-5 flex-1">
+                  {plans.pro.features.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
+                      <CheckCircle2 size={18} className="text-primary-500 mt-0.5 shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                {plans.pro.aim && (
+                  <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.pro.aim}</p>
+                )}
+                {plans.pro.price ? (
+                  <button
+                    onClick={() => navigate('/checkout', { state: { plan: plans.pro, goal: selectedGoal, goalLabel } })}
+                    className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
+                      hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center cursor-pointer"
+                  >
+                    Satın Al
+                  </button>
+                ) : (
+                  <a href="#contact"
+                    className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
+                      hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center block"
+                  >
+                    Bilgi Alın
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>

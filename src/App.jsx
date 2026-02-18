@@ -14,6 +14,7 @@ import KullaniciSozlesmesi from './pages/KullaniciSozlesmesi';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
+import Checkout from './pages/Checkout';
 
 // Ana Sayfalar
 import Dashboard from './pages/Dashboard';
@@ -464,6 +465,7 @@ function App() {
           </PublicRoute>
         } />
         <Route path="/kullanici-sozlesmesi" element={<KullaniciSozlesmesi />} />
+        <Route path="/checkout" element={<Checkout />} />
 
         {/* ===== ANA SAYFA - LANDING PAGE ===== */}
         <Route path="/" element={
