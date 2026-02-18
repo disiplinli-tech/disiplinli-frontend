@@ -114,7 +114,7 @@ export default function Login({ setUser }) {
                 <div
                   key={i}
                   className="w-8 h-8 rounded-full border-2 border-primary-700 flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ backgroundColor: ['#f97316', '#a855f7', '#22c55e', '#3b82f6'][i] }}
+                  style={{ backgroundColor: ['#f97316', '#ea580c', '#22c55e', '#3b82f6'][i] }}
                 >
                   {initials}
                 </div>
