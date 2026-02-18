@@ -1,24 +1,86 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import API from "../api";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Target, TrendingUp, Users, BookOpen, ChevronRight } from "lucide-react";
+import {
+  Eye, EyeOff, Mail, Lock, ArrowRight, ArrowLeft, Target, TrendingUp,
+  Users, BookOpen, ChevronRight, Phone, Shield, KeyRound
+} from "lucide-react";
 
 export default function Login({ setUser }) {
-  const [inputVal, setInputVal] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  // Step: 'identifier' | 'password' | 'otp'
+  const [step, setStep] = useState('identifier');
+  const [identifier, setIdentifier] = useState('');
+  const [isPhone, setIsPhone] = useState(false);
+  const [password, setPassword] = useState('');
+  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [otpSending, setOtpSending] = useState(false);
   const navigate = useNavigate();
+  const otpRefs = useRef([]);
 
-  const handleLogin = async (e) => {
+  // OTP geri sayım
+  useEffect(() => {
+    if (otpTimer <= 0) return;
+    const interval = setInterval(() => setOtpTimer(t => t - 1), 1000);
+    return () => clearInterval(interval);
+  }, [otpTimer]);
+
+  // Telefon mu mail mi kontrol et
+  const detectType = (val) => {
+    const cleaned = val.replace(/\s/g, '').replace(/[()-]/g, '');
+    // Başı 0 veya + ile başlıyorsa ve sadece rakam/+ içeriyorsa telefon
+    if (/^[+0]\d{9,}$/.test(cleaned)) return true;
+    // Sadece rakamlardan oluşuyorsa ve 10+ karakterse telefon
+    if (/^\d{10,}$/.test(cleaned)) return true;
+    return false;
+  };
+
+  // Adım 1: Identifier gönder
+  const handleIdentifierSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
+
+    if (!identifier.trim()) {
+      setError('Lütfen telefon numaranı veya e-posta adresini gir.');
+      return;
+    }
+
+    const phone = detectType(identifier);
+    setIsPhone(phone);
+
+    if (phone) {
+      // Telefon → OTP gönder
+      setOtpSending(true);
+      try {
+        await API.post('/api/send-otp/', { phone: identifier });
+        setStep('otp');
+        setOtpTimer(120); // 2 dakika
+        setOtpCode(['', '', '', '', '', '']);
+        setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      } catch (err) {
+        const msg = err.response?.data?.error || 'SMS gönderilemedi. Lütfen tekrar dene.';
+        setError(msg);
+      } finally {
+        setOtpSending(false);
+      }
+    } else {
+      // Mail → şifre ekranına geç
+      setStep('password');
+    }
+  };
+
+  // Adım 2a: Şifre ile giriş
+  const handlePasswordLogin = async (e) => {
+    e.preventDefault();
+    setError('');
     setLoading(true);
 
     try {
-      const res = await API.post("/api/login/", {
-        email: inputVal,
+      const res = await API.post('/api/login/', {
+        email: identifier,
         password
       });
 
@@ -28,21 +90,110 @@ export default function Login({ setUser }) {
       localStorage.setItem('user_id', res.data.user_id);
 
       if (setUser) {
-        setUser({
-          name: res.data.user,
-          role: res.data.role
-        });
+        setUser({ name: res.data.user, role: res.data.role });
       }
 
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (err) {
       const errorMsg = err.response?.data?.error ||
                        err.response?.data?.message ||
-                       "Giriş başarısız! Bilgilerini kontrol et.";
+                       'Giriş başarısız! Bilgilerini kontrol et.';
       setError(errorMsg);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Adım 2b: OTP doğrulama
+  const handleOtpVerify = async (code) => {
+    const fullCode = code || otpCode.join('');
+    if (fullCode.length < 6) return;
+
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await API.post('/api/verify-otp/', {
+        phone: identifier,
+        code: fullCode
+      });
+
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', res.data.user);
+      localStorage.setItem('role', res.data.role);
+      localStorage.setItem('user_id', res.data.user_id);
+
+      if (setUser) {
+        setUser({ name: res.data.user, role: res.data.role });
+      }
+
+      navigate('/dashboard');
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || 'Kod hatalı! Tekrar dene.';
+      setError(errorMsg);
+      setOtpCode(['', '', '', '', '', '']);
+      otpRefs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // OTP input handler
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otpCode];
+    newOtp[index] = value.slice(-1);
+    setOtpCode(newOtp);
+
+    // Sonraki inputa geç
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+
+    // Hepsi dolduysa otomatik doğrula
+    const fullCode = newOtp.join('');
+    if (fullCode.length === 6) {
+      handleOtpVerify(fullCode);
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  // OTP tekrar gönder
+  const resendOtp = async () => {
+    if (otpTimer > 0) return;
+    setOtpSending(true);
+    setError('');
+    try {
+      await API.post('/api/send-otp/', { phone: identifier });
+      setOtpTimer(120);
+      setOtpCode(['', '', '', '', '', '']);
+      otpRefs.current[0]?.focus();
+    } catch (err) {
+      setError('SMS gönderilemedi. Lütfen tekrar dene.');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  // Geri dön
+  const goBack = () => {
+    setStep('identifier');
+    setError('');
+    setPassword('');
+    setOtpCode(['', '', '', '', '', '']);
+    setOtpTimer(0);
+  };
+
+  // Telefon numarasını maskele
+  const maskedPhone = () => {
+    const cleaned = identifier.replace(/\s/g, '');
+    if (cleaned.length < 4) return identifier;
+    return cleaned.slice(0, 4) + ' *** ** ' + cleaned.slice(-2);
   };
 
   return (
@@ -128,7 +279,7 @@ export default function Login({ setUser }) {
         </div>
       </div>
 
-      {/* Sag Panel - Form */}
+      {/* Sağ Panel - Form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-12 xl:px-20">
         <div className="w-full max-w-[420px]">
 
@@ -142,123 +293,276 @@ export default function Login({ setUser }) {
             </Link>
           </div>
 
-          {/* Baslik */}
-          <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-surface-900">
-              Tekrar hoş geldin
-            </h1>
-            <p className="text-surface-500 mt-2">
-              Hesabına giriş yap ve kaldığın yerden devam et.
-            </p>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 font-medium border border-red-100 flex items-start gap-3">
-              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-red-500 text-xs font-bold">!</span>
+          {/* ═══════════ ADIM 1: IDENTIFIER ═══════════ */}
+          {step === 'identifier' && (
+            <>
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-surface-900">
+                  Tekrar hoş geldin
+                </h1>
+                <p className="text-surface-500 mt-2">
+                  Telefon numaran veya e-posta adresinle giriş yap.
+                </p>
               </div>
-              <span>{error}</span>
-            </div>
+
+              {error && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 font-medium border border-red-100 flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-red-500 text-xs font-bold">!</span>
+                  </div>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleIdentifierSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-surface-700 mb-2">
+                    Telefon veya E-posta
+                  </label>
+                  <div className="relative group">
+                    {detectType(identifier) ? (
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-500 transition-colors" size={18} />
+                    ) : (
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-500 transition-colors" size={18} />
+                    )}
+                    <input
+                      type="text"
+                      placeholder="0 5XX XXX XX XX veya ornek@mail.com"
+                      className="w-full pl-11 pr-4 py-3.5 border border-surface-200 rounded-xl bg-surface-50
+                        focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white
+                        outline-none transition-all text-surface-800 placeholder:text-surface-400"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      autoFocus
+                      required
+                      disabled={otpSending}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={otpSending}
+                  className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3.5 rounded-xl
+                    font-bold hover:from-primary-600 hover:to-primary-700 transition-all
+                    shadow-lg shadow-primary-200/50 disabled:opacity-50 disabled:cursor-not-allowed
+                    transform hover:shadow-xl hover:shadow-primary-300/40 hover:-translate-y-0.5 active:translate-y-0
+                    flex items-center justify-center gap-2 group"
+                >
+                  {otpSending ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      SMS gönderiliyor...
+                    </span>
+                  ) : (
+                    <>
+                      Devam Et
+                      <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="mt-8 mb-6 flex items-center gap-4">
+                <div className="flex-1 h-px bg-surface-200" />
+                <span className="text-xs text-surface-400 font-medium">veya</span>
+                <div className="flex-1 h-px bg-surface-200" />
+              </div>
+
+              {/* Register Link */}
+              <Link
+                to="/register"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-surface-200
+                  text-surface-700 font-semibold hover:border-primary-200 hover:bg-primary-50/50
+                  hover:text-primary-600 transition-all group"
+              >
+                Yeni hesap oluştur
+                <ChevronRight size={16} className="text-surface-400 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            </>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-surface-700 mb-2">
-                E-posta veya Kullanıcı Adı
-              </label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                <input
-                  type="text"
-                  placeholder="ornek@mail.com"
-                  className="w-full pl-11 pr-4 py-3.5 border border-surface-200 rounded-xl bg-surface-50
-                    focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white
-                    outline-none transition-all text-surface-800 placeholder:text-surface-400"
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-            </div>
+          {/* ═══════════ ADIM 2a: ŞİFRE (Mail) ═══════════ */}
+          {step === 'password' && (
+            <>
+              <button
+                onClick={goBack}
+                className="flex items-center gap-2 text-surface-500 hover:text-surface-700 transition-colors mb-6 group"
+              >
+                <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                <span className="text-sm font-medium">Geri</span>
+              </button>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold text-surface-700">
-                  Şifre
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs text-primary-500 hover:text-primary-600 font-medium hover:underline"
-                >
-                  Şifremi Unuttum
-                </Link>
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-surface-900">
+                  Şifreni gir
+                </h1>
+                <p className="text-surface-500 mt-2">
+                  <span className="font-medium text-surface-700">{identifier}</span> hesabına giriş yap.
+                </p>
               </div>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className="w-full pl-11 pr-12 py-3.5 border border-surface-200 rounded-xl bg-surface-50
-                    focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white
-                    outline-none transition-all text-surface-800 placeholder:text-surface-400"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3.5 rounded-xl
-                font-bold hover:from-primary-600 hover:to-primary-700 transition-all
-                shadow-lg shadow-primary-200/50 disabled:opacity-50 disabled:cursor-not-allowed
-                transform hover:shadow-xl hover:shadow-primary-300/40 hover:-translate-y-0.5 active:translate-y-0
-                flex items-center justify-center gap-2 group"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Giriş yapılıyor...
-                </span>
-              ) : (
-                <>
-                  Giriş Yap
-                  <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
-                </>
+              {error && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 font-medium border border-red-100 flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-red-500 text-xs font-bold">!</span>
+                  </div>
+                  <span>{error}</span>
+                </div>
               )}
-            </button>
-          </form>
 
-          {/* Divider */}
-          <div className="mt-8 mb-6 flex items-center gap-4">
-            <div className="flex-1 h-px bg-surface-200" />
-            <span className="text-xs text-surface-400 font-medium">veya</span>
-            <div className="flex-1 h-px bg-surface-200" />
-          </div>
+              <form onSubmit={handlePasswordLogin} className="space-y-5">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-semibold text-surface-700">
+                      Şifre
+                    </label>
+                    <Link
+                      to="/forgot-password"
+                      className="text-xs text-primary-500 hover:text-primary-600 font-medium hover:underline"
+                    >
+                      Şifremi Unuttum
+                    </Link>
+                  </div>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-500 transition-colors" size={18} />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="w-full pl-11 pr-12 py-3.5 border border-surface-200 rounded-xl bg-surface-50
+                        focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white
+                        outline-none transition-all text-surface-800 placeholder:text-surface-400"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoFocus
+                      required
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
 
-          {/* Register Link */}
-          <Link
-            to="/register"
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-surface-200
-              text-surface-700 font-semibold hover:border-primary-200 hover:bg-primary-50/50
-              hover:text-primary-600 transition-all group"
-          >
-            Yeni hesap oluştur
-            <ChevronRight size={16} className="text-surface-400 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all" />
-          </Link>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3.5 rounded-xl
+                    font-bold hover:from-primary-600 hover:to-primary-700 transition-all
+                    shadow-lg shadow-primary-200/50 disabled:opacity-50 disabled:cursor-not-allowed
+                    transform hover:shadow-xl hover:shadow-primary-300/40 hover:-translate-y-0.5 active:translate-y-0
+                    flex items-center justify-center gap-2 group"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Giriş yapılıyor...
+                    </span>
+                  ) : (
+                    <>
+                      Giriş Yap
+                      <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* ═══════════ ADIM 2b: OTP (Telefon) ═══════════ */}
+          {step === 'otp' && (
+            <>
+              <button
+                onClick={goBack}
+                className="flex items-center gap-2 text-surface-500 hover:text-surface-700 transition-colors mb-6 group"
+              >
+                <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                <span className="text-sm font-medium">Geri</span>
+              </button>
+
+              <div className="mb-8">
+                <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center mb-4">
+                  <Shield className="text-primary-500" size={28} />
+                </div>
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-surface-900">
+                  Doğrulama kodu
+                </h1>
+                <p className="text-surface-500 mt-2">
+                  <span className="font-medium text-surface-700">{maskedPhone()}</span> numarasına gönderilen 6 haneli kodu gir.
+                </p>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 font-medium border border-red-100 flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-red-500 text-xs font-bold">!</span>
+                  </div>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* OTP Inputs */}
+              <div className="flex gap-3 justify-center mb-6">
+                {otpCode.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => otpRefs.current[i] = el}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                      if (paste.length === 6) {
+                        const newOtp = paste.split('');
+                        setOtpCode(newOtp);
+                        otpRefs.current[5]?.focus();
+                        handleOtpVerify(paste);
+                      }
+                    }}
+                    className={`w-12 h-14 text-center text-xl font-bold border-2 rounded-xl bg-surface-50
+                      focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white
+                      outline-none transition-all text-surface-800
+                      ${digit ? 'border-primary-300 bg-primary-50/50' : 'border-surface-200'}`}
+                    disabled={loading}
+                  />
+                ))}
+              </div>
+
+              {/* Loading */}
+              {loading && (
+                <div className="flex items-center justify-center gap-2 text-surface-500 mb-4">
+                  <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm">Doğrulanıyor...</span>
+                </div>
+              )}
+
+              {/* Timer ve Tekrar Gönder */}
+              <div className="text-center">
+                {otpTimer > 0 ? (
+                  <p className="text-sm text-surface-400">
+                    Yeni kod gönder <span className="font-semibold text-surface-600">{Math.floor(otpTimer / 60)}:{String(otpTimer % 60).padStart(2, '0')}</span>
+                  </p>
+                ) : (
+                  <button
+                    onClick={resendOtp}
+                    disabled={otpSending}
+                    className="text-sm text-primary-500 hover:text-primary-600 font-semibold hover:underline disabled:opacity-50"
+                  >
+                    {otpSending ? 'Gönderiliyor...' : 'Kodu tekrar gönder'}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
 
           {/* Footer */}
           <p className="text-center text-surface-400 text-xs mt-8">
