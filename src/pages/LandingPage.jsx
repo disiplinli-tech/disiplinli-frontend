@@ -458,7 +458,7 @@ export default function LandingPage() {
               name: `Disiplinli Premium ${goalLabel}`,
               subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
               aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
-              price: '6.000',
+              price: '5.000',
               features: [
                 'Plus planındaki her şey',
                 'Aylık 4 saat birebir canlı özel ders hakkı',
