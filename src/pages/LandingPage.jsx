@@ -615,7 +615,7 @@ export default function LandingPage() {
               )}
               <button
                 onClick={() => plans.core.price
-                  ? navigate('/checkout', { state: { plan: plans.core, goal: selectedGoal, goalLabel } })
+                  ? navigate('/register', { state: { goal: selectedGoal, plan: 'core' } })
                   : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
                 }
                 className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
@@ -652,7 +652,7 @@ export default function LandingPage() {
               )}
               <button
                 onClick={() => plans.plus.price
-                  ? navigate('/checkout', { state: { plan: plans.plus, goal: selectedGoal, goalLabel } })
+                  ? navigate('/register', { state: { goal: selectedGoal, plan: 'plus' } })
                   : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
                 }
                 className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
@@ -710,7 +710,7 @@ export default function LandingPage() {
                 )}
                 <button
                   onClick={() => plans.pro.price
-                    ? navigate('/checkout', { state: { plan: plans.pro, goal: selectedGoal, goalLabel } })
+                    ? navigate('/register', { state: { goal: selectedGoal, plan: 'pro' } })
                     : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
                   }
                   className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
