@@ -429,7 +429,7 @@ export default function LandingPage() {
               name: `Disiplinli ${goalLabel}`,
               subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
               aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
-              price: '1.500',
+              price: '1.250',
               features: [
                 'Disiplinli çalışma ve takip sistemi erişimi',
                 'Haftalık kişisel çalışma planı',
@@ -443,7 +443,7 @@ export default function LandingPage() {
               name: `Disiplinli Plus ${goalLabel}`,
               subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
               aim: 'Düzenli takip ile disiplin ve not artışı.',
-              price: '3.000',
+              price: '2.500',
               features: [
                 'Disiplinli Ortaokul planındaki her şey',
                 'Birebir akademik koç',
@@ -458,7 +458,7 @@ export default function LandingPage() {
               name: `Disiplinli Premium ${goalLabel}`,
               subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
               aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
-              price: '5.000',
+              price: '4.500',
               features: [
                 'Plus planındaki her şey',
                 'Aylık 4 saat birebir canlı özel ders hakkı',
@@ -474,27 +474,43 @@ export default function LandingPage() {
               name: 'Disiplinli Lise',
               subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
               aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
-              price: null,
+              price: '1.500',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Disiplinli çalışma ve takip sistemi erişimi',
+                'Haftalık kişisel çalışma planı',
+                'Haftalık akademik görevler',
+                'Konu kazanım checklist takibi',
+                'Performans paneli ve ilerleme grafikleri',
+                'Tüm dersler haftalık analiz föyü 32\'li set'
               ]
             },
             plus: {
               name: 'Disiplinli Plus Lise',
               subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
               aim: 'Düzenli takip ile disiplin ve not artışı.',
-              price: null,
+              price: '3.000',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Disiplinli Lise planındaki her şey',
+                'Birebir akademik koç',
+                'Haftalık 2 kez videolu koç görüşmesi',
+                'Koç ile mesajlaşma desteği',
+                'Kişiselleştirilmiş program',
+                'Haftalık gelişim analizi',
+                'Aylık veli bilgilendirme'
               ]
             },
             pro: {
               name: 'Disiplinli Premium Lise',
               subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
               aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
-              price: null,
+              price: '5.000',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Plus planındaki her şey',
+                'Aylık 4 saat birebir canlı özel ders hakkı',
+                'Eksik konu kapatma çalışmaları',
+                'Derse özel materyal desteği',
+                'Öncelikli destek',
+                'Detaylı veli raporu'
               ]
             }
           },
