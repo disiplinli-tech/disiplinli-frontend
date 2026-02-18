@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api';
 import {
   BookOpen, ChevronRight, ArrowRight, Calendar, BarChart3,
   ClipboardList, Users, MessageCircle, CheckCircle2, Layers,
@@ -667,8 +668,11 @@ export default function LandingPage() {
                       if (!callForm.name || !callForm.phone || !callForm.role) return;
                       setCallFormStatus('sending');
                       try {
-                        // TODO: Backend endpoint entegrasyonu
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        await API.post('/api/contact/', {
+                          name: callForm.name,
+                          phone: callForm.phone,
+                          role: callForm.role,
+                        });
                         setCallFormStatus('sent');
                       } catch {
                         setCallFormStatus('error');
