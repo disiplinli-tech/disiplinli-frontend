@@ -327,7 +327,7 @@ export default function Login({ setUser }) {
                     )}
                     <input
                       type="text"
-                      placeholder="0 5XX XXX XX XX veya ornek@mail.com"
+                      placeholder="Telefon veya e-posta"
                       className="w-full pl-11 pr-4 py-3.5 border border-surface-200 rounded-xl bg-surface-50
                         focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white
                         outline-none transition-all text-surface-800 placeholder:text-surface-400"
