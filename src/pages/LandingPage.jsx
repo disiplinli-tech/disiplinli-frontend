@@ -422,6 +422,105 @@ export default function LandingPage() {
          ═══════════════════════════════════════════════════ */}
       {selectedGoal && (() => {
         const goalLabel = { ortaokul: 'Ortaokul', lise: 'Lise', lgs: 'LGS', yks: 'YKS' }[selectedGoal];
+
+        const planData = {
+          ortaokul: {
+            core: {
+              name: `Disiplinli ${goalLabel}`,
+              subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
+              aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
+              price: '1.500',
+              features: [
+                'Disiplinli çalışma ve takip sistemi erişimi',
+                'Haftalık kişisel çalışma planı',
+                'Haftalık akademik görevler',
+                'Konu kazanım checklist takibi',
+                'Performans paneli ve ilerleme grafikleri',
+                'Tüm dersler haftalık analiz föyü 32\'li set'
+              ]
+            },
+            plus: {
+              name: `Disiplinli Plus ${goalLabel}`,
+              subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
+              aim: 'Düzenli takip ile disiplin ve not artışı.',
+              price: '3.000',
+              features: [
+                'Disiplinli Ortaokul planındaki her şey',
+                'Birebir akademik koç',
+                'Haftalık 2 kez videolu koç görüşmesi',
+                'Koç ile mesajlaşma desteği',
+                'Kişiselleştirilmiş program',
+                'Haftalık gelişim analizi',
+                'Aylık veli bilgilendirme'
+              ]
+            },
+            pro: {
+              name: `Disiplinli Premium ${goalLabel}`,
+              subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
+              aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
+              price: '6.000',
+              features: [
+                'Plus planındaki her şey',
+                'Aylık 4 saat birebir canlı özel ders hakkı',
+                'Eksik konu kapatma çalışmaları',
+                'Derse özel materyal desteği',
+                'Öncelikli destek',
+                'Detaylı veli raporu'
+              ]
+            }
+          },
+          lise: {
+            core: {
+              name: `Disiplinli ${goalLabel}`,
+              subtitle: 'Kendi kendine ilerlemek isteyenler için temel yapı',
+              price: null,
+              features: [
+                'Haftalık deneme sınavları',
+                'Detaylı deneme analiz raporu',
+                'Net takip sistemi',
+                'İlerleme göstergeleri',
+                'Kişisel çalışma planı'
+              ]
+            },
+            plus: {
+              name: `Disiplinli Plus ${goalLabel}`,
+              subtitle: 'Birebir koç desteğiyle sistemi en verimli şekilde kullan',
+              price: null,
+              features: [
+                'Core planındaki her şey',
+                'Birebir akademik koç',
+                'Haftalık görüşme & takip',
+                'Kişiselleştirilmiş program',
+                'Eksik analizi raporu',
+                'Koç ile mesajlaşma'
+              ]
+            },
+            pro: {
+              name: `Disiplinli Pro ${goalLabel}`,
+              subtitle: 'Tam destek — koçluk, özel ders ve sistem bir arada',
+              price: null,
+              features: [
+                'Plus planındaki her şey',
+                'Birebir özel ders desteği',
+                'Konuya özel eksik kapatma',
+                'Online ders desteği',
+                'Veli bilgilendirme'
+              ]
+            }
+          }
+        };
+        // LGS ve YKS şimdilik Lise ile aynı yapıyı kullanıyor
+        planData.lgs = { ...planData.lise };
+        planData.lgs.core = { ...planData.lise.core, name: `Disiplinli ${goalLabel}` };
+        planData.lgs.plus = { ...planData.lise.plus, name: `Disiplinli Plus ${goalLabel}` };
+        planData.lgs.pro = { ...planData.lise.pro, name: `Disiplinli Pro ${goalLabel}` };
+        planData.yks = { ...planData.lise };
+        planData.yks.core = { ...planData.lise.core, name: `Disiplinli ${goalLabel}` };
+        planData.yks.plus = { ...planData.lise.plus, name: `Disiplinli Plus ${goalLabel}` };
+        planData.yks.pro = { ...planData.lise.pro, name: `Disiplinli Pro ${goalLabel}` };
+
+        const plans = planData[selectedGoal];
+
         return (
       <Section id="pricing" className="py-12 md:py-16 px-6">
         <div className="max-w-7xl mx-auto">
@@ -433,26 +532,31 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {/* ── Disiplinli [Hedef] ── */}
+            {/* ── Core Plan ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Disiplinli {goalLabel}</h3>
-                <p className="text-sm text-surface-400">Kendi kendine ilerlemek isteyenler için temel yapı</p>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{plans.core.name}</h3>
+                <p className="text-sm text-surface-400">{plans.core.subtitle}</p>
               </div>
-              <ul className="space-y-3 mb-7 flex-1">
-                {[
-                  'Haftalık deneme sınavları',
-                  'Detaylı deneme analiz raporu',
-                  'Net takip sistemi',
-                  'İlerleme göstergeleri',
-                  'Kişisel çalışma planı'
-                ].map((item, i) => (
+              {plans.core.price && (
+                <div className="mb-5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-display font-bold text-surface-900">{plans.core.price}₺</span>
+                    <span className="text-sm text-surface-400">/ay</span>
+                  </div>
+                </div>
+              )}
+              <ul className="space-y-3 mb-5 flex-1">
+                {plans.core.features.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
                     <CheckCircle2 size={18} className="text-emerald-500 mt-0.5 shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
+              {plans.core.aim && (
+                <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.core.aim}</p>
+              )}
               <a href="#contact"
                 className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
                   hover:bg-surface-100 transition-all text-center block"
@@ -467,24 +571,28 @@ export default function LandingPage() {
                 <span className="text-xs font-bold text-white">En Popüler</span>
               </div>
               <div className="mb-5 mt-2">
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Disiplinli Plus {goalLabel}</h3>
-                <p className="text-sm text-surface-400">Birebir koç desteğiyle sistemi en verimli şekilde kullan</p>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{plans.plus.name}</h3>
+                <p className="text-sm text-surface-400">{plans.plus.subtitle}</p>
               </div>
-              <ul className="space-y-3 mb-7 flex-1">
-                {[
-                  'Core planındaki her şey',
-                  'Birebir akademik koç',
-                  'Haftalık görüşme & takip',
-                  'Kişiselleştirilmiş program',
-                  'Eksik analizi raporu',
-                  'Koç ile mesajlaşma'
-                ].map((item, i) => (
+              {plans.plus.price && (
+                <div className="mb-5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-display font-bold text-primary-600">{plans.plus.price}₺</span>
+                    <span className="text-sm text-surface-400">/ay</span>
+                  </div>
+                </div>
+              )}
+              <ul className="space-y-3 mb-5 flex-1">
+                {plans.plus.features.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
                     <CheckCircle2 size={18} className="text-primary-500 mt-0.5 shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
+              {plans.plus.aim && (
+                <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.plus.aim}</p>
+              )}
               <a href="#contact"
                 className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
                   hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center block"
@@ -493,26 +601,31 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* ── Pro ── */}
+            {/* ── Pro / Premium ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
-                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">Disiplinli Pro {goalLabel}</h3>
-                <p className="text-sm text-surface-400">Tam destek — koçluk, özel ders ve sistem bir arada</p>
+                <h3 className="text-xl font-display font-bold text-surface-900 mb-1">{plans.pro.name}</h3>
+                <p className="text-sm text-surface-400">{plans.pro.subtitle}</p>
               </div>
-              <ul className="space-y-3 mb-7 flex-1">
-                {[
-                  'Plus planındaki her şey',
-                  'Birebir özel ders desteği',
-                  'Konuya özel eksik kapatma',
-                  'Online ders desteği',
-                  'Veli bilgilendirme'
-                ].map((item, i) => (
+              {plans.pro.price && (
+                <div className="mb-5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-display font-bold text-surface-900">{plans.pro.price}₺</span>
+                    <span className="text-sm text-surface-400">/ay</span>
+                  </div>
+                </div>
+              )}
+              <ul className="space-y-3 mb-5 flex-1">
+                {plans.pro.features.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-surface-600">
                     <CheckCircle2 size={18} className="text-warm-500 mt-0.5 shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
+              {plans.pro.aim && (
+                <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.pro.aim}</p>
+              )}
               <a href="#contact"
                 className="w-full py-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold text-surface-700
                   hover:bg-surface-100 transition-all text-center block"
