@@ -20,7 +20,7 @@ function KvkkModal({ isOpen, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-surface-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center">
               <Shield className="text-white" size={20} />
             </div>
             <div>
@@ -118,8 +118,8 @@ function KvkkModal({ isOpen, onClose }) {
         <div className="p-5 border-t border-surface-100 bg-surface-50 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-3 rounded-xl
-              font-bold hover:from-primary-700 hover:to-primary-800 transition-all"
+            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-xl
+              font-bold hover:from-primary-600 hover:to-primary-700 transition-all"
           >
             Tamam, Anladım!
           </button>
@@ -231,7 +231,7 @@ export default function Register() {
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
 
       {/* Sol Panel - Branding */}
-      <div className="hidden lg:flex lg:w-[48%] relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900">
+      <div className="hidden lg:flex lg:w-[48%] relative overflow-hidden bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700">
         {/* Dekoratif arka plan elementleri */}
         <div className="absolute inset-0">
           <div className="absolute top-20 -left-20 w-72 h-72 bg-warm-400/20 rounded-full blur-3xl animate-pulse-soft" />
@@ -294,7 +294,7 @@ export default function Register() {
               {['AK', 'EB', 'SY', 'MK'].map((initials, i) => (
                 <div
                   key={i}
-                  className="w-8 h-8 rounded-full border-2 border-primary-700 flex items-center justify-center text-[10px] font-bold text-white"
+                  className="w-8 h-8 rounded-full border-2 border-primary-500 flex items-center justify-center text-[10px] font-bold text-white"
                   style={{ backgroundColor: ['#f97316', '#ea580c', '#22c55e', '#3b82f6'][i] }}
                 >
                   {initials}
@@ -316,7 +316,7 @@ export default function Register() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2.5">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-200">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-200">
                 <BookOpen className="text-white" size={20} />
               </div>
               <span className="font-display font-bold text-xl text-surface-800">Disiplinli</span>
@@ -354,7 +354,7 @@ export default function Register() {
                 onClick={() => handleRoleChange("student")}
                 className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border-2 transition-all font-medium text-sm
                   ${formData.role === "student"
-                    ? "border-primary-500 bg-primary-50 text-primary-700 shadow-sm shadow-primary-100"
+                    ? "border-primary-400 bg-primary-50 text-primary-600 shadow-sm shadow-primary-100"
                     : "border-surface-200 text-surface-500 hover:border-surface-300 hover:bg-surface-50"}`}
               >
                 <GraduationCap size={18} />
@@ -365,7 +365,7 @@ export default function Register() {
                 onClick={() => handleRoleChange("parent")}
                 className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border-2 transition-all font-medium text-sm
                   ${formData.role === "parent"
-                    ? "border-primary-500 bg-primary-50 text-primary-700 shadow-sm shadow-primary-100"
+                    ? "border-primary-400 bg-primary-50 text-primary-600 shadow-sm shadow-primary-100"
                     : "border-surface-200 text-surface-500 hover:border-surface-300 hover:bg-surface-50"}`}
               >
                 <Users size={18} />
@@ -512,7 +512,7 @@ export default function Register() {
               <p className="text-sm text-surface-600 leading-relaxed">
                 <button
                   type="button"
-                  className="text-primary-600 hover:text-primary-700 hover:underline font-medium"
+                  className="text-primary-500 hover:text-primary-600 hover:underline font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowKvkkModal(true);
@@ -531,7 +531,7 @@ export default function Register() {
               className={`w-full py-3.5 rounded-xl font-bold transition-all
                 flex items-center justify-center gap-2 group
                 ${kvkkAccepted
-                  ? "bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-lg shadow-primary-200/50 hover:shadow-xl hover:shadow-primary-300/40 hover:-translate-y-0.5 active:translate-y-0 transform"
+                  ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-lg shadow-primary-200/50 hover:shadow-xl hover:shadow-primary-300/40 hover:-translate-y-0.5 active:translate-y-0 transform"
                   : "bg-surface-200 text-surface-400 cursor-not-allowed shadow-none"}
                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none`}
             >
@@ -561,7 +561,7 @@ export default function Register() {
             to="/login"
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-surface-200
               text-surface-700 font-semibold hover:border-primary-200 hover:bg-primary-50/50
-              hover:text-primary-700 transition-all group"
+              hover:text-primary-600 transition-all group"
           >
             <ChevronLeft size={16} className="text-surface-400 group-hover:text-primary-500 group-hover:-translate-x-0.5 transition-all" />
             Zaten hesabım var, giriş yap

@@ -49,7 +49,7 @@ export default function Login({ setUser }) {
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
 
       {/* Sol Panel - Branding */}
-      <div className="hidden lg:flex lg:w-[48%] relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900">
+      <div className="hidden lg:flex lg:w-[48%] relative overflow-hidden bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700">
         {/* Dekoratif arka plan elementleri */}
         <div className="absolute inset-0">
           <div className="absolute top-20 -left-20 w-72 h-72 bg-warm-400/20 rounded-full blur-3xl animate-pulse-soft" />
@@ -113,7 +113,7 @@ export default function Login({ setUser }) {
               {['AK', 'EB', 'SY', 'MK'].map((initials, i) => (
                 <div
                   key={i}
-                  className="w-8 h-8 rounded-full border-2 border-primary-700 flex items-center justify-center text-[10px] font-bold text-white"
+                  className="w-8 h-8 rounded-full border-2 border-primary-500 flex items-center justify-center text-[10px] font-bold text-white"
                   style={{ backgroundColor: ['#f97316', '#ea580c', '#22c55e', '#3b82f6'][i] }}
                 >
                   {initials}
@@ -135,7 +135,7 @@ export default function Login({ setUser }) {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2.5">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-200">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-200">
                 <BookOpen className="text-white" size={20} />
               </div>
               <span className="font-display font-bold text-xl text-surface-800">Disiplinli</span>
@@ -191,7 +191,7 @@ export default function Login({ setUser }) {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-primary-600 hover:text-primary-700 font-medium hover:underline"
+                  className="text-xs text-primary-500 hover:text-primary-600 font-medium hover:underline"
                 >
                   Şifremi Unuttum
                 </Link>
@@ -222,8 +222,8 @@ export default function Login({ setUser }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-3.5 rounded-xl
-                font-bold hover:from-primary-700 hover:to-primary-800 transition-all
+              className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3.5 rounded-xl
+                font-bold hover:from-primary-600 hover:to-primary-700 transition-all
                 shadow-lg shadow-primary-200/50 disabled:opacity-50 disabled:cursor-not-allowed
                 transform hover:shadow-xl hover:shadow-primary-300/40 hover:-translate-y-0.5 active:translate-y-0
                 flex items-center justify-center gap-2 group"
@@ -254,7 +254,7 @@ export default function Login({ setUser }) {
             to="/register"
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-surface-200
               text-surface-700 font-semibold hover:border-primary-200 hover:bg-primary-50/50
-              hover:text-primary-700 transition-all group"
+              hover:text-primary-600 transition-all group"
           >
             Yeni hesap oluştur
             <ChevronRight size={16} className="text-surface-400 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all" />
