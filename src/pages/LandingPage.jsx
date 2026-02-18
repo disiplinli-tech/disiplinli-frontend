@@ -83,14 +83,15 @@ export default function LandingPage() {
             {/* Desktop nav — centered with slight left offset */}
             <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-[55%]">
               {[
-                ['Nasıl Çalışır', '#how-it-works'],
-                ['Planlar', '#pricing'],
-                ['Referanslar', '#testimonials'],
-                ['İletişim', '#contact']
-              ].map(([label, href]) => (
-                <a key={href} href={href} className="text-surface-500 hover:text-surface-900 transition-colors text-sm font-medium">
+                ['Nasıl Çalışır', 'how-it-works'],
+                ['Planlar', 'goal-selection'],
+                ['Referanslar', 'testimonials'],
+                ['İletişim', 'contact']
+              ].map(([label, id]) => (
+                <button key={id} onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-surface-500 hover:text-surface-900 transition-colors text-sm font-medium cursor-pointer">
                   {label}
-                </a>
+                </button>
               ))}
             </div>
 
@@ -102,13 +103,13 @@ export default function LandingPage() {
               >
                 Giriş Yap
               </button>
-              <a
-                href="#contact"
+              <button
+                onClick={() => document.getElementById('goal-selection')?.scrollIntoView({ behavior: 'smooth' })}
                 className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
-                  hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.03] active:scale-[0.98]"
+                  hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
               >
                 Paket Seç
-              </a>
+              </button>
             </div>
 
             {/* Mobile hamburger */}
@@ -122,24 +123,24 @@ export default function LandingPage() {
         {mobileMenu && (
           <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-surface-100 px-6 py-6 space-y-4 shadow-lg">
             {[
-              ['Nasıl Çalışır', '#how-it-works'],
-              ['Planlar', '#pricing'],
-              ['Referanslar', '#testimonials'],
-              ['İletişim', '#contact']
-            ].map(([label, href]) => (
-              <a key={href} href={href} onClick={() => setMobileMenu(false)}
-                className="block text-surface-700 hover:text-surface-900 text-base font-medium">
+              ['Nasıl Çalışır', 'how-it-works'],
+              ['Planlar', 'goal-selection'],
+              ['Referanslar', 'testimonials'],
+              ['İletişim', 'contact']
+            ].map(([label, id]) => (
+              <button key={id} onClick={() => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); setMobileMenu(false); }}
+                className="block text-surface-700 hover:text-surface-900 text-base font-medium cursor-pointer">
                 {label}
-              </a>
+              </button>
             ))}
             <div className="pt-4 flex flex-col gap-3 border-t border-surface-100">
               <button onClick={() => navigate('/login')} className="py-3 text-surface-600 text-sm font-medium">
                 Giriş Yap
               </button>
-              <a href="#contact" onClick={() => setMobileMenu(false)}
-                className="py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold text-center block">
+              <button onClick={() => { document.getElementById('goal-selection')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenu(false); }}
+                className="py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold text-center block w-full cursor-pointer rounded-xl">
                 Paket Seç
-              </a>
+              </button>
             </div>
           </div>
         )}
@@ -382,7 +383,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            SEGMENTATION — Hedefini Seç
          ═══════════════════════════════════════════════════ */}
-      <Section className="py-12 md:py-16 px-6">
+      <Section id="goal-selection" className="py-12 md:py-16 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900 mb-3">
