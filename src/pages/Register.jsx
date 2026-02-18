@@ -493,9 +493,10 @@ export default function Register() {
                   <label className="block text-sm font-semibold text-surface-700 mb-1.5">Telefon Numarası</label>
                   <div className="relative group">
                     <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-400 group-focus-within:text-primary-500 transition-colors" size={17} />
-                    <input type="tel" placeholder="05XX XXX XX XX" value={phone} onChange={e => setPhone(e.target.value)} required
+                    <input type="tel" placeholder="5XX XXX XX XX" value={phone} onChange={e => setPhone(e.target.value)} required
                       className="w-full pl-10 pr-4 py-3 border border-surface-200 rounded-xl bg-surface-50 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:bg-white outline-none transition-all text-surface-800 placeholder:text-surface-400 text-sm" />
                   </div>
+                  <p className="text-xs text-surface-400 mt-1">Başında 0 olmadan, 10 haneli olarak girin.</p>
                 </div>
 
                 {/* E-posta */}
