@@ -464,7 +464,7 @@ export default function LandingPage() {
                 'Plus planındaki her şey',
                 'Aylık 4 saat birebir canlı özel ders hakkı',
                 'Eksik konu kapatma çalışmaları',
-                'Derse özel materyal desteği',
+                'Dijital özel materyal desteği',
                 'Öncelikli destek',
                 'Detaylı veli raporu'
               ]
@@ -509,7 +509,7 @@ export default function LandingPage() {
                 'Plus planındaki her şey',
                 'Aylık 4 saat birebir canlı özel ders hakkı',
                 'Eksik konu kapatma çalışmaları',
-                'Derse özel materyal desteği',
+                'Dijital özel materyal desteği',
                 'Öncelikli destek',
                 'Detaylı veli raporu'
               ]
@@ -554,7 +554,7 @@ export default function LandingPage() {
                 'Plus planındaki her şey',
                 'Aylık 4 saat birebir canlı özel ders hakkı',
                 'Eksik konu kapatma çalışmaları',
-                'Derse özel materyal desteği',
+                'Dijital özel materyal desteği',
                 'Öncelikli destek',
                 'Detaylı veli raporu'
               ]
@@ -599,7 +599,7 @@ export default function LandingPage() {
                 'Plus planındaki her şey',
                 'Aylık 4 saat birebir canlı özel ders hakkı',
                 'Eksik konu kapatma çalışmaları',
-                'Derse özel materyal desteği',
+                'Dijital özel materyal desteği',
                 'Öncelikli destek',
                 'Detaylı veli raporu'
               ]
