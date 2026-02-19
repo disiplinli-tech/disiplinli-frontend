@@ -394,23 +394,28 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { key: 'ortaokul', label: 'Ortaokul' },
-              { key: 'lise', label: 'Lise' },
-              { key: 'lgs', label: 'LGS' },
-              { key: 'yks', label: 'YKS' }
+              { key: 'ortaokul', label: 'Ortaokul', emoji: '📚', desc: '5-8. sınıf' },
+              { key: 'lise', label: 'Lise', emoji: '🎓', desc: '9-12. sınıf' },
+              { key: 'lgs', label: 'LGS', emoji: '🎯', desc: '8. sınıf sınavı' },
+              { key: 'yks', label: 'YKS', emoji: '🚀', desc: 'Üniversite sınavı' }
             ].map((goal) => (
               <button
                 key={goal.key}
                 onClick={() => setSelectedGoal(goal.key === selectedGoal ? '' : goal.key)}
-                className={`group relative py-5 px-6 rounded-2xl border-2 transition-all duration-300 text-center cursor-pointer
+                className={`group relative py-6 px-5 rounded-2xl border-2 transition-all duration-300 text-center cursor-pointer
+                  hover:scale-[1.03] active:scale-[0.98]
                   ${selectedGoal === goal.key
                     ? 'border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/10 scale-[1.03]'
                     : 'border-surface-100 bg-white hover:border-primary-200 hover:shadow-card'
                   }`}
               >
+                <span className="text-2xl mb-2 block">{goal.emoji}</span>
                 <p className={`text-lg font-bold transition-colors ${
                   selectedGoal === goal.key ? 'text-primary-700' : 'text-surface-700'
                 }`}>{goal.label}</p>
+                <p className={`text-xs mt-1 transition-colors ${
+                  selectedGoal === goal.key ? 'text-primary-500' : 'text-surface-400'
+                }`}>{goal.desc}</p>
               </button>
             ))}
           </div>
