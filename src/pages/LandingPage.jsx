@@ -383,16 +383,16 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            SEGMENTATION — Hedefini Seç
          ═══════════════════════════════════════════════════ */}
-      <Section id="goal-selection" className="py-12 md:py-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-10">
+      <Section id="goal-selection" className="pt-24 md:pt-32 pb-12 md:pb-16 px-6 scroll-mt-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-3xl mx-auto mb-8">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-surface-900 mb-3">
               Hedefini <span className="bg-gradient-to-r from-primary-600 to-warm-500 gradient-text">seç</span>
             </h2>
             <p className="text-surface-500 text-lg">Paketlerimiz seçtiğin hedefe göre şekillenir.</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
             {[
               { key: 'ortaokul', label: 'Ortaokul' },
               { key: 'lise', label: 'Lise' },
