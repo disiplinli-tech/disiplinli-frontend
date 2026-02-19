@@ -653,7 +653,7 @@ export default function LandingPage() {
                 className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
                   hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
               >
-                Satın Al
+                Bilgi Al
               </button>
             </div>
 
@@ -690,7 +690,7 @@ export default function LandingPage() {
                 className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
                   hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
               >
-                Satın Al
+                Bilgi Al
               </button>
             </div>
 
@@ -748,7 +748,7 @@ export default function LandingPage() {
                   className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
                     hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center cursor-pointer"
                 >
-                  Satın Al
+                  Bilgi Al
                 </button>
               </div>
             </div>
