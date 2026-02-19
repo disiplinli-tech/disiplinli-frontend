@@ -246,11 +246,8 @@ export default function Register() {
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
         <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-white/25 transition-all">
-              <BookOpen className="text-white" size={20} />
-            </div>
-            <span className="text-white font-display font-bold text-xl">Disiplinli</span>
+          <Link to="/" className="inline-block group">
+            <span className="text-white font-display font-bold text-xl group-hover:opacity-80 transition-opacity">Disiplinli.com</span>
           </Link>
 
           <div className="space-y-8">
@@ -302,11 +299,8 @@ export default function Register() {
 
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-6">
-            <Link to="/" className="inline-flex items-center gap-2.5">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-200">
-                <BookOpen className="text-white" size={20} />
-              </div>
-              <span className="font-display font-bold text-xl text-surface-800">Disiplinli</span>
+            <Link to="/" className="inline-block">
+              <span className="font-display font-bold text-xl text-surface-800">Disiplinli.com</span>
             </Link>
           </div>
 
