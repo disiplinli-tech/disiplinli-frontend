@@ -587,7 +587,7 @@ export default function LandingPage() {
             <p className="text-surface-500 text-lg">Her plan aynı sistemi kullanır. Fark, koçluk ve ders desteğinin yoğunluğunda.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto pt-4">
+          <div key={selectedGoal} className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto pt-4 pricing-grid-animated">
             {/* ── Core Plan ── */}
             <div className="pricing-card bg-white rounded-3xl p-7 border border-surface-100 shadow-card flex flex-col">
               <div className="mb-5">
