@@ -95,7 +95,7 @@ const planData = {
     core: {
       name: 'Disiplinli Ortaokul', price: '1.250',
       subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
-      features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'Haftalık akademik görevler', 'Konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri']
+      features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'Haftalık akademik görevler', 'Konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri', 'Dijital eğitim içerikleri']
     },
     plus: {
       name: 'Disiplinli Plus Ortaokul', price: '2.500',
@@ -112,7 +112,7 @@ const planData = {
     core: {
       name: 'Disiplinli Lise', price: '1.500',
       subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
-      features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'Haftalık akademik görevler', 'Konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri']
+      features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'Haftalık akademik görevler', 'Konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri', 'Dijital eğitim içerikleri']
     },
     plus: {
       name: 'Disiplinli Plus Lise', price: '3.000',
@@ -126,12 +126,12 @@ const planData = {
     }
   },
   lgs: {
-    core: { name: 'Disiplinli LGS', price: '1.500', subtitle: 'LGS\'ye yönelik temel çalışma sistemi.', features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'Konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri', 'LGS deneme analiz föyleri'] },
+    core: { name: 'Disiplinli LGS', price: '1.500', subtitle: 'LGS\'ye yönelik temel çalışma sistemi.', features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'Konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri', 'Dijital eğitim içerikleri'] },
     plus: { name: 'Disiplinli Plus LGS', price: '3.000', subtitle: 'Birebir koçluk ile LGS sürecini yönet.', features: ['Disiplinli LGS planındaki her şey', 'Birebir akademik koç', 'Haftalık 2 kez videolu koç görüşmesi', 'Koç ile mesajlaşma desteği', 'Kişiselleştirilmiş LGS programı', 'Haftalık gelişim analizi'] },
     pro: { name: 'Disiplinli Premium LGS', price: '5.000', subtitle: 'Koçluk ve özel ders ile LGS\'de maksimum başarı.', features: ['Plus planındaki her şey', 'Aylık 4 saat birebir canlı özel ders', 'Eksik konu kapatma çalışmaları', 'Derse özel materyal desteği', 'Öncelikli destek', 'Detaylı veli raporu'] }
   },
   yks: {
-    core: { name: 'Disiplinli YKS', price: '1.750', subtitle: 'YKS\'ye yönelik temel çalışma sistemi.', features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'TYT + AYT konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri', 'TYT-AYT deneme analiz föyleri'] },
+    core: { name: 'Disiplinli YKS', price: '1.750', subtitle: 'YKS\'ye yönelik temel çalışma sistemi.', features: ['Disiplinli çalışma ve takip sistemi erişimi', 'Haftalık kişisel çalışma planı', 'TYT + AYT konu kazanım checklist takibi', 'Performans paneli ve ilerleme grafikleri', 'Dijital eğitim içerikleri'] },
     plus: { name: 'Disiplinli Plus YKS', price: '3.500', subtitle: 'Birebir koçluk ile YKS sürecini yönet.', features: ['Disiplinli YKS planındaki her şey', 'Birebir akademik koç', 'Haftalık 2 kez videolu koç görüşmesi', 'Koç ile mesajlaşma desteği', 'Alan bazlı kişiselleştirilmiş YKS programı', 'Haftalık gelişim analizi'] },
     pro: { name: 'Disiplinli Premium YKS', price: '6.000', subtitle: 'Koçluk ve özel ders ile YKS\'de maksimum başarı.', features: ['Plus planındaki her şey', 'Aylık 4 saat birebir canlı özel ders', 'Eksik konu kapatma çalışmaları', 'Derse özel materyal desteği', 'Öncelikli destek', 'Detaylı veli raporu'] }
   }

@@ -437,7 +437,7 @@ export default function LandingPage() {
                 'Haftalık akademik görevler',
                 'Konu kazanım checklist takibi',
                 'Performans paneli ve ilerleme grafikleri',
-                'Tüm dersler haftalık analiz föyü 32\'li set'
+                'Dijital eğitim içerikleri'
               ]
             },
             plus: {
@@ -482,7 +482,7 @@ export default function LandingPage() {
                 'Haftalık akademik görevler',
                 'Konu kazanım checklist takibi',
                 'Performans paneli ve ilerleme grafikleri',
-                'Tüm dersler haftalık analiz föyü 32\'li set'
+                'Dijital eğitim içerikleri'
               ]
             },
             plus: {
@@ -527,7 +527,7 @@ export default function LandingPage() {
                 'Haftalık akademik görevler',
                 'Konu kazanım checklist takibi',
                 'Performans paneli ve ilerleme grafikleri',
-                'LGS deneme analiz föyleri 32\'li set'
+                'Dijital eğitim içerikleri'
               ]
             },
             plus: {
@@ -572,7 +572,7 @@ export default function LandingPage() {
                 'Haftalık akademik görevler',
                 'TYT + AYT konu kazanım checklist takibi',
                 'Performans paneli ve ilerleme grafikleri',
-                'TYT-AYT deneme analiz föyleri 32\'li set'
+                'Dijital eğitim içerikleri'
               ]
             },
             plus: {
