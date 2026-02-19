@@ -646,10 +646,7 @@ export default function LandingPage() {
                 <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.core.aim}</p>
               )}
               <button
-                onClick={() => plans.core.price
-                  ? navigate('/register', { state: { goal: selectedGoal, plan: 'core' } })
-                  : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-                }
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                 className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
                   hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
               >
@@ -683,10 +680,7 @@ export default function LandingPage() {
                 <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.plus.aim}</p>
               )}
               <button
-                onClick={() => plans.plus.price
-                  ? navigate('/register', { state: { goal: selectedGoal, plan: 'plus' } })
-                  : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-                }
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                 className="w-full py-3.5 bg-surface-800 text-white rounded-xl text-sm font-semibold
                   hover:bg-surface-900 transition-all hover:shadow-lg text-center cursor-pointer"
               >
@@ -741,10 +735,7 @@ export default function LandingPage() {
                   <p className="text-xs text-surface-400 italic mb-5 px-1">{plans.pro.aim}</p>
                 )}
                 <button
-                  onClick={() => plans.pro.price
-                    ? navigate('/register', { state: { goal: selectedGoal, plan: 'pro' } })
-                    : document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-                  }
+                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                   className="w-full py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl text-sm font-semibold
                     hover:shadow-lg hover:shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] text-center cursor-pointer"
                 >
