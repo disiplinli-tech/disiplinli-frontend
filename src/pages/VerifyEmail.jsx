@@ -10,8 +10,8 @@ const goalLabels = { ortaokul: 'Ortaokul', lise: 'Lise', lgs: 'LGS', yks: 'YKS' 
 const planPrices = {
   ortaokul: { core: '1.250', plus: '2.500', pro: '4.500' },
   lise:     { core: '1.500', plus: '3.000', pro: '5.000' },
-  lgs:      { core: null, plus: null, pro: null },
-  yks:      { core: null, plus: null, pro: null },
+  lgs:      { core: '1.500', plus: '3.000', pro: '5.000' },
+  yks:      { core: '1.750', plus: '3.500', pro: '6.000' },
 };
 
 const IBAN_INFO = {

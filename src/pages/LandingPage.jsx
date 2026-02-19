@@ -519,28 +519,44 @@ export default function LandingPage() {
             core: {
               name: 'Disiplinli LGS',
               subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
-              aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
-              price: null,
+              aim: 'LGS\'ye yönelik düzenli çalışma alışkanlığı kazanması.',
+              price: '1.500',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Disiplinli çalışma ve takip sistemi erişimi',
+                'Haftalık kişisel çalışma planı',
+                'Haftalık akademik görevler',
+                'Konu kazanım checklist takibi',
+                'Performans paneli ve ilerleme grafikleri',
+                'LGS deneme analiz föyleri 32\'li set'
               ]
             },
             plus: {
               name: 'Disiplinli Plus LGS',
-              subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
-              aim: 'Düzenli takip ile disiplin ve not artışı.',
-              price: null,
+              subtitle: 'Birebir koçluk ile LGS sürecini en verimli şekilde yönet.',
+              aim: 'Düzenli takip ile LGS net artışı ve motivasyon.',
+              price: '3.000',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Disiplinli LGS planındaki her şey',
+                'Birebir akademik koç',
+                'Haftalık 2 kez videolu koç görüşmesi',
+                'Koç ile mesajlaşma desteği',
+                'Kişiselleştirilmiş LGS çalışma programı',
+                'Haftalık gelişim analizi',
+                'Aylık veli bilgilendirme'
               ]
             },
             pro: {
               name: 'Disiplinli Premium LGS',
-              subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
+              subtitle: 'Koçluk ve özel ders ile LGS\'de maksimum başarı.',
               aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
-              price: null,
+              price: '5.000',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Plus planındaki her şey',
+                'Aylık 4 saat birebir canlı özel ders hakkı',
+                'Eksik konu kapatma çalışmaları',
+                'Derse özel materyal desteği',
+                'Öncelikli destek',
+                'Detaylı veli raporu'
               ]
             }
           },
@@ -548,28 +564,44 @@ export default function LandingPage() {
             core: {
               name: 'Disiplinli YKS',
               subtitle: 'Kendi kendine ilerlemek isteyen öğrenciler için temel sistem.',
-              aim: 'Öğrencinin düzenli çalışma alışkanlığı kazanması.',
-              price: null,
+              aim: 'YKS\'ye yönelik düzenli çalışma alışkanlığı kazanması.',
+              price: '1.750',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Disiplinli çalışma ve takip sistemi erişimi',
+                'Haftalık kişisel çalışma planı',
+                'Haftalık akademik görevler',
+                'TYT + AYT konu kazanım checklist takibi',
+                'Performans paneli ve ilerleme grafikleri',
+                'TYT-AYT deneme analiz föyleri 32\'li set'
               ]
             },
             plus: {
               name: 'Disiplinli Plus YKS',
-              subtitle: 'Birebir koçluk ile sistemi en verimli şekilde kullan.',
-              aim: 'Düzenli takip ile disiplin ve not artışı.',
-              price: null,
+              subtitle: 'Birebir koçluk ile YKS sürecini en verimli şekilde yönet.',
+              aim: 'Düzenli takip ile YKS net artışı ve motivasyon.',
+              price: '3.500',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Disiplinli YKS planındaki her şey',
+                'Birebir akademik koç',
+                'Haftalık 2 kez videolu koç görüşmesi',
+                'Koç ile mesajlaşma desteği',
+                'Alan bazlı kişiselleştirilmiş YKS programı',
+                'Haftalık gelişim analizi',
+                'Aylık veli bilgilendirme'
               ]
             },
             pro: {
               name: 'Disiplinli Premium YKS',
-              subtitle: 'Koçluk ve özel ders ile maksimum akademik destek.',
+              subtitle: 'Koçluk ve özel ders ile YKS\'de maksimum başarı.',
               aim: 'Hem alışkanlık hem de akademik başarıyı hızlandırmak.',
-              price: null,
+              price: '6.000',
               features: [
-                'Yakında detaylar paylaşılacak'
+                'Plus planındaki her şey',
+                'Aylık 4 saat birebir canlı özel ders hakkı',
+                'Eksik konu kapatma çalışmaları',
+                'Derse özel materyal desteği',
+                'Öncelikli destek',
+                'Detaylı veli raporu'
               ]
             }
           }
