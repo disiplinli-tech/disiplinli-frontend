@@ -314,7 +314,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            HOW IT WORKS
          ═══════════════════════════════════════════════════ */}
-      <Section id="how-it-works" className="py-12 md:py-16 px-6 bg-surface-50/60">
+      <Section id="how-it-works" className="py-12 md:py-16 px-6 bg-surface-50/60 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-100 rounded-full mb-5">
@@ -729,7 +729,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            TESTIMONIALS
          ═══════════════════════════════════════════════════ */}
-      <Section id="testimonials" className="py-12 md:py-16 px-6 bg-surface-50/60">
+      <Section id="testimonials" className="py-12 md:py-16 px-6 bg-surface-50/60 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-100 rounded-full mb-5">
@@ -807,7 +807,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════════
            SIZI ARAYALIM — CONTACT FORM
          ═══════════════════════════════════════════════════ */}
-      <Section id="contact" className="py-12 md:py-16 px-6">
+      <Section id="contact" className="py-12 md:py-16 px-6 scroll-mt-20">
         <div className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
 
