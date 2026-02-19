@@ -1042,8 +1042,10 @@ export default function LandingPage() {
                 <ul className="space-y-2.5">
                   {[
                     ['Kullanım Şartları', '/kullanici-sozlesmesi'],
-                    ['Gizlilik Sözleşmesi', '#'],
-                    ['İptal ve İade Koşulları', '#']
+                    ['Mesafeli Satış Sözleşmesi', '/mesafeli-satis-sozlesmesi'],
+                    ['İptal ve İade Koşulları', '/iptal-iade'],
+                    ['KVKK Aydınlatma Metni', '/kvkk'],
+                    ['Çerez Politikası', '/cerez-politikasi']
                   ].map(([label, href]) => (
                     <li key={label}>
                       <a href={href} className="text-sm text-surface-400 hover:text-white transition-colors">{label}</a>
@@ -1092,8 +1094,18 @@ export default function LandingPage() {
               </div>
             </div>
 
+            {/* ── Hizmet Sağlayıcı Bilgileri ── */}
+            <div className="border-t border-white/10 pt-8 mb-6">
+              <div className="text-xs text-surface-500 space-y-1">
+                <p><strong className="text-surface-400">Hizmet Sağlayıcı:</strong> [AD SOYAD] — Bireysel Hizmet Sağlayıcı</p>
+                <p><strong className="text-surface-400">VKN:</strong> [VERGİ KİMLİK NUMARASI] | <strong className="text-surface-400">KEP:</strong> [KEP ADRESİ]</p>
+                <p><strong className="text-surface-400">Adres:</strong> [AÇIK ADRES]</p>
+                <p><strong className="text-surface-400">E-posta:</strong> destek@disiplinli.com | <strong className="text-surface-400">Tel:</strong> [TELEFON]</p>
+              </div>
+            </div>
+
             {/* ── Alt çizgi ── */}
-            <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-sm text-surface-400">
                 destek@disiplinli.com
               </p>

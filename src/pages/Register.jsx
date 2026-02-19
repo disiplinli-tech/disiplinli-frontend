@@ -162,6 +162,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
+  const [salesAccepted, setSalesAccepted] = useState(false);
   const [showKvkk, setShowKvkk] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -196,6 +197,7 @@ export default function Register() {
     if (!email.trim()) return setError('E-posta zorunludur.');
     if (!password || password.length < 6) return setError('Şifre en az 6 karakter olmalıdır.');
     if (!kvkkAccepted) return setError('Gizlilik ve Kullanım Koşullarını kabul etmelisin.');
+    if (!salesAccepted) return setError('Mesafeli Satış Sözleşmesi ve Ön Bilgilendirme Formunu kabul etmelisin.');
 
     setLoading(true);
     try {
@@ -528,12 +530,35 @@ export default function Register() {
                     <button type="button" onClick={() => setShowKvkk(true)} className="text-primary-500 hover:text-primary-600 font-medium hover:underline">
                       Gizlilik ve Kullanım Koşulları
                     </button>
-                    'nı okudum, kabul ediyorum. 18 yaşından küçüksem velimin onayıyla kayıt oluyorum.
+                    'nı ve{' '}
+                    <a href="/kvkk" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-600 font-medium hover:underline">
+                      KVKK Aydınlatma Metni
+                    </a>
+                    'ni okudum, kabul ediyorum. 18 yaşından küçüksem velimin onayıyla kayıt oluyorum.
+                  </p>
+                </div>
+
+                {/* Mesafeli Satış Sözleşmesi */}
+                <div className="flex items-start gap-2">
+                  <button type="button" onClick={() => setSalesAccepted(!salesAccepted)}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all
+                      ${salesAccepted ? 'bg-primary-500 border-primary-500' : 'border-surface-300 hover:border-primary-400'}`}>
+                    {salesAccepted && <Check size={12} className="text-white" />}
+                  </button>
+                  <p className="text-xs text-surface-500 leading-relaxed">
+                    <a href="/mesafeli-satis-sozlesmesi" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-600 font-medium hover:underline">
+                      Mesafeli Satış Sözleşmesi
+                    </a>
+                    'ni ve{' '}
+                    <a href="/on-bilgilendirme" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-600 font-medium hover:underline">
+                      Ön Bilgilendirme Formu
+                    </a>
+                    'nu okudum, kabul ediyorum.
                   </p>
                 </div>
 
                 {/* Kayıt Ol */}
-                <button type="submit" disabled={loading || !kvkkAccepted}
+                <button type="submit" disabled={loading || !kvkkAccepted || !salesAccepted}
                   className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3.5 rounded-xl
                     font-bold hover:from-primary-600 hover:to-primary-700 transition-all
                     shadow-lg shadow-primary-200/50 disabled:opacity-50 disabled:cursor-not-allowed

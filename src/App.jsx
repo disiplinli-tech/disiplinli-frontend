@@ -11,10 +11,18 @@ import Register from './pages/Register';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import KullaniciSozlesmesi from './pages/KullaniciSozlesmesi';
+import MesafeliSatisSozlesmesi from './pages/MesafeliSatisSozlesmesi';
+import OnBilgilendirme from './pages/OnBilgilendirme';
+import IptalIade from './pages/IptalIade';
+import KVKK from './pages/KVKK';
+import CerezPolitikasi from './pages/CerezPolitikasi';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
 import Checkout from './pages/Checkout';
+
+// Components
+import CookieBanner from './components/CookieBanner';
 
 // Ana Sayfalar
 import Dashboard from './pages/Dashboard';
@@ -446,6 +454,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <CookieBanner />
       <Routes>
         {/* ===== PUBLIC ROUTES ===== */}
         <Route path="/login" element={
@@ -465,6 +474,11 @@ function App() {
           </PublicRoute>
         } />
         <Route path="/kullanici-sozlesmesi" element={<KullaniciSozlesmesi />} />
+        <Route path="/mesafeli-satis-sozlesmesi" element={<MesafeliSatisSozlesmesi />} />
+        <Route path="/on-bilgilendirme" element={<OnBilgilendirme />} />
+        <Route path="/iptal-iade" element={<IptalIade />} />
+        <Route path="/kvkk" element={<KVKK />} />
+        <Route path="/cerez-politikasi" element={<CerezPolitikasi />} />
         <Route path="/checkout" element={<Checkout />} />
 
         {/* ===== ANA SAYFA - LANDING PAGE ===== */}
