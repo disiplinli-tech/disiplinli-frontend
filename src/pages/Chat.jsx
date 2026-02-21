@@ -103,7 +103,7 @@ export default function Chat() {
         flex-col w-full md:w-80 bg-white border-r border-gray-200 flex-shrink-0`}>
         
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div className="p-4 border-b border-gray-200 bg-[#075e54]">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="text-white/80 hover:text-white">
               <ArrowLeft size={20} />
@@ -132,13 +132,13 @@ export default function Chat() {
                   setSelectedUser(conv.user_id);
                   setSelectedName(conv.name);
                 }}
-                className={`flex items-center gap-3 p-4 cursor-pointer border-b border-gray-100 
-                  hover:bg-indigo-50 transition-colors
-                  ${selectedUser === conv.user_id ? 'bg-indigo-50 border-l-4 border-l-indigo-500' : ''}`}
+                className={`flex items-center gap-3 p-4 cursor-pointer border-b border-gray-100
+                  hover:bg-gray-50 transition-colors
+                  ${selectedUser === conv.user_id ? 'bg-[#f0f2f5]' : ''}`}
               >
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 
-                  flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#dfe5e7]
+                  flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0">
                   {conv.name.charAt(0).toUpperCase()}
                 </div>
 
@@ -153,7 +153,7 @@ export default function Chat() {
                       {conv.last_message}
                     </p>
                     {conv.unread_count > 0 && (
-                      <span className="bg-indigo-500 text-white text-xs rounded-full w-5 h-5 
+                      <span className="bg-[#25d366] text-white text-xs rounded-full w-5 h-5
                         flex items-center justify-center flex-shrink-0 ml-2">
                         {conv.unread_count}
                       </span>
@@ -171,50 +171,52 @@ export default function Chat() {
         {selectedUser ? (
           <>
             {/* Chat Header */}
-            <div className="flex items-center gap-3 p-4 bg-white border-b border-gray-200 shadow-sm">
-              <button 
+            <div className="flex items-center gap-3 p-3 bg-[#075e54] text-white shadow-sm">
+              <button
                 onClick={() => { setSelectedUser(null); setMessages([]); }}
-                className="md:hidden text-gray-500 hover:text-gray-700"
+                className="md:hidden text-white/80 hover:text-white"
               >
                 <ArrowLeft size={20} />
               </button>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 
+              <div className="w-9 h-9 rounded-full bg-white/20
                 flex items-center justify-center text-white font-bold text-sm">
                 {selectedName.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">{selectedName}</h3>
-                {/*<p className="text-xs text-green-500">Çevrimiçi</p>*/}
+                <h3 className="font-semibold text-white text-sm">{selectedName}</h3>
               </div>
             </div>
 
             {/* Mesajlar */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-1"
-              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
-              
+            <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-[#efeae2]"
+              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23c9b99a\' fill-opacity=\'0.08\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
+
               {Object.entries(grouped).map(([date, msgs]) => (
                 <div key={date}>
                   {/* Tarih ayırıcı */}
-                  <div className="flex items-center justify-center my-4">
-                    <span className="px-3 py-1 bg-gray-200 text-gray-600 text-xs rounded-full">
+                  <div className="flex items-center justify-center my-3">
+                    <span className="px-3 py-1 bg-white/80 text-gray-600 text-[11px] rounded-lg shadow-sm font-medium">
                       {date}
                     </span>
                   </div>
 
                   {msgs.map(msg => (
-                    <div key={msg.id} className={`flex mb-2 ${msg.is_mine ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[75%] px-4 py-2 rounded-2xl shadow-sm
-                        ${msg.is_mine 
-                          ? 'bg-indigo-500 text-white rounded-br-md' 
-                          : 'bg-white text-gray-800 rounded-bl-md border border-gray-100'}`}>
-                        <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                        <div className={`flex items-center justify-end gap-1 mt-1
-                          ${msg.is_mine ? 'text-indigo-200' : 'text-gray-400'}`}>
-                          <span className="text-[10px]">{msg.time}</span>
+                    <div key={msg.id} className={`flex mb-1.5 ${msg.is_mine ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`relative max-w-[75%] px-3 py-2 shadow-sm
+                        ${msg.is_mine
+                          ? 'bg-[#d9fdd3] text-gray-800 rounded-xl rounded-tr-sm'
+                          : 'bg-white text-gray-800 rounded-xl rounded-tl-sm'}`}>
+                        {/* Gönderen ismi (karşı taraf için) */}
+                        {!msg.is_mine && msg.sender_name && (
+                          <p className="text-xs font-semibold text-orange-600 mb-0.5">{msg.sender_name}</p>
+                        )}
+                        <p className="text-[13px] whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
+                        <div className={`flex items-center justify-end gap-1 -mb-0.5 mt-0.5`}>
+                          <span className="text-[10px] text-gray-500">{msg.time}</span>
                           {msg.is_mine && (
-                            msg.is_read 
-                              ? <CheckCheck size={12} className="text-blue-200" />
-                              : <Check size={12} />
+                            msg.is_read
+                              ? <CheckCheck size={14} className="text-blue-500" />
+                              : <Check size={14} className="text-gray-400" />
                           )}
                         </div>
                       </div>
@@ -226,21 +228,21 @@ export default function Chat() {
             </div>
 
             {/* Mesaj Gönder */}
-            <div className="p-3 bg-white border-t border-gray-200">
+            <div className="p-2 bg-[#f0f0f0]">
               <div className="flex items-center gap-2">
                 <textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  placeholder="Mesajınızı yazın..."
+                  placeholder="Mesaj yaz..."
                   rows={1}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 border-0 rounded-full text-sm 
-                    focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="flex-1 px-4 py-2.5 bg-white border-0 rounded-full text-sm
+                    focus:outline-none resize-none shadow-sm"
                 />
                 <button
                   onClick={handleSend}
                   disabled={!newMessage.trim()}
-                  className="w-10 h-10 bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300
+                  className="w-10 h-10 bg-[#075e54] hover:bg-[#064e46] disabled:bg-gray-300
                     text-white rounded-full flex items-center justify-center transition-colors"
                 >
                   <Send size={18} />

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { MessageCircle, FileText, ClipboardList, Check, Send, User } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { MessageCircle, FileText, ClipboardList, Check, CheckCheck, Send, User } from 'lucide-react';
 import API from '../api';
 
 const TABS = [
@@ -54,21 +54,37 @@ function MessagesTab() {
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedName, setSelectedName] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef(null);
+  const pollRef = useRef(null);
 
   useEffect(() => {
     fetchConversations();
   }, []);
+
+  // Mesaj gelince aşağı kaydır
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Polling: 3 saniyede bir mesaj kontrolü
+  useEffect(() => {
+    if (selectedUserId) {
+      pollRef.current = setInterval(() => selectConversation(selectedUserId), 3000);
+      return () => clearInterval(pollRef.current);
+    }
+  }, [selectedUserId]);
 
   const fetchConversations = async () => {
     try {
       const res = await API.get('/api/chat/conversations/');
       const convos = res.data || [];
       setConversations(convos);
-      // Otomatik olarak koçu seç (genelde tek konuşma olur)
       if (convos.length > 0 && !selectedUserId) {
+        setSelectedName(convos[0].name);
         selectConversation(convos[0].user_id);
       }
     } catch (err) {
@@ -116,54 +132,84 @@ function MessagesTab() {
     );
   }
 
-  const myUserId = parseInt(localStorage.getItem('user_id'));
+  // Mesajları tarihe göre grupla
+  const grouped = {};
+  messages.forEach(m => {
+    const date = m.date || '';
+    if (!grouped[date]) grouped[date] = [];
+    grouped[date].push(m);
+  });
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="rounded-2xl overflow-hidden border border-gray-100">
+      {/* Koç header */}
+      {selectedName && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-[#075e54] text-white">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+            {selectedName.charAt(0).toUpperCase()}
+          </div>
+          <span className="font-semibold text-sm">{selectedName}</span>
+        </div>
+      )}
+
       {/* Mesaj listesi */}
-      <div className="h-[400px] overflow-y-auto p-4 space-y-3">
+      <div className="h-[400px] overflow-y-auto p-3 space-y-1 bg-[#efeae2]"
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23c9b99a\' fill-opacity=\'0.08\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
         {messages.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm py-8">Henüz mesaj yok. Bir mesaj gönder!</p>
+          <p className="text-center text-gray-500 text-sm py-8">Henüz mesaj yok. Bir mesaj gönder!</p>
         ) : (
-          messages.map((msg, idx) => {
-            const isMine = msg.sender_id === myUserId || msg.sender === localStorage.getItem('user');
-            return (
-              <div key={idx} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm
-                  ${isMine
-                    ? 'bg-primary-500 text-white rounded-br-md'
-                    : 'bg-gray-100 text-gray-800 rounded-bl-md'
-                  }`}
-                >
-                  <p>{msg.message}</p>
-                  <p className={`text-[10px] mt-1 ${isMine ? 'text-white/60' : 'text-gray-400'}`}>
-                    {msg.created_at ? new Date(msg.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : ''}
-                  </p>
+          Object.entries(grouped).map(([date, msgs]) => (
+            <div key={date}>
+              {date && (
+                <div className="flex items-center justify-center my-3">
+                  <span className="px-3 py-1 bg-white/80 text-gray-600 text-[11px] rounded-lg shadow-sm font-medium">
+                    {date}
+                  </span>
                 </div>
-              </div>
-            );
-          })
+              )}
+              {msgs.map((msg) => (
+                <div key={msg.id} className={`flex mb-1.5 ${msg.is_mine ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`relative max-w-[80%] px-3 py-2 shadow-sm
+                    ${msg.is_mine
+                      ? 'bg-[#d9fdd3] text-gray-800 rounded-xl rounded-tr-sm'
+                      : 'bg-white text-gray-800 rounded-xl rounded-tl-sm'}`}>
+                    {/* Gönderen ismi (koç mesajı) */}
+                    {!msg.is_mine && msg.sender_name && (
+                      <p className="text-xs font-semibold text-orange-600 mb-0.5">{msg.sender_name}</p>
+                    )}
+                    <p className="text-[13px] whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
+                    <div className="flex items-center justify-end gap-1 -mb-0.5 mt-0.5">
+                      <span className="text-[10px] text-gray-500">{msg.time}</span>
+                      {msg.is_mine && (
+                        msg.is_read
+                          ? <CheckCheck size={14} className="text-blue-500" />
+                          : <Check size={14} className="text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Mesaj gönderme */}
-      <div className="border-t border-gray-100 p-3 flex gap-2">
+      <div className="p-2 bg-[#f0f0f0] flex gap-2">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Mesajını yaz..."
-          className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400"
+          placeholder="Mesaj yaz..."
+          className="flex-1 px-4 py-2.5 bg-white rounded-full text-sm focus:outline-none shadow-sm"
         />
         <button
           onClick={handleSend}
           disabled={!newMessage.trim() || sending}
-          className={`px-4 py-2.5 rounded-xl transition-all
-            ${newMessage.trim() && !sending
-              ? 'bg-primary-500 text-white hover:bg-primary-600'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
+          className="w-10 h-10 bg-[#075e54] hover:bg-[#064e46] disabled:bg-gray-300
+            text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0"
         >
           <Send size={18} />
         </button>
