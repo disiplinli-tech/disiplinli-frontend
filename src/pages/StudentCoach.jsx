@@ -144,7 +144,7 @@ function MessagesTab() {
     <div className="rounded-2xl overflow-hidden border border-gray-100">
       {/* Koç header */}
       {selectedName && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-[#075e54] text-white">
+        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
             {selectedName.charAt(0).toUpperCase()}
           </div>
@@ -153,8 +153,8 @@ function MessagesTab() {
       )}
 
       {/* Mesaj listesi */}
-      <div className="h-[400px] overflow-y-auto p-3 space-y-1 bg-[#efeae2]"
-        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23c9b99a\' fill-opacity=\'0.08\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
+      <div className="h-[400px] overflow-y-auto p-3 space-y-1 bg-[#f5f0eb]"
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d4a574\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
         {messages.length === 0 ? (
           <p className="text-center text-gray-500 text-sm py-8">Henüz mesaj yok. Bir mesaj gönder!</p>
         ) : (
@@ -171,7 +171,7 @@ function MessagesTab() {
                 <div key={msg.id} className={`flex mb-1.5 ${msg.is_mine ? 'justify-end' : 'justify-start'}`}>
                   <div className={`relative max-w-[80%] px-3 py-2 shadow-sm
                     ${msg.is_mine
-                      ? 'bg-[#d9fdd3] text-gray-800 rounded-xl rounded-tr-sm'
+                      ? 'bg-orange-50 text-gray-800 rounded-xl rounded-tr-sm border border-orange-100'
                       : 'bg-white text-gray-800 rounded-xl rounded-tl-sm'}`}>
                     {/* Gönderen ismi (koç mesajı) */}
                     {!msg.is_mine && msg.sender_name && (
@@ -182,7 +182,7 @@ function MessagesTab() {
                       <span className="text-[10px] text-gray-500">{msg.time}</span>
                       {msg.is_mine && (
                         msg.is_read
-                          ? <CheckCheck size={14} className="text-blue-500" />
+                          ? <CheckCheck size={14} className="text-orange-500" />
                           : <Check size={14} className="text-gray-400" />
                       )}
                     </div>
@@ -196,7 +196,7 @@ function MessagesTab() {
       </div>
 
       {/* Mesaj gönderme */}
-      <div className="p-2 bg-[#f0f0f0] flex gap-2">
+      <div className="p-2 bg-gray-100 flex gap-2">
         <input
           type="text"
           value={newMessage}
@@ -208,7 +208,7 @@ function MessagesTab() {
         <button
           onClick={handleSend}
           disabled={!newMessage.trim() || sending}
-          className="w-10 h-10 bg-[#075e54] hover:bg-[#064e46] disabled:bg-gray-300
+          className="w-10 h-10 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300
             text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0"
         >
           <Send size={18} />

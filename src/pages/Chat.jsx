@@ -101,9 +101,9 @@ export default function Chat() {
       {/* Sol: Sohbet Listesi */}
       <div className={`${selectedUser ? 'hidden md:flex' : 'flex'}
         flex-col w-full md:w-80 bg-white border-r border-gray-200 flex-shrink-0`}>
-        
+
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 bg-[#075e54]">
+        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-orange-500 to-amber-500">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="text-white/80 hover:text-white">
               <ArrowLeft size={20} />
@@ -117,7 +117,7 @@ export default function Chat() {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center h-32">
-              <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full" />
+              <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full" />
             </div>
           ) : conversations.length === 0 ? (
             <div className="p-6 text-center text-gray-400">
@@ -133,12 +133,12 @@ export default function Chat() {
                   setSelectedName(conv.name);
                 }}
                 className={`flex items-center gap-3 p-4 cursor-pointer border-b border-gray-100
-                  hover:bg-gray-50 transition-colors
-                  ${selectedUser === conv.user_id ? 'bg-[#f0f2f5]' : ''}`}
+                  hover:bg-orange-50/50 transition-colors
+                  ${selectedUser === conv.user_id ? 'bg-orange-50' : ''}`}
               >
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-[#dfe5e7]
-                  flex items-center justify-center text-gray-500 font-bold text-sm flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-orange-100
+                  flex items-center justify-center text-orange-600 font-bold text-sm flex-shrink-0">
                   {conv.name.charAt(0).toUpperCase()}
                 </div>
 
@@ -153,7 +153,7 @@ export default function Chat() {
                       {conv.last_message}
                     </p>
                     {conv.unread_count > 0 && (
-                      <span className="bg-[#25d366] text-white text-xs rounded-full w-5 h-5
+                      <span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5
                         flex items-center justify-center flex-shrink-0 ml-2">
                         {conv.unread_count}
                       </span>
@@ -171,7 +171,7 @@ export default function Chat() {
         {selectedUser ? (
           <>
             {/* Chat Header */}
-            <div className="flex items-center gap-3 p-3 bg-[#075e54] text-white shadow-sm">
+            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
               <button
                 onClick={() => { setSelectedUser(null); setMessages([]); }}
                 className="md:hidden text-white/80 hover:text-white"
@@ -188,14 +188,14 @@ export default function Chat() {
             </div>
 
             {/* Mesajlar */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-[#efeae2]"
-              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23c9b99a\' fill-opacity=\'0.08\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
+            <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-[#f5f0eb]"
+              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d4a574\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
 
               {Object.entries(grouped).map(([date, msgs]) => (
                 <div key={date}>
                   {/* Tarih ayırıcı */}
                   <div className="flex items-center justify-center my-3">
-                    <span className="px-3 py-1 bg-white/80 text-gray-600 text-[11px] rounded-lg shadow-sm font-medium">
+                    <span className="px-3 py-1 bg-white/90 text-gray-600 text-[11px] rounded-lg shadow-sm font-medium">
                       {date}
                     </span>
                   </div>
@@ -204,18 +204,18 @@ export default function Chat() {
                     <div key={msg.id} className={`flex mb-1.5 ${msg.is_mine ? 'justify-end' : 'justify-start'}`}>
                       <div className={`relative max-w-[75%] px-3 py-2 shadow-sm
                         ${msg.is_mine
-                          ? 'bg-[#d9fdd3] text-gray-800 rounded-xl rounded-tr-sm'
+                          ? 'bg-orange-50 text-gray-800 rounded-xl rounded-tr-sm border border-orange-100'
                           : 'bg-white text-gray-800 rounded-xl rounded-tl-sm'}`}>
                         {/* Gönderen ismi (karşı taraf için) */}
                         {!msg.is_mine && msg.sender_name && (
                           <p className="text-xs font-semibold text-orange-600 mb-0.5">{msg.sender_name}</p>
                         )}
                         <p className="text-[13px] whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
-                        <div className={`flex items-center justify-end gap-1 -mb-0.5 mt-0.5`}>
-                          <span className="text-[10px] text-gray-500">{msg.time}</span>
+                        <div className="flex items-center justify-end gap-1 -mb-0.5 mt-0.5">
+                          <span className="text-[10px] text-gray-400">{msg.time}</span>
                           {msg.is_mine && (
                             msg.is_read
-                              ? <CheckCheck size={14} className="text-blue-500" />
+                              ? <CheckCheck size={14} className="text-orange-500" />
                               : <Check size={14} className="text-gray-400" />
                           )}
                         </div>
@@ -228,7 +228,7 @@ export default function Chat() {
             </div>
 
             {/* Mesaj Gönder */}
-            <div className="p-2 bg-[#f0f0f0]">
+            <div className="p-2 bg-gray-100 border-t border-gray-200">
               <div className="flex items-center gap-2">
                 <textarea
                   value={newMessage}
@@ -242,7 +242,7 @@ export default function Chat() {
                 <button
                   onClick={handleSend}
                   disabled={!newMessage.trim()}
-                  className="w-10 h-10 bg-[#075e54] hover:bg-[#064e46] disabled:bg-gray-300
+                  className="w-10 h-10 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300
                     text-white rounded-full flex items-center justify-center transition-colors"
                 >
                   <Send size={18} />
