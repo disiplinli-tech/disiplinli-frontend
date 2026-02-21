@@ -207,7 +207,7 @@ export default function Chat() {
         {selectedUser ? (
           <>
             {/* Chat Header */}
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
+            <div className="sticky top-0 z-10 flex items-center gap-3 p-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm">
               <button
                 onClick={() => { setSelectedUser(null); setMessages([]); }}
                 className="md:hidden text-white/80 hover:text-white"

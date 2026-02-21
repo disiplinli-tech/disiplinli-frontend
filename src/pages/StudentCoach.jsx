@@ -182,7 +182,7 @@ function MessagesTab() {
       <div className="rounded-2xl overflow-hidden border border-gray-100">
         {/* Koç header */}
         {selectedName && (
-          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+          <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
               {selectedName.charAt(0).toUpperCase()}
             </div>
