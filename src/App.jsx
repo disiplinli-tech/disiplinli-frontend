@@ -90,34 +90,32 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     navigate('/login');
   };
 
-  // Koç menüsü - Güncellenmiş
+  // Koç menüsü
   const coachMenuItems = [
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
-    { type: 'divider' },
-    { icon: Compass, label: 'Bugün', path: '/coach-today', highlight: true },
+    { icon: Compass, label: 'Bugün', path: '/coach-today' },
     { icon: Users, label: 'Öğrenciler', path: '/students' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: Calendar, label: 'Takvim', path: '/schedule' },
     { icon: FileText, label: 'Denemeler', path: '/coach-exams' },
     { icon: Video, label: 'Canlı Dersler', path: '/lessons' },
     { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
-    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings', muted: true },
+    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
   ];
 
-  // Öğrenci menüsü - Davranış değiştiren sistem
+  // Öğrenci menüsü
   const studentMenuItems = [
-    { icon: Compass, label: 'Bugün', path: '/today', highlight: true },
+    { icon: Compass, label: 'Bugün', path: '/today' },
     { icon: Calendar, label: 'Planım', path: '/plan' },
     { icon: TrendingUp, label: 'İlerlemem', path: '/progress' },
     { icon: Target, label: 'Hedefim', path: '/goal' },
-    { type: 'divider' },
     { icon: BookOpen, label: 'Denemeler', path: '/exams' },
+    { icon: Calendar, label: 'Takvim', path: '/schedule' },
     { icon: MessageCircle, label: 'Koçum', path: '/coach' },
-    { type: 'divider' },
-    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings', muted: true },
+    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
   ];
 
-  // Veli menüsü (sadece dashboard ve ayarlar)
+  // Veli menüsü
   const parentMenuItems = [
     { icon: LayoutDashboard, label: 'Veli Paneli', path: '/dashboard' },
     { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
@@ -197,47 +195,9 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
 
       {/* Menu Items */}
       <nav className="flex-1 px-3 space-y-1">
-        {menuItems.map((item, index) => {
-          // Divider (ayırıcı çizgi) - daha görünür
-          if (item.type === 'divider') {
-            return <div key={`divider-${index}`} className="my-4 mx-2 border-t-2 border-gray-300 border-dashed" />;
-          }
-
-          // Header (grup başlığı)
-          if (item.type === 'header') {
-            if (collapsed) return null;
-            return (
-              <div key={`header-${index}`} className="pt-4 pb-1 px-3">
-                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
-                  {item.label}
-                </span>
-              </div>
-            );
-          }
-
+        {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
-
-          // Highlight (Bugün menüsü için özel stil)
-          if (item.highlight) {
-            return (
-              <button
-                key={item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  setMobileOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
-                  ${isActive
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-200'
-                    : 'bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 hover:from-orange-100 hover:to-amber-100 border border-orange-200'}
-                  ${collapsed ? 'justify-center px-2' : ''}`}
-              >
-                <Icon size={20} className={isActive ? 'text-white' : 'text-orange-500'} />
-                {!collapsed && <span className="text-sm font-semibold">{item.label}</span>}
-              </button>
-            );
-          }
 
           return (
             <button
@@ -248,14 +208,12 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
                 ${isActive
-                  ? 'bg-indigo-50 text-indigo-600 font-medium'
-                  : item.muted
-                    ? 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
-                    : 'text-gray-600 hover:bg-gray-50'}
+                  ? 'bg-orange-50 text-orange-600 font-medium'
+                  : 'text-gray-600 hover:bg-gray-50'}
                 ${collapsed ? 'justify-center px-2' : ''}`}
             >
-              <Icon size={20} className={isActive ? 'text-indigo-500' : item.muted ? 'text-gray-300' : 'text-gray-400'} />
-              {!collapsed && <span className={`text-sm ${item.muted ? '' : ''}`}>{item.label}</span>}
+              <Icon size={20} className={isActive ? 'text-orange-500' : 'text-gray-400'} />
+              {!collapsed && <span className="text-sm">{item.label}</span>}
             </button>
           );
         })}
