@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { ArrowLeft, Send, MessageCircle, Check, CheckCheck, Image, X } from 'lucide-react';
 import API from '../api';
 
 export default function Chat() {
@@ -12,8 +12,12 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
   const messagesEndRef = useRef(null);
   const pollRef = useRef(null);
+  const fileInputRef = useRef(null);
   const role = localStorage.getItem('role');
 
   // Sohbet listesini yükle
@@ -64,16 +68,30 @@ export default function Chat() {
   };
 
   const handleSend = async () => {
-    if (!newMessage.trim() || !selectedUser) return;
+    if ((!newMessage.trim() && !selectedImage) || !selectedUser) return;
 
     try {
-      await API.post('/api/chat/send/', {
-        receiver_id: selectedUser,
-        message: newMessage.trim()
-      });
+      if (selectedImage) {
+        const formData = new FormData();
+        formData.append('receiver_id', selectedUser);
+        formData.append('message', newMessage.trim());
+        formData.append('image', selectedImage);
+        await API.post('/api/chat/send/', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        await API.post('/api/chat/send/', {
+          receiver_id: selectedUser,
+          message: newMessage.trim()
+        });
+      }
       setNewMessage('');
+      clearImage();
       loadMessages();
     } catch (err) {
+      if (err.response?.data?.error) {
+        alert(err.response.data.error);
+      }
     }
   };
 
@@ -82,6 +100,24 @@ export default function Chat() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Fotoğraf en fazla 5MB olabilir');
+      return;
+    }
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   // Mesajları tarihe göre grupla
@@ -210,7 +246,18 @@ export default function Chat() {
                         {!msg.is_mine && msg.sender_name && (
                           <p className="text-xs font-semibold text-orange-600 mb-0.5">{msg.sender_name}</p>
                         )}
-                        <p className="text-[13px] whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
+                        {/* Fotoğraf */}
+                        {msg.image_url && (
+                          <img
+                            src={msg.image_url}
+                            alt=""
+                            className="rounded-lg max-w-full max-h-60 object-cover cursor-pointer mb-1"
+                            onClick={() => setLightboxUrl(msg.image_url)}
+                          />
+                        )}
+                        {msg.message && (
+                          <p className="text-[13px] whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
+                        )}
                         <div className="flex items-center justify-end gap-1 -mb-0.5 mt-0.5">
                           <span className="text-[10px] text-gray-400">{msg.time}</span>
                           {msg.is_mine && (
@@ -227,9 +274,39 @@ export default function Chat() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Fotoğraf Önizleme */}
+            {imagePreview && (
+              <div className="px-3 pt-2 bg-gray-100 border-t border-gray-200">
+                <div className="relative inline-block">
+                  <img src={imagePreview} alt="" className="h-20 rounded-lg object-cover" />
+                  <button
+                    onClick={clearImage}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full
+                      flex items-center justify-center shadow-md hover:bg-red-600"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Mesaj Gönder */}
-            <div className="p-2 bg-gray-100 border-t border-gray-200">
+            <div className={`p-2 bg-gray-100 ${!imagePreview ? 'border-t border-gray-200' : ''}`}>
               <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-10 h-10 text-gray-500 hover:text-orange-500 flex items-center justify-center
+                    transition-colors flex-shrink-0"
+                >
+                  <Image size={22} />
+                </button>
                 <textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -241,7 +318,7 @@ export default function Chat() {
                 />
                 <button
                   onClick={handleSend}
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() && !selectedImage}
                   className="w-10 h-10 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300
                     text-white rounded-full flex items-center justify-center transition-colors"
                 >
@@ -259,6 +336,28 @@ export default function Chat() {
           </div>
         )}
       </div>
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full
+              flex items-center justify-center text-white transition-colors"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <X size={24} />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt=""
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

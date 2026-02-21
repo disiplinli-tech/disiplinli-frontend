@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { MessageCircle, FileText, ClipboardList, Check, CheckCheck, Send, User } from 'lucide-react';
+import { MessageCircle, FileText, ClipboardList, Check, CheckCheck, Send, User, Image, X } from 'lucide-react';
 import API from '../api';
 
 const TABS = [
@@ -58,8 +58,12 @@ function MessagesTab() {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
   const messagesEndRef = useRef(null);
   const pollRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchConversations();
@@ -102,20 +106,53 @@ function MessagesTab() {
   };
 
   const handleSend = async () => {
-    if (!newMessage.trim() || !selectedUserId) return;
+    if ((!newMessage.trim() && !selectedImage) || !selectedUserId) return;
     setSending(true);
     try {
-      await API.post('/api/chat/send/', {
-        receiver_id: selectedUserId,
-        message: newMessage.trim(),
-      });
+      if (selectedImage) {
+        const formData = new FormData();
+        formData.append('receiver_id', selectedUserId);
+        formData.append('message', newMessage.trim());
+        formData.append('image', selectedImage);
+        await API.post('/api/chat/send/', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        await API.post('/api/chat/send/', {
+          receiver_id: selectedUserId,
+          message: newMessage.trim(),
+        });
+      }
       setNewMessage('');
+      clearImage();
       selectConversation(selectedUserId);
     } catch (err) {
-      alert('Mesaj gönderilemedi');
+      if (err.response?.data?.error) {
+        alert(err.response.data.error);
+      } else {
+        alert('Mesaj gönderilemedi');
+      }
     } finally {
       setSending(false);
     }
+  };
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Fotoğraf en fazla 5MB olabilir');
+      return;
+    }
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   if (loading) {
@@ -141,80 +178,145 @@ function MessagesTab() {
   });
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-gray-100">
-      {/* Koç header */}
-      {selectedName && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
-            {selectedName.charAt(0).toUpperCase()}
+    <>
+      <div className="rounded-2xl overflow-hidden border border-gray-100">
+        {/* Koç header */}
+        {selectedName && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+              {selectedName.charAt(0).toUpperCase()}
+            </div>
+            <span className="font-semibold text-sm">{selectedName}</span>
           </div>
-          <span className="font-semibold text-sm">{selectedName}</span>
-        </div>
-      )}
+        )}
 
-      {/* Mesaj listesi */}
-      <div className="h-[400px] overflow-y-auto p-3 space-y-1 bg-[#f5f0eb]"
-        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d4a574\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
-        {messages.length === 0 ? (
-          <p className="text-center text-gray-500 text-sm py-8">Henüz mesaj yok. Bir mesaj gönder!</p>
-        ) : (
-          Object.entries(grouped).map(([date, msgs]) => (
-            <div key={date}>
-              {date && (
-                <div className="flex items-center justify-center my-3">
-                  <span className="px-3 py-1 bg-white/80 text-gray-600 text-[11px] rounded-lg shadow-sm font-medium">
-                    {date}
-                  </span>
-                </div>
-              )}
-              {msgs.map((msg) => (
-                <div key={msg.id} className={`flex mb-1.5 ${msg.is_mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`relative max-w-[80%] px-3 py-2 shadow-sm
-                    ${msg.is_mine
-                      ? 'bg-orange-50 text-gray-800 rounded-xl rounded-tr-sm border border-orange-100'
-                      : 'bg-white text-gray-800 rounded-xl rounded-tl-sm'}`}>
-                    {/* Gönderen ismi (koç mesajı) */}
-                    {!msg.is_mine && msg.sender_name && (
-                      <p className="text-xs font-semibold text-orange-600 mb-0.5">{msg.sender_name}</p>
-                    )}
-                    <p className="text-[13px] whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
-                    <div className="flex items-center justify-end gap-1 -mb-0.5 mt-0.5">
-                      <span className="text-[10px] text-gray-500">{msg.time}</span>
-                      {msg.is_mine && (
-                        msg.is_read
-                          ? <CheckCheck size={14} className="text-orange-500" />
-                          : <Check size={14} className="text-gray-400" />
+        {/* Mesaj listesi */}
+        <div className="h-[400px] overflow-y-auto p-3 space-y-1 bg-[#f5f0eb]"
+          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d4a574\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
+          {messages.length === 0 ? (
+            <p className="text-center text-gray-500 text-sm py-8">Henüz mesaj yok. Bir mesaj gönder!</p>
+          ) : (
+            Object.entries(grouped).map(([date, msgs]) => (
+              <div key={date}>
+                {date && (
+                  <div className="flex items-center justify-center my-3">
+                    <span className="px-3 py-1 bg-white/80 text-gray-600 text-[11px] rounded-lg shadow-sm font-medium">
+                      {date}
+                    </span>
+                  </div>
+                )}
+                {msgs.map((msg) => (
+                  <div key={msg.id} className={`flex mb-1.5 ${msg.is_mine ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`relative max-w-[80%] px-3 py-2 shadow-sm
+                      ${msg.is_mine
+                        ? 'bg-orange-50 text-gray-800 rounded-xl rounded-tr-sm border border-orange-100'
+                        : 'bg-white text-gray-800 rounded-xl rounded-tl-sm'}`}>
+                      {/* Gönderen ismi (koç mesajı) */}
+                      {!msg.is_mine && msg.sender_name && (
+                        <p className="text-xs font-semibold text-orange-600 mb-0.5">{msg.sender_name}</p>
                       )}
+                      {/* Fotoğraf */}
+                      {msg.image_url && (
+                        <img
+                          src={msg.image_url}
+                          alt=""
+                          className="rounded-lg max-w-full max-h-60 object-cover cursor-pointer mb-1"
+                          onClick={() => setLightboxUrl(msg.image_url)}
+                        />
+                      )}
+                      {msg.message && (
+                        <p className="text-[13px] whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
+                      )}
+                      <div className="flex items-center justify-end gap-1 -mb-0.5 mt-0.5">
+                        <span className="text-[10px] text-gray-500">{msg.time}</span>
+                        {msg.is_mine && (
+                          msg.is_read
+                            ? <CheckCheck size={14} className="text-orange-500" />
+                            : <Check size={14} className="text-gray-400" />
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Fotoğraf Önizleme */}
+        {imagePreview && (
+          <div className="px-3 pt-2 bg-gray-100 border-t border-gray-200">
+            <div className="relative inline-block">
+              <img src={imagePreview} alt="" className="h-20 rounded-lg object-cover" />
+              <button
+                onClick={clearImage}
+                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full
+                  flex items-center justify-center shadow-md hover:bg-red-600"
+              >
+                <X size={14} />
+              </button>
             </div>
-          ))
+          </div>
         )}
-        <div ref={messagesEndRef} />
+
+        {/* Mesaj gönderme */}
+        <div className={`p-2 bg-gray-100 flex items-center gap-2 ${!imagePreview ? '' : ''}`}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-10 h-10 text-gray-500 hover:text-orange-500 flex items-center justify-center
+              transition-colors flex-shrink-0"
+          >
+            <Image size={22} />
+          </button>
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Mesaj yaz..."
+            className="flex-1 px-4 py-2.5 bg-white rounded-full text-sm focus:outline-none shadow-sm"
+          />
+          <button
+            onClick={handleSend}
+            disabled={(!newMessage.trim() && !selectedImage) || sending}
+            className="w-10 h-10 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300
+              text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+          >
+            <Send size={18} />
+          </button>
+        </div>
       </div>
 
-      {/* Mesaj gönderme */}
-      <div className="p-2 bg-gray-100 flex gap-2">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Mesaj yaz..."
-          className="flex-1 px-4 py-2.5 bg-white rounded-full text-sm focus:outline-none shadow-sm"
-        />
-        <button
-          onClick={handleSend}
-          disabled={!newMessage.trim() || sending}
-          className="w-10 h-10 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300
-            text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setLightboxUrl(null)}
         >
-          <Send size={18} />
-        </button>
-      </div>
-    </div>
+          <button
+            className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full
+              flex items-center justify-center text-white transition-colors"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <X size={24} />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt=""
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
   );
 }
 
