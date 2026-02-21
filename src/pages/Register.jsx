@@ -150,10 +150,11 @@ export default function Register() {
   const preselectedGoal = location.state?.goal || '';
   const preselectedPlan = location.state?.plan || '';
 
-  // Adımlar: 1=hedef, 2=sınıf, 3=paket, 4=bilgiler
+  // Adımlar: 1=hedef, 2=sınıf/alan, 3=paket, 4=bilgiler
   const [step, setStep] = useState(preselectedGoal && preselectedPlan ? 4 : preselectedGoal ? 2 : 1);
   const [selectedGoal, setSelectedGoal] = useState(preselectedGoal);
   const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedField, setSelectedField] = useState(''); // YKS alan: SAY, EA, SOZ, DIL
   const [selectedPlan, setSelectedPlan] = useState(preselectedPlan);
 
   // Form state
@@ -169,9 +170,10 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   // Progress bar labels
+  const stepLabel2 = selectedGoal === 'yks' ? 'Alan' : 'Sınıf';
   const steps = [
     { num: 1, label: 'Hedef' },
-    { num: 2, label: 'Sınıf' },
+    { num: 2, label: stepLabel2 },
     { num: 3, label: 'Paket' },
     { num: 4, label: 'Bilgiler' }
   ];
@@ -190,27 +192,43 @@ export default function Register() {
     ],
   };
 
+  // YKS alan seçenekleri
+  const fieldOptions = [
+    { value: 'SAY', label: 'Sayısal', emoji: '🔢' },
+    { value: 'EA', label: 'Eşit Ağırlık', emoji: '⚖️' },
+    { value: 'SOZ', label: 'Sözel', emoji: '📖' },
+    { value: 'DIL', label: 'Yabancı Dil', emoji: '🌍' },
+  ];
+
   // ==================== ADIM 1: HEDEF SEÇ ====================
   const handleGoalSelect = (goal) => {
     setSelectedGoal(goal);
     setSelectedPlan(''); // Hedef değişince paket sıfırla
     setSelectedGrade(''); // Grade sıfırla
+    setSelectedField(''); // Alan sıfırla
 
-    // LGS ve YKS'de sınıf adımını atla
     if (goal === 'lgs') {
+      // LGS direkt pakete
       setSelectedGrade('LGS');
       setStep(3);
     } else if (goal === 'yks') {
+      // YKS alan seçimine
       setSelectedGrade('YKS');
-      setStep(3);
+      setStep(2);
     } else {
-      setStep(2); // Ortaokul veya lise ise sınıf seçimine
+      // Ortaokul veya lise ise sınıf seçimine
+      setStep(2);
     }
   };
 
-  // ==================== ADIM 2: SINIF SEÇ ====================
+  // ==================== ADIM 2: SINIF / ALAN SEÇ ====================
   const handleGradeSelect = (grade) => {
     setSelectedGrade(grade);
+    setStep(3);
+  };
+
+  const handleFieldSelect = (field) => {
+    setSelectedField(field);
     setStep(3);
   };
 
@@ -243,6 +261,7 @@ export default function Register() {
         goal: selectedGoal,
         plan: selectedPlan,
         grade_level: selectedGrade,
+        exam_goal_type: selectedField || '', // YKS alan seçimi (SAY, EA, SOZ, DIL)
       };
 
       const res = await API.post('/api/register/', payload);
@@ -267,10 +286,11 @@ export default function Register() {
     setError('');
     if (step === 4) setStep(3);
     else if (step === 3) {
-      // LGS/YKS'den geri gelirken direkt hedef seçime
-      if (selectedGoal === 'lgs' || selectedGoal === 'yks') {
+      // LGS'den geri gelirken direkt hedef seçime (sınıf/alan adımı yok)
+      if (selectedGoal === 'lgs') {
         setStep(1);
       } else {
+        // Ortaokul, Lise, YKS → sınıf/alan adımına geri dön
         setStep(2);
       }
     }
@@ -409,8 +429,8 @@ export default function Register() {
             </div>
           )}
 
-          {/* ═══════════ ADIM 2: SINIF SEÇ ═══════════ */}
-          {step === 2 && selectedGoal && gradeOptions[selectedGoal] && (
+          {/* ═══════════ ADIM 2: SINIF veya ALAN SEÇ ═══════════ */}
+          {step === 2 && selectedGoal && selectedGoal !== 'yks' && gradeOptions[selectedGoal] && (
             <div className="animate-fade-up">
               <button onClick={goBack} className="flex items-center gap-2 text-surface-500 hover:text-surface-700 transition-colors mb-6 group">
                 <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
@@ -441,6 +461,45 @@ export default function Register() {
                         <GraduationCap size={22} className="text-primary-500" />
                       </div>
                       <p className="text-lg font-bold text-surface-700 group-hover:text-primary-600 transition-colors">{grade.label}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════ ADIM 2: YKS ALAN SEÇ ═══════════ */}
+          {step === 2 && selectedGoal === 'yks' && (
+            <div className="animate-fade-up">
+              <button onClick={goBack} className="flex items-center gap-2 text-surface-500 hover:text-surface-700 transition-colors mb-6 group">
+                <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                <span className="text-sm font-medium">Geri</span>
+              </button>
+
+              <div className="mb-8 text-center">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-surface-900">
+                  Alanını seç
+                </h1>
+                <p className="text-surface-500 mt-2">
+                  <span className="font-medium text-primary-600">YKS</span> - Hangi alanda hazırlanıyorsun?
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                {fieldOptions.map((field) => (
+                  <button
+                    key={field.value}
+                    onClick={() => handleFieldSelect(field.value)}
+                    className="group relative py-6 px-6 rounded-2xl border-2 border-surface-100 bg-white
+                      hover:border-primary-300 hover:shadow-card transition-all duration-300 text-center cursor-pointer
+                      hover:scale-[1.01] active:scale-[0.99]"
+                  >
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center
+                        group-hover:bg-primary-100 transition-colors">
+                        <span className="text-xl">{field.emoji}</span>
+                      </div>
+                      <p className="text-lg font-bold text-surface-700 group-hover:text-primary-600 transition-colors">{field.label}</p>
                     </div>
                   </button>
                 ))}

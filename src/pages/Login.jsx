@@ -90,6 +90,8 @@ export default function Login({ setUser }) {
       localStorage.setItem('user_id', res.data.user_id);
       if (res.data.full_name) localStorage.setItem('full_name', res.data.full_name);
       if (res.data.grade_level) localStorage.setItem('grade_level', res.data.grade_level);
+      if (res.data.selected_goal) localStorage.setItem('selected_goal', res.data.selected_goal);
+      if (res.data.exam_goal_type) localStorage.setItem('exam_goal_type', res.data.exam_goal_type);
 
       if (setUser) {
         setUser({ name: res.data.user, role: res.data.role });
@@ -126,6 +128,8 @@ export default function Login({ setUser }) {
       localStorage.setItem('user_id', res.data.user_id);
       if (res.data.full_name) localStorage.setItem('full_name', res.data.full_name);
       if (res.data.grade_level) localStorage.setItem('grade_level', res.data.grade_level);
+      if (res.data.selected_goal) localStorage.setItem('selected_goal', res.data.selected_goal);
+      if (res.data.exam_goal_type) localStorage.setItem('exam_goal_type', res.data.exam_goal_type);
 
       if (setUser) {
         setUser({ name: res.data.user, role: res.data.role });
