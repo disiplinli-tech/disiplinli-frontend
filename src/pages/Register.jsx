@@ -150,9 +150,10 @@ export default function Register() {
   const preselectedGoal = location.state?.goal || '';
   const preselectedPlan = location.state?.plan || '';
 
-  // Adımlar: 1=hedef, 2=paket, 3=bilgiler
-  const [step, setStep] = useState(preselectedGoal && preselectedPlan ? 3 : preselectedGoal ? 2 : 1);
+  // Adımlar: 1=hedef, 2=sınıf, 3=paket, 4=bilgiler
+  const [step, setStep] = useState(preselectedGoal && preselectedPlan ? 4 : preselectedGoal ? 2 : 1);
   const [selectedGoal, setSelectedGoal] = useState(preselectedGoal);
+  const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedPlan, setSelectedPlan] = useState(preselectedPlan);
 
   // Form state
@@ -170,21 +171,53 @@ export default function Register() {
   // Progress bar labels
   const steps = [
     { num: 1, label: 'Hedef' },
-    { num: 2, label: 'Paket' },
-    { num: 3, label: 'Bilgiler' }
+    { num: 2, label: 'Sınıf' },
+    { num: 3, label: 'Paket' },
+    { num: 4, label: 'Bilgiler' }
   ];
+
+  // Grade seçenekleri
+  const gradeOptions = {
+    ortaokul: [
+      { value: '5', label: '5. Sınıf' },
+      { value: '6', label: '6. Sınıf' },
+      { value: '7', label: '7. Sınıf' },
+    ],
+    lise: [
+      { value: '9', label: '9. Sınıf' },
+      { value: '10', label: '10. Sınıf' },
+      { value: '11', label: '11. Sınıf' },
+    ],
+  };
 
   // ==================== ADIM 1: HEDEF SEÇ ====================
   const handleGoalSelect = (goal) => {
     setSelectedGoal(goal);
     setSelectedPlan(''); // Hedef değişince paket sıfırla
-    setStep(2);
+    setSelectedGrade(''); // Grade sıfırla
+
+    // LGS ve YKS'de sınıf adımını atla
+    if (goal === 'lgs') {
+      setSelectedGrade('LGS');
+      setStep(3);
+    } else if (goal === 'yks') {
+      setSelectedGrade('YKS');
+      setStep(3);
+    } else {
+      setStep(2); // Ortaokul veya lise ise sınıf seçimine
+    }
   };
 
-  // ==================== ADIM 2: PAKET SEÇ ====================
+  // ==================== ADIM 2: SINIF SEÇ ====================
+  const handleGradeSelect = (grade) => {
+    setSelectedGrade(grade);
+    setStep(3);
+  };
+
+  // ==================== ADIM 3: PAKET SEÇ ====================
   const handlePlanSelect = (plan) => {
     setSelectedPlan(plan);
-    setStep(3);
+    setStep(4);
   };
 
   // ==================== ADIM 3: KAYIT ====================
@@ -209,6 +242,7 @@ export default function Register() {
         role: 'student',
         goal: selectedGoal,
         plan: selectedPlan,
+        grade_level: selectedGrade,
       };
 
       const res = await API.post('/api/register/', payload);
@@ -231,7 +265,15 @@ export default function Register() {
   // Geri
   const goBack = () => {
     setError('');
-    if (step === 3) setStep(2);
+    if (step === 4) setStep(3);
+    else if (step === 3) {
+      // LGS/YKS'den geri gelirken direkt hedef seçime
+      if (selectedGoal === 'lgs' || selectedGoal === 'yks') {
+        setStep(1);
+      } else {
+        setStep(2);
+      }
+    }
     else if (step === 2) setStep(1);
   };
 
@@ -367,8 +409,47 @@ export default function Register() {
             </div>
           )}
 
-          {/* ═══════════ ADIM 2: PAKET SEÇ ═══════════ */}
-          {step === 2 && selectedGoal && (
+          {/* ═══════════ ADIM 2: SINIF SEÇ ═══════════ */}
+          {step === 2 && selectedGoal && gradeOptions[selectedGoal] && (
+            <div className="animate-fade-up">
+              <button onClick={goBack} className="flex items-center gap-2 text-surface-500 hover:text-surface-700 transition-colors mb-6 group">
+                <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                <span className="text-sm font-medium">Geri</span>
+              </button>
+
+              <div className="mb-8 text-center">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-surface-900">
+                  Sınıfını seç
+                </h1>
+                <p className="text-surface-500 mt-2">
+                  <span className="font-medium text-primary-600">{goalLabels[selectedGoal]}</span> - Hangi sınıftasın?
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                {gradeOptions[selectedGoal].map((grade) => (
+                  <button
+                    key={grade.value}
+                    onClick={() => handleGradeSelect(grade.value)}
+                    className="group relative py-6 px-6 rounded-2xl border-2 border-surface-100 bg-white
+                      hover:border-primary-300 hover:shadow-card transition-all duration-300 text-center cursor-pointer
+                      hover:scale-[1.01] active:scale-[0.99]"
+                  >
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center
+                        group-hover:bg-primary-100 transition-colors">
+                        <GraduationCap size={22} className="text-primary-500" />
+                      </div>
+                      <p className="text-lg font-bold text-surface-700 group-hover:text-primary-600 transition-colors">{grade.label}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════ ADIM 3: PAKET SEÇ ═══════════ */}
+          {step === 3 && selectedGoal && (
             <div className="animate-fade-up">
               <button onClick={goBack} className="flex items-center gap-2 text-surface-500 hover:text-surface-700 transition-colors mb-6 group">
                 <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
@@ -434,8 +515,8 @@ export default function Register() {
             </div>
           )}
 
-          {/* ═══════════ ADIM 3: HESAP BİLGİLERİ ═══════════ */}
-          {step === 3 && (
+          {/* ═══════════ ADIM 4: HESAP BİLGİLERİ ═══════════ */}
+          {step === 4 && (
             <div className="animate-fade-up">
               <button onClick={goBack} className="flex items-center gap-2 text-surface-500 hover:text-surface-700 transition-colors mb-4 group">
                 <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />

@@ -88,6 +88,8 @@ export default function Login({ setUser }) {
       localStorage.setItem('user', res.data.user);
       localStorage.setItem('role', res.data.role);
       localStorage.setItem('user_id', res.data.user_id);
+      if (res.data.full_name) localStorage.setItem('full_name', res.data.full_name);
+      if (res.data.grade_level) localStorage.setItem('grade_level', res.data.grade_level);
 
       if (setUser) {
         setUser({ name: res.data.user, role: res.data.role });
@@ -122,6 +124,8 @@ export default function Login({ setUser }) {
       localStorage.setItem('user', res.data.user);
       localStorage.setItem('role', res.data.role);
       localStorage.setItem('user_id', res.data.user_id);
+      if (res.data.full_name) localStorage.setItem('full_name', res.data.full_name);
+      if (res.data.grade_level) localStorage.setItem('grade_level', res.data.grade_level);
 
       if (setUser) {
         setUser({ name: res.data.user, role: res.data.role });

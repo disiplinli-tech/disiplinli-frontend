@@ -64,6 +64,8 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const location = useLocation();
   const role = localStorage.getItem('role') || 'student';
   const userName = localStorage.getItem('user') || 'Kullanıcı';
+  const fullName = localStorage.getItem('full_name') || userName;
+  const gradeLevel = localStorage.getItem('grade_level') || '';
 
   // Öğrenci için alan bilgisi
   const [studentField, setStudentField] = useState(localStorage.getItem('exam_goal_type') || 'SAY');
@@ -80,6 +82,9 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
             setStudentField(res.data.exam_goal_type);
             localStorage.setItem('exam_goal_type', res.data.exam_goal_type);
           }
+          // Full name ve grade level güncelle
+          if (res.data?.full_name) localStorage.setItem('full_name', res.data.full_name);
+          if (res.data?.grade_level) localStorage.setItem('grade_level', res.data.grade_level);
         } catch (err) {
           // Hata olsa da devam et
         }
@@ -151,11 +156,21 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
                     role === 'parent' ? parentMenuItems : 
                     studentMenuItems;
 
+  // Grade label helper
+  const getGradeLabel = (grade) => {
+    const labels = {
+      '5': '5. Sınıf', '6': '6. Sınıf', '7': '7. Sınıf',
+      '9': '9. Sınıf', '10': '10. Sınıf', '11': '11. Sınıf',
+      'LGS': 'LGS', 'YKS': 'YKS',
+    };
+    return labels[grade] || '';
+  };
+
   const getRoleBadge = () => {
     switch (role) {
-      case 'coach': return { gradient: 'from-amber-500 to-orange-500', emoji: '🎓', label: 'Koç' };
-      case 'parent': return { gradient: 'from-emerald-500 to-teal-500', emoji: '👨‍👩‍👧', label: 'Veli' };
-      default: return { gradient: 'from-indigo-500 to-purple-500', emoji: '📚', label: 'Öğrenci' };
+      case 'coach': return { gradient: 'from-orange-500 to-amber-500', emoji: '🎓', label: 'Koç' };
+      case 'parent': return { gradient: 'from-orange-500 to-amber-500', emoji: '👨‍👩‍👧', label: 'Veli' };
+      default: return { gradient: 'from-orange-500 to-amber-500', emoji: '📚', label: getGradeLabel(gradeLevel) || 'Öğrenci' };
     }
   };
 
@@ -165,15 +180,11 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     <>
       {/* Logo */}
       <div className={`p-4 border-b border-gray-100 ${collapsed ? 'px-2' : ''}`}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-            <BookOpen className="text-white" size={20} />
-          </div>
-          {!collapsed && (
-            <div>
-              <h1 className="font-bold text-gray-800">Disiplinli</h1>
-              <p className="text-xs text-gray-400">YKS Koçluk</p>
-            </div>
+        <div className="flex items-center justify-center">
+          {collapsed ? (
+            <span className="text-lg font-bold text-orange-500">d</span>
+          ) : (
+            <h1 className="font-bold text-lg text-gray-800">disiplinli<span className="text-orange-500">.com</span></h1>
           )}
         </div>
       </div>
@@ -183,11 +194,11 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
         <div className={`bg-gradient-to-r ${badge.gradient} rounded-xl p-3 text-white ${collapsed ? 'p-2' : ''}`}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
-              {userName.charAt(0).toUpperCase()}
+              {fullName.charAt(0).toUpperCase()}
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="font-semibold text-sm truncate">{userName}</p>
+                <p className="font-semibold text-sm truncate">{fullName}</p>
                 <p className="text-xs opacity-80">{badge.emoji} {badge.label}</p>
               </div>
             )}
@@ -384,11 +395,8 @@ function Layout({ children }) {
           <button onClick={() => setMobileOpen(true)} className="p-2 text-gray-600">
             <Menu size={24} />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <BookOpen className="text-white" size={16} />
-            </div>
-            <span className="font-bold text-gray-800">Disiplinli</span>
+          <div className="flex items-center">
+            <span className="font-bold text-gray-800">disiplinli<span className="text-orange-500">.com</span></span>
           </div>
           <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">
             {userName.charAt(0).toUpperCase()}

@@ -132,11 +132,11 @@ export default function StudentPlan() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+      <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-800">Planım</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Planım</h1>
           <button
             onClick={() => setShowMinModal(true)}
             className="text-sm px-3 py-2 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
@@ -146,7 +146,7 @@ export default function StudentPlan() {
         </div>
 
         {/* Gün Tabları */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
+        <div className="flex gap-1 sm:gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
           {SHORT_DAYS.map((day, idx) => {
             const taskCount = planData?.days?.[idx]?.tasks?.length || 0;
             const isSelected = selectedDay === idx;
@@ -156,13 +156,13 @@ export default function StudentPlan() {
               <button
                 key={idx}
                 onClick={() => setSelectedDay(idx)}
-                className={`flex-1 min-w-[48px] py-3 px-2 rounded-xl text-center transition-all relative
+                className={`flex-1 min-w-[40px] sm:min-w-[48px] py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl text-center transition-all relative
                   ${isSelected
                     ? 'bg-primary-500 text-white shadow-lg shadow-primary-200'
                     : 'bg-white border border-gray-100 text-gray-600 hover:bg-gray-50'
                   }`}
               >
-                <p className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-gray-500'}`}>{day}</p>
+                <p className={`text-[11px] sm:text-xs font-semibold ${isSelected ? 'text-white' : 'text-gray-500'}`}>{day}</p>
                 {taskCount > 0 && (
                   <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
                     {taskCount} görev
@@ -284,8 +284,8 @@ export default function StudentPlan() {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => { setShowAddModal(false); resetForm(); }} />
-          <div className="relative bg-white rounded-2xl max-w-md w-full overflow-hidden animate-fade-up">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div className="relative bg-white rounded-2xl max-w-md w-full overflow-hidden animate-fade-up max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-800">
                 {editingTask ? 'Görevi Düzenle' : 'Yeni Görev'}
               </h3>
@@ -294,7 +294,7 @@ export default function StudentPlan() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4">
               {/* Ders */}
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">Ders *</label>
@@ -367,7 +367,7 @@ export default function StudentPlan() {
               </div>
             </div>
 
-            <div className="px-6 pb-6">
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
               <button
                 onClick={handleSaveTask}
                 disabled={!formSubject || saving}
