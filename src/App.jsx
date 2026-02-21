@@ -41,6 +41,13 @@ import Today from './pages/Today';
 import CoachExams from './pages/CoachExams';
 import FocusAreas from './pages/FocusAreas';
 import QuestionWheel from './pages/QuestionWheel';
+// Öğrenci Davranış Paneli
+import StudentToday from './pages/StudentToday';
+import StudentPlan from './pages/StudentPlan';
+import StudentProgress from './pages/StudentProgress';
+import StudentGoal from './pages/StudentGoal';
+import StudentCoach from './pages/StudentCoach';
+
 import API from './api';
 
 // Alan Tipleri
@@ -111,7 +118,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const coachMenuItems = [
     { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
     { type: 'divider' },
-    { icon: Compass, label: 'Bugün', path: '/today', highlight: true },
+    { icon: Compass, label: 'Bugün', path: '/coach-today', highlight: true },
     { icon: Users, label: 'Öğrenciler', path: '/students' },
     { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
     { icon: Calendar, label: 'Takvim', path: '/schedule' },
@@ -121,21 +128,17 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     { icon: SettingsIcon, label: 'Ayarlar', path: '/settings', muted: true },
   ];
 
-  // Öğrenci menüsü
+  // Öğrenci menüsü - Davranış değiştiren sistem
   const studentMenuItems = [
-    { icon: LayoutDashboard, label: 'Genel Bakış', path: '/dashboard' },
-    { icon: TrendingUp, label: 'Deneme Sonuçları', path: '/exams' },
-    { icon: Target, label: 'Konu Takibi', path: '/topics' },
-    { type: 'header', label: 'Odak & Pratik' },
-    { icon: Compass, label: 'Odak Alanlarım', path: '/focus-areas' },
-    { icon: Sparkles, label: 'Soru Çarkı', path: '/question-wheel', highlight: true },
+    { icon: Compass, label: 'Bugün', path: '/today', highlight: true },
+    { icon: Calendar, label: 'Planım', path: '/plan' },
+    { icon: TrendingUp, label: 'İlerlemem', path: '/progress' },
+    { icon: Target, label: 'Hedefim', path: '/goal' },
     { type: 'divider' },
-    { icon: Video, label: 'Online Dersler', path: '/lessons' },
-    { icon: MessageCircle, label: 'Mesajlar', path: '/chat' },
-    { icon: ClipboardList, label: 'Ödevler', path: '/assignments' },
-    { icon: Calendar, label: 'Programım', path: '/schedule' },
-    { icon: Calculator, label: 'Sıralama Hesapla', path: '/ranking-calculator' },
-    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
+    { icon: BookOpen, label: 'Denemeler', path: '/exams' },
+    { icon: MessageCircle, label: 'Koçum', path: '/coach' },
+    { type: 'divider' },
+    { icon: SettingsIcon, label: 'Ayarlar', path: '/settings', muted: true },
   ];
 
   // Veli menüsü (sadece dashboard ve ayarlar)
@@ -428,13 +431,18 @@ function PublicRoute({ children }) {
 // ==================== DASHBOARD ROUTER ====================
 function DashboardRouter() {
   const role = localStorage.getItem('role');
-  
+
   // Veli için ParentDashboard göster
   if (role === 'parent') {
     return <ParentDashboard />;
   }
-  
-  // Koç ve Öğrenci için normal Dashboard
+
+  // Öğrenci için /today'e yönlendir
+  if (role === 'student') {
+    return <Navigate to="/today" replace />;
+  }
+
+  // Koç için normal Dashboard
   return <Dashboard />;
 }
 
@@ -490,7 +498,12 @@ function App() {
         
         {/* ===== PROTECTED ROUTES ===== */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
-        <Route path="/today" element={<ProtectedRoute><Today /></ProtectedRoute>} />
+        <Route path="/today" element={<ProtectedRoute><StudentToday /></ProtectedRoute>} />
+        <Route path="/plan" element={<ProtectedRoute><StudentPlan /></ProtectedRoute>} />
+        <Route path="/progress" element={<ProtectedRoute><StudentProgress /></ProtectedRoute>} />
+        <Route path="/goal" element={<ProtectedRoute><StudentGoal /></ProtectedRoute>} />
+        <Route path="/coach" element={<ProtectedRoute><StudentCoach /></ProtectedRoute>} />
+        <Route path="/coach-today" element={<ProtectedRoute><Today /></ProtectedRoute>} />
         <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
         <Route path="/student/:id" element={<ProtectedRoute><StudentDetail /></ProtectedRoute>} />
         <Route path="/coach-exams" element={<ProtectedRoute><CoachExams /></ProtectedRoute>} />
