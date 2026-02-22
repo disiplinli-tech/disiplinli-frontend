@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
-  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, ChevronLeft, ChevronRight, Menu, Video, Calculator, Target, Compass, FileText
+  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, PanelLeftClose, PanelLeft, Menu, Video, Calculator, Target, Compass, FileText
 } from 'lucide-react';
 
 // Auth Sayfaları
@@ -216,8 +216,16 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="p-3 border-t border-gray-100">
+      {/* Collapse Toggle + Logout */}
+      <div className="p-3 border-t border-gray-100 space-y-1">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className={`hidden md:flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors
+            ${collapsed ? 'justify-center px-2' : ''}`}
+        >
+          {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+          {!collapsed && <span className="text-sm">Menüyü Küçült</span>}
+        </button>
         <button
           onClick={handleLogout}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors
@@ -236,15 +244,6 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
       <aside className={`hidden md:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 h-screen sticky top-0
         ${collapsed ? 'w-20' : 'w-64'}`}>
         {sidebarContent}
-        
-        {/* Collapse Button */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-white border border-gray-200 rounded-full 
-            flex items-center justify-center text-gray-400 hover:text-gray-600 shadow-sm z-10"
-        >
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
       </aside>
 
       {/* Mobile Sidebar */}
