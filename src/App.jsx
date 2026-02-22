@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
@@ -36,14 +36,12 @@ import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 import OnlineLessons from './pages/OnlineLessons';
 import RankingCalculator from './pages/RankingCalculator';
-import TopicTracker from './pages/TopicTracker';
 import Today from './pages/Today';
 import CoachExams from './pages/CoachExams';
 import FocusAreas from './pages/FocusAreas';
 import QuestionWheel from './pages/QuestionWheel';
 // Öğrenci Davranış Paneli
 import StudentToday from './pages/StudentToday';
-import StudentPlan from './pages/StudentPlan';
 import StudentProgress from './pages/StudentProgress';
 import StudentGoal from './pages/StudentGoal';
 import StudentCoach from './pages/StudentCoach';
@@ -105,8 +103,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
 
   // Öğrenci menüsü
   const studentMenuItems = [
-    { icon: Compass, label: 'Bugün', path: '/today' },
-    { icon: Calendar, label: 'Planım', path: '/plan' },
+    { icon: Compass, label: 'Çalışmalarım', path: '/today' },
     { icon: TrendingUp, label: 'İlerlemem', path: '/progress' },
     { icon: Target, label: 'Hedefim', path: '/goal' },
     { icon: BookOpen, label: 'Denemeler', path: '/exams' },
@@ -267,10 +264,35 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
 function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const mainRef = useRef(null);
   const userName = localStorage.getItem('user') || 'Kullanıcı';
 
+  const handleScroll = useCallback(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const currentY = el.scrollTop;
+    const delta = currentY - lastScrollY.current;
+
+    // En üstteyse her zaman göster
+    if (currentY < 10) {
+      setHeaderVisible(true);
+    }
+    // Aşağı 15px+ kaydırırsa gizle
+    else if (delta > 15) {
+      setHeaderVisible(false);
+    }
+    // Yukarı 5px+ çekerse göster (düşük eşik = anında tepki)
+    else if (delta < -5) {
+      setHeaderVisible(true);
+    }
+
+    lastScrollY.current = currentY;
+  }, []);
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
@@ -278,9 +300,11 @@ function Layout({ children }) {
         setMobileOpen={setMobileOpen}
       />
 
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Mobile Header */}
-        <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40 w-full">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        {/* Mobile Header — aşağı kaydırınca gizlenir, yukarı çekince gelir */}
+        <header className={`md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-40 w-full
+          transition-transform duration-300 absolute top-0 left-0 right-0
+          ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
           <button onClick={() => setMobileOpen(true)} className="p-2 text-gray-600">
             <Menu size={24} />
           </button>
@@ -292,8 +316,8 @@ function Layout({ children }) {
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1">
+        {/* Page Content — mobilde header yüksekliği kadar üstten padding */}
+        <main ref={mainRef} onScroll={handleScroll} className="flex-1 overflow-y-auto pt-[49px] md:pt-0">
           {children}
         </main>
       </div>
@@ -396,7 +420,7 @@ function App() {
         {/* ===== PROTECTED ROUTES ===== */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
         <Route path="/today" element={<ProtectedRoute><StudentToday /></ProtectedRoute>} />
-        <Route path="/plan" element={<ProtectedRoute><StudentPlan /></ProtectedRoute>} />
+        <Route path="/plan" element={<Navigate to="/today" replace />} />
         <Route path="/progress" element={<ProtectedRoute><StudentProgress /></ProtectedRoute>} />
         <Route path="/goal" element={<ProtectedRoute><StudentGoal /></ProtectedRoute>} />
         <Route path="/coach" element={<ProtectedRoute><StudentCoach /></ProtectedRoute>} />
@@ -412,7 +436,7 @@ function App() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/lessons" element={<ProtectedRoute><OnlineLessons /></ProtectedRoute>} />
         <Route path="/ranking-calculator" element={<ProtectedRoute><RankingCalculator /></ProtectedRoute>} />
-        <Route path="/topics" element={<ProtectedRoute><TopicTracker /></ProtectedRoute>} />
+        <Route path="/topics" element={<Navigate to="/progress" replace />} />
         <Route path="/focus-areas" element={<ProtectedRoute><FocusAreas /></ProtectedRoute>} />
         <Route path="/question-wheel" element={<ProtectedRoute><QuestionWheel /></ProtectedRoute>} />
 
