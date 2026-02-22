@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Flame, Check, Clock, BookOpen, AlertCircle, ChevronRight, Play, Plus, X, Edit2, Trash2, Lock } from 'lucide-react';
+import { Flame, Check, Clock, BookOpen, AlertCircle, ChevronRight, Play, Pause, Square, Plus, X, Edit2, Trash2, Lock } from 'lucide-react';
 import API from '../api';
 import CheckInModal from '../components/CheckInModal';
 
@@ -23,6 +23,29 @@ export default function StudentToday() {
   const [noteText, setNoteText] = useState('');
   const [countdown, setCountdown] = useState('');
   const countdownRef = useRef(null);
+
+  // Timer state: { taskId: { startedAt, elapsed, running } }
+  const [timers, setTimers] = useState(() => {
+    try {
+      const saved = localStorage.getItem('task_timers');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Restore running timers: recalculate elapsed
+        const now = Date.now();
+        const restored = {};
+        for (const [id, t] of Object.entries(parsed)) {
+          if (t.running && t.startedAt) {
+            restored[id] = { ...t, elapsed: t.elapsed + Math.floor((now - t.startedAt) / 1000) };
+          } else {
+            restored[id] = t;
+          }
+        }
+        return restored;
+      }
+    } catch {}
+    return {};
+  });
+  const timerIntervalRef = useRef(null);
 
   // === Haftalık Plan state ===
   const [planData, setPlanData] = useState(null);
@@ -84,6 +107,75 @@ export default function StudentToday() {
     return () => clearInterval(countdownRef.current);
   }, []);
 
+  // Timer tick - her saniye güncelle
+  useEffect(() => {
+    const hasRunning = Object.values(timers).some(t => t.running);
+    if (hasRunning) {
+      timerIntervalRef.current = setInterval(() => {
+        setTimers(prev => {
+          const updated = { ...prev };
+          for (const [id, t] of Object.entries(updated)) {
+            if (t.running) {
+              updated[id] = { ...t, elapsed: t.elapsed + 1 };
+            }
+          }
+          return updated;
+        });
+      }, 1000);
+    } else {
+      clearInterval(timerIntervalRef.current);
+    }
+    return () => clearInterval(timerIntervalRef.current);
+  }, [Object.values(timers).some(t => t.running)]);
+
+  // localStorage'a kaydet
+  useEffect(() => {
+    const toSave = {};
+    for (const [id, t] of Object.entries(timers)) {
+      toSave[id] = t.running
+        ? { ...t, startedAt: Date.now(), elapsed: t.elapsed }
+        : { ...t, startedAt: null };
+    }
+    localStorage.setItem('task_timers', JSON.stringify(toSave));
+  }, [timers]);
+
+  const startTimer = (taskId) => {
+    setTimers(prev => ({
+      ...prev,
+      [taskId]: { startedAt: Date.now(), elapsed: prev[taskId]?.elapsed || 0, running: true }
+    }));
+  };
+
+  const pauseTimer = (taskId) => {
+    setTimers(prev => ({
+      ...prev,
+      [taskId]: { ...prev[taskId], running: false, startedAt: null }
+    }));
+  };
+
+  const stopTimer = (taskId) => {
+    // Timer'ı durdur ve bitir akışına geç
+    pauseTimer(taskId);
+    setNoteInputId(taskId);
+    setNoteText('');
+  };
+
+  const clearTimer = (taskId) => {
+    setTimers(prev => {
+      const updated = { ...prev };
+      delete updated[taskId];
+      return updated;
+    });
+  };
+
+  const formatTimer = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
   // === Günlük fonksiyonlar ===
   const fetchToday = async () => {
     try {
@@ -102,6 +194,7 @@ export default function StudentToday() {
       await API.post('/api/student/today/complete/', { task_id: taskId, note: noteText });
       setNoteInputId(null);
       setNoteText('');
+      clearTimer(taskId);
       fetchToday();
     } catch (err) {
       alert('Çalışma güncellenemedi');
@@ -351,11 +444,19 @@ export default function StudentToday() {
                                 </p>
                               )}
                               <div className="flex items-center gap-4 mt-2">
-                                {task.duration_target > 0 && (
-                                  <span className="flex items-center gap-1 text-xs text-gray-400">
-                                    <Clock size={12} /> {task.duration_target} dk
-                                  </span>
-                                )}
+                                {task.duration_target > 0 && (() => {
+                                  const timer = timers[task.id];
+                                  const elapsedMin = timer ? Math.floor(timer.elapsed / 60) : 0;
+                                  const reached = elapsedMin >= task.duration_target;
+                                  return (
+                                    <span className={`flex items-center gap-1 text-xs ${
+                                      reached ? 'text-green-500 font-medium' : timer ? 'text-primary-500' : 'text-gray-400'
+                                    }`}>
+                                      <Clock size={12} />
+                                      {timer ? `${elapsedMin}/${task.duration_target} dk` : `${task.duration_target} dk`}
+                                    </span>
+                                  );
+                                })()}
                                 {task.question_target > 0 && (
                                   <span className="flex items-center gap-1 text-xs text-gray-400">
                                     <BookOpen size={12} /> {task.question_target} soru
@@ -369,14 +470,72 @@ export default function StudentToday() {
                               )}
                             </div>
 
-                            {!isCompleted && !showNote && (
-                              <button
-                                onClick={() => toggleTask(task)}
-                                className="flex items-center gap-1 px-3 py-2 bg-primary-50 text-primary-600 rounded-xl text-sm font-medium hover:bg-primary-100 transition-colors flex-shrink-0"
-                              >
-                                <Play size={14} /> Başla
-                              </button>
-                            )}
+                            {!isCompleted && !showNote && (() => {
+                              const timer = timers[task.id];
+                              const isRunning = timer?.running;
+                              const hasTimer = timer && timer.elapsed > 0;
+
+                              if (isRunning) {
+                                return (
+                                  <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                                    <div className="text-lg font-mono font-bold text-primary-600 tabular-nums">
+                                      {formatTimer(timer.elapsed)}
+                                    </div>
+                                    <div className="flex gap-1.5">
+                                      <button
+                                        onClick={() => pauseTimer(task.id)}
+                                        className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                                        title="Duraklat"
+                                      >
+                                        <Pause size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() => stopTimer(task.id)}
+                                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                                        title="Bitir"
+                                      >
+                                        <Square size={14} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              if (hasTimer && !isRunning) {
+                                return (
+                                  <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                                    <div className="text-lg font-mono font-bold text-gray-400 tabular-nums">
+                                      {formatTimer(timer.elapsed)}
+                                    </div>
+                                    <div className="flex gap-1.5">
+                                      <button
+                                        onClick={() => startTimer(task.id)}
+                                        className="p-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 transition-colors"
+                                        title="Devam et"
+                                      >
+                                        <Play size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() => stopTimer(task.id)}
+                                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                                        title="Bitir"
+                                      >
+                                        <Square size={14} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              return (
+                                <button
+                                  onClick={() => startTimer(task.id)}
+                                  className="flex items-center gap-1 px-3 py-2 bg-primary-50 text-primary-600 rounded-xl text-sm font-medium hover:bg-primary-100 transition-colors flex-shrink-0"
+                                >
+                                  <Play size={14} /> Başla
+                                </button>
+                              );
+                            })()}
                           </div>
 
                           {showNote && (
