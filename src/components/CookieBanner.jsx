@@ -6,6 +6,10 @@ export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // Giriş yapmış kullanıcılara gösterme
+    const token = localStorage.getItem('token');
+    if (token) return;
+
     const consent = localStorage.getItem('cookie_consent');
     if (!consent) {
       // Kısa gecikme ile göster (sayfa yüklendikten sonra)
