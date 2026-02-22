@@ -423,7 +423,7 @@ function TopicsTab({ topicData, loadingTopics, onToggle }) {
           <p className="text-xl font-bold text-orange-600">{currentTopics.total - currentTopics.completed}</p>
         </div>
         <div className="bg-amber-50 rounded-xl p-3 border border-amber-100 text-center">
-          <p className="text-xs text-amber-700">Oran</p>
+          <p className="text-xs text-amber-700">{examTab} İlerleme</p>
           <p className="text-xl font-bold text-amber-700">%{currentTopics.progress}</p>
         </div>
       </div>
