@@ -133,7 +133,7 @@ export default function Chat() {
   const grouped = groupMessagesByDate(messages);
 
   return (
-    <div className="flex h-[calc(100vh-80px)] bg-gray-50 max-w-[100vw] overflow-hidden">
+    <div className="flex h-[calc(100dvh-57px)] md:h-screen bg-gray-50 max-w-[100vw] overflow-hidden">
       {/* Sol: Sohbet Listesi */}
       <div className={`${selectedUser ? 'hidden md:flex' : 'flex'}
         flex-col w-full md:w-80 bg-white border-r border-gray-200 flex-shrink-0`}>
