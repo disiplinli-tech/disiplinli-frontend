@@ -406,156 +406,199 @@ export default function StudentToday() {
                     const isCompletingThis = completingId === task.id;
                     const showNote = noteInputId === task.id;
 
+                    const timer = timers[task.id];
+                    const isTimerActive = timer && (timer.running || timer.elapsed > 0);
+
                     return (
                       <div
                         key={task.id}
                         className={`bg-white rounded-2xl border transition-all ${
-                          isCompleted ? 'border-green-200 bg-green-50/50' : 'border-gray-100'
+                          isCompleted ? 'border-green-200 bg-green-50/50' : isTimerActive ? 'border-primary-200 shadow-lg shadow-primary-100/50' : 'border-gray-100'
                         }`}
                       >
-                        <div className="p-4">
-                          <div className="flex items-start gap-3">
-                            <button
-                              onClick={() => toggleTask(task)}
-                              disabled={isCompletingThis}
-                              className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all
-                                ${isCompleted ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-primary-400'}`}
-                            >
-                              {isCompleted && <Check size={16} className="text-white" />}
-                            </button>
-
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colors.badge}`}>
-                                  {task.category}
-                                </span>
-                                <h3 className={`font-semibold ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
-                                  {task.subject}
-                                </h3>
-                              </div>
-                              {task.topic && (
-                                <p className={`text-sm mt-0.5 ${isCompleted ? 'text-gray-400' : 'text-gray-500'}`}>
-                                  {task.topic}
-                                </p>
-                              )}
-                              {task.description && (
-                                <p className={`text-xs mt-1 italic ${isCompleted ? 'text-gray-300' : 'text-gray-400'}`}>
-                                  "{task.description}"
-                                </p>
-                              )}
-                              <div className="flex items-center gap-4 mt-2">
-                                {task.duration_target > 0 && (() => {
-                                  const timer = timers[task.id];
-                                  const elapsedMin = timer ? Math.floor(timer.elapsed / 60) : 0;
-                                  const reached = elapsedMin >= task.duration_target;
-                                  return (
-                                    <span className={`flex items-center gap-1 text-xs ${
-                                      reached ? 'text-green-500 font-medium' : timer ? 'text-primary-500' : 'text-gray-400'
-                                    }`}>
-                                      <Clock size={12} />
-                                      {timer ? `${elapsedMin}/${task.duration_target} dk` : `${task.duration_target} dk`}
-                                    </span>
-                                  );
-                                })()}
-                                {task.question_target > 0 && (
-                                  <span className="flex items-center gap-1 text-xs text-gray-400">
-                                    <BookOpen size={12} /> {task.question_target} soru
-                                  </span>
-                                )}
-                              </div>
-                              {isCompleted && task.completion_note && (
-                                <p className="text-xs text-green-600 mt-2 bg-green-50 px-2 py-1 rounded-lg inline-block">
-                                  "{task.completion_note}"
-                                </p>
-                              )}
+                        {/* Timer aktifken: büyük circular progress görünümü */}
+                        {isTimerActive && !isCompleted && !showNote ? (
+                          <div className="p-6">
+                            {/* Üst: ders bilgisi */}
+                            <div className="flex items-center gap-2 mb-5">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colors.badge}`}>
+                                {task.category}
+                              </span>
+                              <h3 className="font-semibold text-gray-800">{task.subject}</h3>
+                              {task.topic && <span className="text-sm text-gray-400">· {task.topic}</span>}
                             </div>
 
-                            {!isCompleted && !showNote && (() => {
-                              const timer = timers[task.id];
-                              const isRunning = timer?.running;
-                              const hasTimer = timer && timer.elapsed > 0;
-
-                              if (isRunning) {
-                                return (
-                                  <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                                    <div className="text-lg font-mono font-bold text-primary-600 tabular-nums">
-                                      {formatTimer(timer.elapsed)}
-                                    </div>
-                                    <div className="flex gap-1.5">
-                                      <button
-                                        onClick={() => pauseTimer(task.id)}
-                                        className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                                        title="Duraklat"
-                                      >
-                                        <Pause size={14} />
-                                      </button>
-                                      <button
-                                        onClick={() => stopTimer(task.id)}
-                                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
-                                        title="Bitir"
-                                      >
-                                        <Square size={14} />
-                                      </button>
-                                    </div>
-                                  </div>
-                                );
-                              }
-
-                              if (hasTimer && !isRunning) {
-                                return (
-                                  <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                                    <div className="text-lg font-mono font-bold text-gray-400 tabular-nums">
-                                      {formatTimer(timer.elapsed)}
-                                    </div>
-                                    <div className="flex gap-1.5">
-                                      <button
-                                        onClick={() => startTimer(task.id)}
-                                        className="p-2 bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 transition-colors"
-                                        title="Devam et"
-                                      >
-                                        <Play size={14} />
-                                      </button>
-                                      <button
-                                        onClick={() => stopTimer(task.id)}
-                                        className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
-                                        title="Bitir"
-                                      >
-                                        <Square size={14} />
-                                      </button>
-                                    </div>
-                                  </div>
-                                );
-                              }
+                            {/* Circular Progress */}
+                            {(() => {
+                              const targetSecs = (task.duration_target || 60) * 60;
+                              const elapsed = timer.elapsed;
+                              const progress = Math.min(elapsed / targetSecs, 1);
+                              const elapsedMin = Math.floor(elapsed / 60);
+                              const remainMin = Math.max(0, task.duration_target - elapsedMin);
+                              const canFinish = elapsed >= targetSecs * 0.8;
+                              const isOver = elapsed >= targetSecs;
+                              const radius = 80;
+                              const circumference = 2 * Math.PI * radius;
+                              const strokeDashoffset = circumference * (1 - progress);
 
                               return (
+                                <div className="flex flex-col items-center">
+                                  {/* SVG Circle */}
+                                  <div className="relative">
+                                    <svg width="200" height="200" className="transform -rotate-90">
+                                      {/* Background circle */}
+                                      <circle
+                                        cx="100" cy="100" r={radius}
+                                        fill="none"
+                                        stroke="#f3f4f6"
+                                        strokeWidth="10"
+                                      />
+                                      {/* Progress circle */}
+                                      <circle
+                                        cx="100" cy="100" r={radius}
+                                        fill="none"
+                                        stroke={isOver ? '#22c55e' : '#f97316'}
+                                        strokeWidth="10"
+                                        strokeLinecap="round"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={strokeDashoffset}
+                                        className="transition-all duration-1000 ease-linear"
+                                      />
+                                    </svg>
+                                    {/* Center text */}
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <p className={`text-3xl font-mono font-bold tabular-nums ${timer.running ? 'text-gray-800' : 'text-gray-400'}`}>
+                                        {formatTimer(elapsed)}
+                                      </p>
+                                      <p className={`text-xs mt-1 ${isOver ? 'text-green-500 font-semibold' : 'text-gray-400'}`}>
+                                        {isOver ? 'Hedef tamamlandı!' : `Kalan: ${remainMin} dk`}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Progress bar text */}
+                                  <p className="text-sm text-gray-500 mt-3">
+                                    {elapsedMin} / {task.duration_target} dakika
+                                  </p>
+
+                                  {/* Buttons */}
+                                  <div className="flex items-center gap-3 mt-5">
+                                    {timer.running ? (
+                                      <button
+                                        onClick={() => pauseTimer(task.id)}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                                      >
+                                        <Pause size={16} /> Duraklat
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => startTimer(task.id)}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-primary-50 text-primary-600 rounded-xl font-medium hover:bg-primary-100 transition-colors"
+                                      >
+                                        <Play size={16} /> Devam Et
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => canFinish ? stopTimer(task.id) : null}
+                                      disabled={!canFinish}
+                                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-colors ${
+                                        canFinish
+                                          ? 'bg-green-500 text-white hover:bg-green-600'
+                                          : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                                      }`}
+                                      title={!canFinish ? `Sürenin en az %80'ini tamamla (${Math.ceil(task.duration_target * 0.8)} dk)` : 'Çalışmayı bitir'}
+                                    >
+                                      <Check size={16} /> Bitir
+                                    </button>
+                                  </div>
+                                  {!canFinish && (
+                                    <p className="text-xs text-gray-400 mt-2">
+                                      En az {Math.ceil(task.duration_target * 0.8)} dk çalışmalısın
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          /* Normal kart görünümü */
+                          <div className="p-4">
+                            <div className="flex items-start gap-3">
+                              <button
+                                onClick={() => toggleTask(task)}
+                                disabled={isCompletingThis}
+                                className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all
+                                  ${isCompleted ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-primary-400'}`}
+                              >
+                                {isCompleted && <Check size={16} className="text-white" />}
+                              </button>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colors.badge}`}>
+                                    {task.category}
+                                  </span>
+                                  <h3 className={`font-semibold ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                                    {task.subject}
+                                  </h3>
+                                </div>
+                                {task.topic && (
+                                  <p className={`text-sm mt-0.5 ${isCompleted ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    {task.topic}
+                                  </p>
+                                )}
+                                {task.description && (
+                                  <p className={`text-xs mt-1 italic ${isCompleted ? 'text-gray-300' : 'text-gray-400'}`}>
+                                    "{task.description}"
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-4 mt-2">
+                                  {task.duration_target > 0 && (
+                                    <span className="flex items-center gap-1 text-xs text-gray-400">
+                                      <Clock size={12} /> {task.duration_target} dk
+                                    </span>
+                                  )}
+                                  {task.question_target > 0 && (
+                                    <span className="flex items-center gap-1 text-xs text-gray-400">
+                                      <BookOpen size={12} /> {task.question_target} soru
+                                    </span>
+                                  )}
+                                </div>
+                                {isCompleted && task.completion_note && (
+                                  <p className="text-xs text-green-600 mt-2 bg-green-50 px-2 py-1 rounded-lg inline-block">
+                                    "{task.completion_note}"
+                                  </p>
+                                )}
+                              </div>
+
+                              {!isCompleted && !showNote && (
                                 <button
                                   onClick={() => startTimer(task.id)}
                                   className="flex items-center gap-1 px-3 py-2 bg-primary-50 text-primary-600 rounded-xl text-sm font-medium hover:bg-primary-100 transition-colors flex-shrink-0"
                                 >
                                   <Play size={14} /> Başla
                                 </button>
-                              );
-                            })()}
-                          </div>
+                              )}
+                            </div>
 
-                          {showNote && (
-                            <div className="mt-3 ml-10 flex gap-2">
-                              <input
-                                type="text"
-                                value={noteText}
-                                onChange={(e) => setNoteText(e.target.value)}
-                                placeholder="Kısa not (opsiyonel)..."
-                                className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400"
-                                onKeyDown={(e) => e.key === 'Enter' && handleComplete(task.id)}
-                                autoFocus
-                              />
-                              <button
-                                onClick={() => handleComplete(task.id)}
-                                disabled={isCompletingThis}
-                                className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors"
-                              >
-                                {isCompletingThis ? '...' : 'Tamam'}
-                              </button>
+                            {showNote && (
+                              <div className="mt-3 ml-10 flex gap-2">
+                                <input
+                                  type="text"
+                                  value={noteText}
+                                  onChange={(e) => setNoteText(e.target.value)}
+                                  placeholder="Kısa not (opsiyonel)..."
+                                  className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400"
+                                  onKeyDown={(e) => e.key === 'Enter' && handleComplete(task.id)}
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => handleComplete(task.id)}
+                                  disabled={isCompletingThis}
+                                  className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors"
+                                >
+                                  {isCompletingThis ? '...' : 'Tamam'}
+                                </button>
                               <button
                                 onClick={() => { setNoteInputId(null); setNoteText(''); }}
                                 className="px-3 py-2 text-gray-400 hover:text-gray-600"
@@ -565,6 +608,7 @@ export default function StudentToday() {
                             </div>
                           )}
                         </div>
+                        )}
                       </div>
                     );
                   })}
