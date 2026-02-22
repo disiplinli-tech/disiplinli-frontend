@@ -39,8 +39,8 @@ export default function StudentToday() {
   const [formSubject, setFormSubject] = useState('');
   const [formTopic, setFormTopic] = useState('');
   const [formCategory, setFormCategory] = useState('TYT');
-  const [formDuration, setFormDuration] = useState(30);
-  const [formQuestions, setFormQuestions] = useState(0);
+  const [formDuration, setFormDuration] = useState('');
+  const [formQuestions, setFormQuestions] = useState('');
 
   useEffect(() => {
     fetchToday();
@@ -139,8 +139,8 @@ export default function StudentToday() {
     setFormSubject('');
     setFormTopic('');
     setFormCategory('TYT');
-    setFormDuration(30);
-    setFormQuestions(0);
+    setFormDuration('');
+    setFormQuestions('');
     setEditingTask(null);
   };
 
@@ -160,15 +160,17 @@ export default function StudentToday() {
     if (!formSubject) return;
     setSaving(true);
     try {
+      const duration = parseInt(formDuration) || 0;
+      const questions = parseInt(formQuestions) || 0;
       if (editingTask) {
         await API.put(`/api/student/plan/${editingTask.id}/`, {
           subject: formSubject, topic: formTopic, category: formCategory,
-          duration_target: formDuration, question_target: formQuestions,
+          duration_target: duration, question_target: questions,
         });
       } else {
         await API.post('/api/student/plan/add/', {
           day_of_week: selectedDay, subject: formSubject, topic: formTopic,
-          category: formCategory, duration_target: formDuration, question_target: formQuestions,
+          category: formCategory, duration_target: duration, question_target: questions,
         });
       }
       setShowAddModal(false);
@@ -667,8 +669,9 @@ export default function StudentToday() {
                   <input
                     type="number"
                     value={formDuration}
-                    onChange={(e) => setFormDuration(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setFormDuration(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
                     min="0"
+                    placeholder="örn: 60"
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400"
                   />
                 </div>
@@ -677,8 +680,9 @@ export default function StudentToday() {
                   <input
                     type="number"
                     value={formQuestions}
-                    onChange={(e) => setFormQuestions(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setFormQuestions(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
                     min="0"
+                    placeholder="örn: 20"
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400"
                   />
                 </div>
