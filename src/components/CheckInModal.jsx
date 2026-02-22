@@ -15,15 +15,15 @@ const DIFFICULTY_OPTIONS = [
   { value: 'stres', label: 'Stres' },
   { value: 'konu', label: 'Konu zorluğu' },
   { value: 'erteleme', label: 'Erteleme' },
-  { value: 'baska', label: 'Başka' },
+  { value: 'yok', label: 'Zorluk çekmedim' },
 ];
 
 const CORRECTION_OPTIONS = [
-  { value: 'kucuk_hedef', label: 'Daha küçük hedef' },
-  { value: 'erken_basla', label: 'Daha erken başla' },
-  { value: 'pomodoro', label: 'Pomodoro dene' },
+  { value: 'hedef_gozden_gecir', label: 'Yarınki hedefini gözden geçir' },
+  { value: 'erken_basla', label: 'Güne daha erken başla' },
+  { value: 'duzenli_calis', label: 'Daha düzenli çalış' },
   { value: 'telefon_uzak', label: 'Telefonu uzak tut' },
-  { value: 'tekrar_ekle', label: 'Tekrar ekle' },
+  { value: 'duzeltme_yok', label: 'Düzeltme yok' },
 ];
 
 export default function CheckInModal({ onClose, onSuccess }) {
