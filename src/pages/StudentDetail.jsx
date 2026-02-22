@@ -470,13 +470,6 @@ export default function StudentDetail() {
             {/* ===== AKTİVİTE ===== */}
             {activeTab === 'activity' && (
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">Günlük Aktivite</h3>
-                    <p className="text-sm text-gray-500">Öğrencinin çalışma disiplini ve aktiviteleri</p>
-                  </div>
-                </div>
-
                 {dailyActivityLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
@@ -488,176 +481,143 @@ export default function StudentDetail() {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {/* Günlük Hedef Tamamlandı Badge */}
-                    {dailyActivity.points?.daily_complete && (
-                      <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-4 text-white">
-                        <div className="flex items-center justify-center gap-3">
-                          <Star size={24} />
-                          <div className="text-center">
-                            <p className="text-lg font-bold">Bugünkü Hedefi Tamamladı!</p>
-                            <p className="text-sm opacity-90">50/50 puana ulaştı</p>
+
+                    {/* Üst Metrikler: Seri + Puan + Haftalık */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className={`rounded-xl p-4 text-center ${dailyActivity.streak?.alive ? 'bg-gradient-to-br from-orange-100 to-amber-50 border border-orange-300' : 'bg-gray-50 border border-gray-200'}`}>
+                        <Flame size={24} className={`mx-auto mb-1 ${dailyActivity.streak?.alive ? 'text-orange-500' : 'text-gray-400'}`} />
+                        <p className="text-2xl font-bold text-gray-800">{dailyActivity.streak?.current || 0}</p>
+                        <p className="text-xs text-gray-500">gün seri</p>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                        <Star size={24} className="mx-auto mb-1 text-amber-500" />
+                        <p className="text-2xl font-bold text-gray-800">{dailyActivity.points?.total || 0}</p>
+                        <p className="text-xs text-gray-500">toplam puan</p>
+                      </div>
+                      <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+                        <Calendar size={24} className="mx-auto mb-1 text-purple-500" />
+                        <p className="text-2xl font-bold text-gray-800">{dailyActivity.summary?.total_days_active || 0}/7</p>
+                        <p className="text-xs text-gray-500">aktif gün</p>
+                      </div>
+                    </div>
+
+                    {/* Zinciri Kırma Takvimi */}
+                    <div className="bg-white border border-gray-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                          <Flame size={16} className="text-orange-500" /> Zinciri Kırma
+                        </h4>
+                        <span className="text-xs text-gray-500">Son 5 hafta</span>
+                      </div>
+                      {(() => {
+                        const chainDates = new Set(dailyActivity.chain_dates || []);
+                        const now = new Date();
+                        const turkeyOffset = 3 * 60;
+                        const localNow = new Date(now.getTime() + (turkeyOffset + now.getTimezoneOffset()) * 60000);
+                        const todayStr = localNow.toISOString().split('T')[0];
+                        const days = [];
+                        for (let i = 34; i >= 0; i--) {
+                          const d = new Date(localNow);
+                          d.setDate(d.getDate() - i);
+                          const iso = d.toISOString().split('T')[0];
+                          days.push({ date: d, iso, done: chainDates.has(iso), isToday: iso === todayStr });
+                        }
+                        const weekLabels = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'];
+                        const firstDay = days[0].date.getDay();
+                        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+                        return (
+                          <div>
+                            <div className="grid grid-cols-7 gap-1 mb-1">
+                              {weekLabels.map(l => <span key={l} className="text-[10px] text-gray-400 text-center">{l}</span>)}
+                            </div>
+                            <div className="grid grid-cols-7 gap-1">
+                              {Array.from({ length: startOffset }).map((_, i) => <div key={`e${i}`} />)}
+                              {days.map((d, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-full aspect-square rounded-lg flex items-center justify-center text-xs font-medium transition-all
+                                    ${d.done ? 'bg-orange-500 text-white' : d.isToday ? 'bg-orange-100 text-orange-600 border border-orange-300' : 'bg-gray-100 text-gray-400'}`}
+                                >
+                                  {d.done ? '✓' : d.date.getDate()}
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                          <Star size={24} />
-                        </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Plan Uyum % Grafiği */}
+                    {dailyActivity.compliance_chart?.some(d => d.has_data) && (
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                          <TrendingUp size={16} className="text-orange-500" /> Plan Uyum %
+                        </h4>
+                        <ResponsiveContainer width="100%" height={180}>
+                          <AreaChart data={(dailyActivity.compliance_chart || []).map(d => ({
+                            ...d,
+                            label: new Date(d.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })
+                          }))}>
+                            <defs>
+                              <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#f97316" stopOpacity={0.3} />
+                                <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                            <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                            <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                            <Tooltip formatter={(v) => [`%${v}`, 'Uyum']} />
+                            <Area type="monotone" dataKey="pct" stroke="#f97316" strokeWidth={2} fill="url(#compGrad)" dot={{ r: 3, fill: '#f97316' }} />
+                          </AreaChart>
+                        </ResponsiveContainer>
                       </div>
                     )}
 
-                    {/* Ana Metrikler */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className={`rounded-xl p-4 ${dailyActivity.streak?.alive ? 'bg-gradient-to-br from-orange-100 to-amber-100 border-2 border-orange-300' : 'bg-gray-50'}`}>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Flame size={20} className={dailyActivity.streak?.alive ? 'text-orange-500' : 'text-gray-400'} />
-                          <span className="text-sm text-gray-600">Seri</span>
-                        </div>
-                        <p className="text-2xl font-bold text-gray-800">{dailyActivity.streak?.current || 0} <span className="text-sm font-normal text-gray-500">gün</span></p>
-                        <p className="text-xs text-gray-500 mt-1">En uzun: {dailyActivity.streak?.longest || 0} gün</p>
-                      </div>
-
-                      <div className={`rounded-xl p-4 ${dailyActivity.points?.daily_complete ? 'bg-gradient-to-br from-green-100 to-emerald-100 border-2 border-green-300' : 'bg-amber-50'}`}>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Star size={20} className={dailyActivity.points?.daily_complete ? 'text-green-500' : 'text-amber-500'} />
-                          <span className="text-sm text-gray-600">Bugün</span>
-                        </div>
-                        <p className="text-2xl font-bold text-gray-800">{dailyActivity.points?.today || 0} <span className="text-sm font-normal text-gray-500">/ {dailyActivity.points?.daily_limit}</span></p>
-                        <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${dailyActivity.points?.daily_complete ? 'bg-green-500' : 'bg-amber-500'}`}
-                            style={{ width: `${Math.min(100, (dailyActivity.points?.today / dailyActivity.points?.daily_limit) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="bg-orange-50 rounded-xl p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Sparkles size={20} className="text-orange-500" />
-                          <span className="text-sm text-gray-600">Toplam</span>
-                        </div>
-                        <p className="text-2xl font-bold text-orange-700">{dailyActivity.points?.total || 0}</p>
-                        <p className="text-xs text-gray-500 mt-1">puan</p>
-                      </div>
-
-                      <div className="bg-purple-50 rounded-xl p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Calendar size={20} className="text-purple-500" />
-                          <span className="text-sm text-gray-600">Bu Hafta</span>
-                        </div>
-                        <p className="text-2xl font-bold text-purple-700">{dailyActivity.summary?.total_days_active || 0} <span className="text-sm font-normal text-gray-500">/ 7 gün</span></p>
-                        <p className="text-xs text-gray-500 mt-1">Ort: {dailyActivity.summary?.avg_points_day || 0} puan/gün</p>
-                      </div>
-                    </div>
-
-                    {/* Haftalık Chart */}
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-3">Haftalık Görünüm</h4>
-                      <div className="flex items-end justify-between gap-2 h-24">
-                        {dailyActivity.week_chart?.map((day, i) => {
-                          const getBarColor = () => {
-                            if (day.status === 'complete') return 'bg-gradient-to-t from-green-400 to-emerald-400';
-                            if (day.status === 'partial') return 'bg-gradient-to-t from-yellow-400 to-amber-400';
-                            return 'bg-gray-200';
+                    {/* Sapma Nedenleri */}
+                    {dailyActivity.deviation_causes && Object.keys(dailyActivity.deviation_causes).length > 0 && (
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                          <BarChart3 size={16} className="text-orange-500" /> Sapma Nedenleri (30 gün)
+                        </h4>
+                        {(() => {
+                          const COLORS = {
+                            odak: { label: 'Odak sorunu', color: '#3B82F6', bg: 'bg-blue-500' },
+                            stres: { label: 'Stres', color: '#EF4444', bg: 'bg-red-500' },
+                            konu: { label: 'Konu zorluğu', color: '#8B5CF6', bg: 'bg-purple-500' },
+                            erteleme: { label: 'Erteleme', color: '#F59E0B', bg: 'bg-amber-500' },
+                            yok: { label: 'Sorun yok', color: '#22C55E', bg: 'bg-green-500' },
                           };
-                          const heightPct = Math.max(10, (day.points / (dailyActivity.points?.daily_limit || 50)) * 100);
+                          const entries = Object.entries(dailyActivity.deviation_causes).sort(([,a],[,b]) => b - a);
+                          const total = entries.reduce((s, [,c]) => s + c, 0);
                           return (
-                            <div key={i} className="flex-1 flex flex-col items-center">
-                              <div
-                                className={`w-full rounded-t-lg transition-all ${getBarColor()}`}
-                                style={{ height: `${heightPct}%` }}
-                                title={`${day.day}: ${day.points} puan`}
-                              />
-                              <span className="text-xs text-gray-500 mt-1">{day.day}</span>
-                              <span className="text-[10px] text-gray-400">{day.points}</span>
+                            <div className="space-y-2">
+                              {entries.map(([tag, count]) => {
+                                const info = COLORS[tag] || { label: tag, color: '#6B7280', bg: 'bg-gray-500' };
+                                const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                                return (
+                                  <div key={tag} className="flex items-center gap-3">
+                                    <span className="text-xs text-gray-600 w-24 truncate">{info.label}</span>
+                                    <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                                      <div className={`h-full rounded-full ${info.bg}`} style={{ width: `${pct}%` }} />
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-600 w-10 text-right">%{pct}</span>
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
-                        })}
-                      </div>
-                      <div className="flex items-center justify-center gap-4 mt-3 text-xs">
-                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-400"></span> Tamamlandı</span>
-                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-400"></span> Kısmi</span>
-                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-200"></span> Boş</span>
-                      </div>
-                    </div>
-
-                    {/* Bugünkü Aktiviteler */}
-                    {dailyActivity.today_activities?.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Bugün Yapılanlar</h4>
-                        <div className="space-y-2">
-                          {dailyActivity.today_activities.map((act, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg">
-                                  {act.action_type === 'study_topic' ? '📘' :
-                                   act.action_type === 'study_review' ? '🔁' :
-                                   act.action_type === 'study_questions' ? '🧠' :
-                                   act.action_type === 'study_exam_analysis' ? '📝' :
-                                   act.action_type === 'wheel_spin' ? '🎡' :
-                                   act.action_type === 'exam_entry' ? '📊' :
-                                   act.action_type === 'focus_interact' ? '🎯' :
-                                   act.action_type === 'login' ? '👋' : '✨'}
-                                </span>
-                                <span className="text-sm text-gray-700">{act.action_label}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-400">{act.time}</span>
-                                <span className="text-sm font-medium text-amber-600">+{act.points}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        })()}
                       </div>
                     )}
 
-                    {/* Manuel Aktivite Durumu */}
-                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                      <h4 className="text-sm font-semibold text-orange-800 mb-3">Manuel Çalışma Aktiviteleri</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {[
-                          { key: 'study_topic', label: 'Konu çalıştı', icon: '📘', points: 10 },
-                          { key: 'study_review', label: 'Tekrar yaptı', icon: '🔁', points: 10 },
-                          { key: 'study_questions', label: 'Soru çözdü', icon: '🧠', points: 20 },
-                          { key: 'study_exam_analysis', label: 'Deneme analizi', icon: '📝', points: 10 },
-                        ].map(item => {
-                          const isActive = dailyActivity.manual_status?.[item.key];
-                          return (
-                            <div
-                              key={item.key}
-                              className={`p-3 rounded-lg text-center ${
-                                isActive ? 'bg-green-100 border-2 border-green-300' : 'bg-white border border-gray-200'
-                              }`}
-                            >
-                              <span className="text-2xl">{item.icon}</span>
-                              <p className={`text-xs mt-1 ${isActive ? 'text-green-700 font-medium' : 'text-gray-500'}`}>
-                                {item.label}
-                              </p>
-                              {isActive && <span className="text-xs text-green-600">+{item.points}</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Son Aktiviteler */}
-                    {dailyActivity.recent_activities?.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Son 7 Gün Aktiviteleri</h4>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                          {dailyActivity.recent_activities.map((act, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-400">{act.date}</span>
-                                <span className="text-sm text-gray-700">{act.action_label}</span>
-                              </div>
-                              <span className="text-sm font-medium text-amber-600">+{act.points}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Gün Değerlendirmeleri (Check-in) */}
+                    {/* Gün Değerlendirmeleri (Check-in Kartları) */}
                     {dailyActivity.checkins?.length > 0 && (
                       <div className="bg-white border border-gray-200 rounded-xl p-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-4">Gün Değerlendirmeleri</h4>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                          <CheckCircle2 size={16} className="text-orange-500" /> Gün Değerlendirmeleri
+                        </h4>
                         <div className="space-y-3 max-h-96 overflow-y-auto">
                           {dailyActivity.checkins.map((ci, idx) => {
                             const pctColor = ci.completion_pct >= 75 ? 'bg-green-500' : ci.completion_pct >= 50 ? 'bg-amber-500' : 'bg-red-500';
@@ -698,6 +658,15 @@ export default function StudentDetail() {
                             );
                           })}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Hiç check-in yoksa */}
+                    {(!dailyActivity.checkins || dailyActivity.checkins.length === 0) && (!dailyActivity.chain_dates || dailyActivity.chain_dates.length === 0) && (
+                      <div className="text-center py-8 text-gray-400">
+                        <CheckCircle2 size={48} className="mx-auto mb-3 opacity-40" />
+                        <p className="text-sm">Henüz gün değerlendirmesi yok</p>
+                        <p className="text-xs mt-1">Öğrenci her gece 22:00-24:00 arası değerlendirme yapabilir</p>
                       </div>
                     )}
                   </div>
