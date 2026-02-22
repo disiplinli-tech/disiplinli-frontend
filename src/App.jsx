@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, MessageCircle, ClipboardList,
-  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, PanelLeftClose, PanelLeft, Menu, Video, Calculator, Target, Compass, FileText
+  Settings as SettingsIcon, LogOut, TrendingUp, BookOpen, PanelLeftClose, PanelLeft, Menu, Video, Calculator, Target, Compass, FileText, HelpCircle
 } from 'lucide-react';
 
 // Auth Sayfaları
@@ -45,6 +45,10 @@ import StudentToday from './pages/StudentToday';
 import StudentProgress from './pages/StudentProgress';
 import StudentGoal from './pages/StudentGoal';
 import StudentCoach from './pages/StudentCoach';
+// Takıldıklarım
+import StuckQuestions from './pages/StuckQuestions';
+import StuckQuestionNew from './pages/StuckQuestionNew';
+import StuckQuestionDetail from './pages/StuckQuestionDetail';
 
 import API from './api';
 
@@ -107,6 +111,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
     { icon: TrendingUp, label: 'İlerlemem', path: '/progress' },
     { icon: Target, label: 'Hedefim', path: '/goal' },
     { icon: BookOpen, label: 'Denemeler', path: '/exams' },
+    { icon: HelpCircle, label: 'Takıldıklarım', path: '/stuck' },
     { icon: Calendar, label: 'Takvim', path: '/schedule' },
     { icon: MessageCircle, label: 'Koçum', path: '/coach' },
     { icon: SettingsIcon, label: 'Ayarlar', path: '/settings' },
@@ -438,6 +443,9 @@ function App() {
         <Route path="/topics" element={<Navigate to="/progress" replace />} />
         <Route path="/focus-areas" element={<ProtectedRoute><FocusAreas /></ProtectedRoute>} />
         <Route path="/question-wheel" element={<ProtectedRoute><QuestionWheel /></ProtectedRoute>} />
+        <Route path="/stuck" element={<ProtectedRoute><StuckQuestions /></ProtectedRoute>} />
+        <Route path="/stuck/new" element={<ProtectedRoute><StuckQuestionNew /></ProtectedRoute>} />
+        <Route path="/stuck/:id" element={<ProtectedRoute><StuckQuestionDetail /></ProtectedRoute>} />
 
         {/* ===== 404 ===== */}
         <Route path="*" element={<Navigate to="/login" replace />} />
