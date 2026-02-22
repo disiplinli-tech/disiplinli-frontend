@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Flame, Check, Clock, BookOpen, AlertCircle, ChevronRight, Play, Plus, X, Edit2, Trash2 } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Flame, Check, Clock, BookOpen, AlertCircle, ChevronRight, Play, Plus, X, Edit2, Trash2, Lock } from 'lucide-react';
 import API from '../api';
 import CheckInModal from '../components/CheckInModal';
 
@@ -21,6 +21,8 @@ export default function StudentToday() {
   const [completingId, setCompletingId] = useState(null);
   const [noteInputId, setNoteInputId] = useState(null);
   const [noteText, setNoteText] = useState('');
+  const [countdown, setCountdown] = useState('');
+  const countdownRef = useRef(null);
 
   // === Haftalık Plan state ===
   const [planData, setPlanData] = useState(null);
@@ -43,6 +45,42 @@ export default function StudentToday() {
   useEffect(() => {
     fetchToday();
     fetchPlan();
+  }, []);
+
+  // Countdown timer for check-in window (22:00 GMT+3)
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      // GMT+3 saatini hesapla
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const turkeyTime = new Date(utc + 3 * 3600000);
+      const h = turkeyTime.getHours();
+      const m = turkeyTime.getMinutes();
+      const s = turkeyTime.getSeconds();
+
+      if (h >= 22) {
+        setCountdown('');
+        clearInterval(countdownRef.current);
+        return;
+      }
+
+      const totalSecsLeft = (22 - h - 1) * 3600 + (59 - m) * 60 + (60 - s);
+      const hours = Math.floor(totalSecsLeft / 3600);
+      const mins = Math.floor((totalSecsLeft % 3600) / 60);
+      const secs = totalSecsLeft % 60;
+
+      if (hours > 0) {
+        setCountdown(`${hours} sa ${mins} dk`);
+      } else if (mins > 0) {
+        setCountdown(`${mins} dk ${secs} sn`);
+      } else {
+        setCountdown(`${secs} sn`);
+      }
+    };
+
+    updateCountdown();
+    countdownRef.current = setInterval(updateCountdown, 1000);
+    return () => clearInterval(countdownRef.current);
   }, []);
 
   // === Günlük fonksiyonlar ===
@@ -382,21 +420,30 @@ export default function StudentToday() {
             )}
 
             {/* Gün Sonu Check-in */}
-            <button
-              onClick={() => setShowCheckIn(true)}
-              disabled={data.checkin_done}
-              className={`w-full py-4 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-2
-                ${data.checkin_done
-                  ? 'bg-green-100 text-green-600 border-2 border-green-200 cursor-default'
-                  : 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-200 hover:shadow-xl hover:shadow-primary-300 active:scale-[0.98]'
-                }`}
-            >
-              {data.checkin_done ? (
-                <><Check size={20} /> Bugün değerlendirildi</>
-              ) : (
-                <><Clock size={20} /> Günümü Değerlendir</>
-              )}
-            </button>
+            {data.checkin_done ? (
+              <button
+                disabled
+                className="w-full py-4 rounded-2xl font-semibold text-lg bg-green-100 text-green-600 border-2 border-green-200 cursor-default flex items-center justify-center gap-2"
+              >
+                <Check size={20} /> Bugün değerlendirildi
+              </button>
+            ) : data.checkin_window_open ? (
+              <button
+                onClick={() => setShowCheckIn(true)}
+                className="w-full py-4 rounded-2xl font-semibold text-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-200 hover:shadow-xl hover:shadow-primary-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2 animate-pulse"
+              >
+                <Clock size={20} /> Günümü Değerlendir
+              </button>
+            ) : (
+              <div className="w-full py-4 rounded-2xl bg-gray-100 border-2 border-gray-200 flex flex-col items-center justify-center gap-1">
+                <div className="flex items-center gap-2 text-gray-400 font-semibold text-base">
+                  <Lock size={18} /> Günümü Değerlendir
+                </div>
+                <p className="text-xs text-gray-400">
+                  Açılmasına kalan süre: <span className="font-bold text-gray-500">{countdown || '...'}</span>
+                </p>
+              </div>
+            )}
           </>
         )}
 

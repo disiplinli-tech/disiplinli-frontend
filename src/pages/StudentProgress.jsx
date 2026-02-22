@@ -16,6 +16,7 @@ const DIFFICULTY_LABELS = {
   stres: 'Stres',
   konu: 'Konu zorluğu',
   erteleme: 'Erteleme',
+  yok: 'Zorluk çekmedim',
   baska: 'Başka',
 };
 
@@ -24,6 +25,7 @@ const DIFFICULTY_COLORS = {
   stres: { bg: 'bg-red-100', text: 'text-red-700', bar: '#EF4444' },
   konu: { bg: 'bg-purple-100', text: 'text-purple-700', bar: '#8B5CF6' },
   erteleme: { bg: 'bg-amber-100', text: 'text-amber-700', bar: '#F59E0B' },
+  yok: { bg: 'bg-green-100', text: 'text-green-700', bar: '#22C55E' },
   baska: { bg: 'bg-gray-100', text: 'text-gray-700', bar: '#6B7280' },
 };
 
@@ -128,7 +130,91 @@ function SubjectCard({ subjectKey, data, onToggle, loadingTopics }) {
 
 /* ─── İstatistikler Tab İçeriği ─── */
 
-function StatsTab({ data }) {
+function ChainCalendar({ chainData }) {
+  if (!chainData) return null;
+
+  const chainDates = new Set(chainData.chain_dates || []);
+  const today = new Date();
+  // GMT+3 offset
+  const utc = today.getTime() + today.getTimezoneOffset() * 60000;
+  const turkeyNow = new Date(utc + 3 * 3600000);
+
+  // Son 35 gün (5 hafta)
+  const days = [];
+  for (let i = 34; i >= 0; i--) {
+    const d = new Date(turkeyNow);
+    d.setDate(d.getDate() - i);
+    const iso = d.toISOString().split('T')[0];
+    const isToday = i === 0;
+    const done = chainDates.has(iso);
+    const isFuture = false; // hepsi geçmiş veya bugün
+    days.push({ date: d, iso, done, isToday });
+  }
+
+  // Haftanın gün etiketleri
+  const dayLabels = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'];
+
+  // Grid'e yerleştirmek için ilk günün haftanın kaçıncı günü olduğunu bulalım
+  const firstDay = days[0].date.getDay(); // 0=Pazar
+  const startIdx = firstDay === 0 ? 6 : firstDay - 1; // 0=Pazartesi
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Flame size={18} className="text-orange-500" />
+        <h2 className="font-semibold text-gray-800 text-sm">Zinciri Kırma</h2>
+        <span className="text-xs text-gray-400 ml-auto">Son 35 gün</span>
+      </div>
+
+      {/* Gün etiketleri */}
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {dayLabels.map(l => (
+          <div key={l} className="text-center text-[10px] text-gray-400 font-medium">{l}</div>
+        ))}
+      </div>
+
+      {/* Takvim grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {/* Boş hücreler (ilk haftanın başı) */}
+        {Array.from({ length: startIdx }).map((_, i) => (
+          <div key={`empty-${i}`} className="w-full aspect-square" />
+        ))}
+
+        {/* Günler */}
+        {days.map(({ iso, done, isToday, date }) => (
+          <div
+            key={iso}
+            className={`w-full aspect-square rounded-lg flex items-center justify-center text-xs font-bold transition-all
+              ${done
+                ? 'bg-orange-500 text-white shadow-sm'
+                : isToday
+                  ? 'bg-orange-100 text-orange-500 border-2 border-orange-300'
+                  : 'bg-gray-100 text-gray-300'
+              }`}
+            title={`${date.getDate()}/${date.getMonth() + 1} ${done ? '✓' : '✗'}`}
+          >
+            {done ? '✓' : date.getDate()}
+          </div>
+        ))}
+      </div>
+
+      {/* Alt bilgi */}
+      <div className="flex items-center justify-between mt-3 px-1">
+        <div className="flex items-center gap-3 text-xs text-gray-500">
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-orange-500"></span> Değerlendirildi</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 border border-gray-200"></span> Yapılmadı</span>
+        </div>
+        <div className="text-xs text-gray-400">
+          {chainData.current_streak > 0 && (
+            <span className="text-orange-500 font-bold">{chainData.current_streak} gün seri 🔥</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatsTab({ data, chainData }) {
   const complianceChart = (data.compliance_chart || []).map((d) => ({
     ...d,
     label: new Date(d.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
@@ -161,6 +247,9 @@ function StatsTab({ data }) {
           </div>
         </div>
       </div>
+
+      {/* Zinciri Kırma Takvimi */}
+      <ChainCalendar chainData={chainData} />
 
       {/* Plan Uyum Grafiği */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4">
@@ -378,9 +467,13 @@ export default function StudentProgress() {
   const [topicLoading, setTopicLoading] = useState(true);
   const [loadingTopics, setLoadingTopics] = useState(new Set());
 
+  // Zincir takvimi verileri
+  const [chainData, setChainData] = useState(null);
+
   useEffect(() => {
     fetchStats();
     fetchTopics();
+    fetchChain();
   }, []);
 
   const fetchStats = async () => {
@@ -391,6 +484,15 @@ export default function StudentProgress() {
       console.error('İlerleme verisi yüklenemedi:', err);
     } finally {
       setStatsLoading(false);
+    }
+  };
+
+  const fetchChain = async () => {
+    try {
+      const res = await API.get('/api/student/checkin/history/');
+      setChainData(res.data);
+    } catch (err) {
+      console.error('Zincir verisi yüklenemedi:', err);
     }
   };
 
@@ -470,7 +572,7 @@ export default function StudentProgress() {
 
         {/* Tab İçerikleri */}
         {tab === 'stats' && statsData && (
-          <StatsTab data={statsData} />
+          <StatsTab data={statsData} chainData={chainData} />
         )}
 
         {tab === 'stats' && !statsData && (
