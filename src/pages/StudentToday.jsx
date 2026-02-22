@@ -38,6 +38,7 @@ export default function StudentToday() {
   // Form state
   const [formSubject, setFormSubject] = useState('');
   const [formTopic, setFormTopic] = useState('');
+  const [formDescription, setFormDescription] = useState('');
   const [formCategory, setFormCategory] = useState('TYT');
   const [formDuration, setFormDuration] = useState('');
   const [formQuestions, setFormQuestions] = useState('');
@@ -138,6 +139,7 @@ export default function StudentToday() {
   const resetForm = () => {
     setFormSubject('');
     setFormTopic('');
+    setFormDescription('');
     setFormCategory('TYT');
     setFormDuration('');
     setFormQuestions('');
@@ -150,6 +152,7 @@ export default function StudentToday() {
     setEditingTask(task);
     setFormSubject(task.subject);
     setFormTopic(task.topic);
+    setFormDescription(task.description || '');
     setFormCategory(task.category);
     setFormDuration(task.duration_target);
     setFormQuestions(task.question_target);
@@ -164,13 +167,14 @@ export default function StudentToday() {
       const questions = parseInt(formQuestions) || 0;
       if (editingTask) {
         await API.put(`/api/student/plan/${editingTask.id}/`, {
-          subject: formSubject, topic: formTopic, category: formCategory,
-          duration_target: duration, question_target: questions,
+          subject: formSubject, topic: formTopic, description: formDescription,
+          category: formCategory, duration_target: duration, question_target: questions,
         });
       } else {
         await API.post('/api/student/plan/add/', {
           day_of_week: selectedDay, subject: formSubject, topic: formTopic,
-          category: formCategory, duration_target: duration, question_target: questions,
+          description: formDescription, category: formCategory,
+          duration_target: duration, question_target: questions,
         });
       }
       setShowAddModal(false);
@@ -339,6 +343,11 @@ export default function StudentToday() {
                               {task.topic && (
                                 <p className={`text-sm mt-0.5 ${isCompleted ? 'text-gray-400' : 'text-gray-500'}`}>
                                   {task.topic}
+                                </p>
+                              )}
+                              {task.description && (
+                                <p className={`text-xs mt-1 italic ${isCompleted ? 'text-gray-300' : 'text-gray-400'}`}>
+                                  "{task.description}"
                                 </p>
                               )}
                               <div className="flex items-center gap-4 mt-2">
@@ -526,6 +535,9 @@ export default function StudentToday() {
                               <h3 className="font-semibold text-gray-800">{task.subject}</h3>
                             </div>
                             {task.topic && <p className="text-sm text-gray-500 mt-0.5">{task.topic}</p>}
+                            {task.description && (
+                              <p className="text-xs text-gray-400 mt-1 italic">"{task.description}"</p>
+                            )}
                             <div className="flex items-center gap-4 mt-2">
                               {task.duration_target > 0 && (
                                 <span className="flex items-center gap-1 text-xs text-gray-400">
@@ -642,6 +654,21 @@ export default function StudentToday() {
                   placeholder="ör. Türev, Paragraf..."
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400"
                 />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1.5">Neden? (opsiyonel)</label>
+                <textarea
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder="Bu görevi neden yapıyorsun? ör. Sınavda en çok hata yaptığım konu..."
+                  maxLength={300}
+                  rows={2}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400 resize-none"
+                />
+                {formDescription.length > 0 && (
+                  <p className="text-xs text-gray-400 text-right mt-1">{formDescription.length}/300</p>
+                )}
               </div>
 
               <div>
