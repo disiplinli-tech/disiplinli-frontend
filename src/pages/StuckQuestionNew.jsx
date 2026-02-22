@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Camera, X, FileText, ClipboardList, BookOpen, Library,
-  Upload, Loader2, ChevronDown
+  Upload, Loader2
 } from 'lucide-react';
 import API from '../api';
 
@@ -30,25 +30,8 @@ export default function StuckQuestionNew() {
   const [examName, setExamName] = useState('');
   const [examSection, setExamSection] = useState('');
   const [topic, setTopic] = useState('');
-  const [topics, setTopics] = useState([]);
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  // Branş değişince konuları çek
-  useEffect(() => {
-    if (!subject) { setTopics([]); return; }
-    // topic_data.py'deki Türkçe isimleri API'ye göndermek için normalize et
-    const subjectMap = {
-      'Türkçe': 'Turkce', 'Matematik': 'Matematik', 'Fizik': 'Fizik',
-      'Kimya': 'Kimya', 'Biyoloji': 'Biyoloji', 'Tarih': 'Tarih',
-      'Coğrafya': 'Cografya', 'Felsefe': 'Felsefe', 'Din Kültürü': 'Din Kulturu',
-      'Edebiyat': 'Edebiyat', 'Geometri': 'Geometri', 'Paragraf': 'Paragraf', 'Diğer': 'Diger',
-    };
-    const key = subjectMap[subject] || subject;
-    API.get(`/api/stuck/topics/?subject=${encodeURIComponent(key)}`)
-      .then(res => setTopics(res.data.topics || []))
-      .catch(() => setTopics(['Emin değilim']));
-  }, [subject]);
 
   const handleFileSelect = (e) => {
     const selected = Array.from(e.target.files || []);
@@ -161,7 +144,7 @@ export default function StuckQuestionNew() {
           {SUBJECTS.map(s => (
             <button
               key={s}
-              onClick={() => { setSubject(s); setTopic(''); }}
+              onClick={() => setSubject(s)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border
                 ${subject === s
                   ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
@@ -222,25 +205,17 @@ export default function StuckQuestionNew() {
         </div>
       )}
 
-      {/* 5. Konu Seçimi */}
-      {subject && topics.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
-          <label className="text-sm font-semibold text-gray-700 mb-3 block">🎓 Konu (opsiyonel)</label>
-          <div className="relative">
-            <select
-              value={topic}
-              onChange={e => setTopic(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-orange-300"
-            >
-              <option value="">Konu seç...</option>
-              {topics.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-      )}
+      {/* 5. Konu */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
+        <label className="text-sm font-semibold text-gray-700 mb-3 block">🎓 Konu (opsiyonel)</label>
+        <input
+          type="text"
+          placeholder="Konu yaz (ör: Türev, Olasılık, Osmanlı...)"
+          value={topic}
+          onChange={e => setTopic(e.target.value)}
+          className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+        />
+      </div>
 
       {/* 6. Not */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6">
