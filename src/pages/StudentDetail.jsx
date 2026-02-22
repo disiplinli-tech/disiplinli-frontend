@@ -3,11 +3,11 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import API from "../api";
 import { formatRanking } from "../utils/formatters";
 import {
-  ArrowLeft, Mail, Target, TrendingUp, TrendingDown, Minus,
-  Calendar, Award, BarChart3, Trophy, MessageCircle, Plus, X, Save,
+  ArrowLeft, Mail, TrendingUp, TrendingDown, Minus,
+  Calendar, Award, BarChart3, Trophy,
   BookOpen, CheckCircle2, Circle, ChevronDown, ChevronUp,
-  Flame, Clock, AlertTriangle, HelpCircle, FileQuestion, Star, Sparkles, Activity,
-  MessageSquarePlus, Send
+  Flame, Clock, Star, Sparkles, Activity,
+  MessageSquarePlus, Send, X, Save
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -25,21 +25,11 @@ export default function StudentDetail() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  // Haftalık hedef state'leri
-  const [weeklyGoals, setWeeklyGoals] = useState([]);
-  const [showGoalModal, setShowGoalModal] = useState(false);
-
   // Konu takip state'leri
   const [topicsData, setTopicsData] = useState(null);
   const [topicsLoading, setTopicsLoading] = useState(false);
   const [topicsTab, setTopicsTab] = useState('TYT');
   const [expandedSubjects, setExpandedSubjects] = useState({});
-  const [goalForm, setGoalForm] = useState({
-    goal_type: 'DENEME_TYT',
-    target_value: '',
-    note: ''
-  });
-  const [savingGoal, setSavingGoal] = useState(false);
 
   // Schedule state
   const [studentSchedule, setStudentSchedule] = useState([]);
@@ -48,12 +38,6 @@ export default function StudentDetail() {
   // Subject results state (branş detayları)
   const [subjectResults, setSubjectResults] = useState([]);
   const [expandedExamId, setExpandedExamId] = useState(null);
-
-  // Odak Alanları ve Soru Aktivitesi (Koç görünümü)
-  const [focusAreas, setFocusAreas] = useState([]);
-  const [focusLoading, setFocusLoading] = useState(false);
-  const [questionActivity, setQuestionActivity] = useState(null);
-  const [activityLoading, setActivityLoading] = useState(false);
 
   // Günlük Aktivite (Koç görünümü)
   const [dailyActivity, setDailyActivity] = useState(null);
@@ -67,12 +51,9 @@ export default function StudentDetail() {
 
   useEffect(() => {
     fetchData();
-    fetchGoals();
     fetchTopics();
     fetchSchedule();
     fetchSubjectResults();
-    fetchFocusAreas();
-    fetchQuestionActivity();
     fetchDailyActivity();
     fetchCoachNotes();
   }, [id]);
@@ -81,29 +62,17 @@ export default function StudentDetail() {
     try {
       const studentRes = await API.get(`/api/student/${id}/`);
       setStudent(studentRes.data);
-
-      // Exams varsa al
       if (studentRes.data.exams) {
         setExams(studentRes.data.exams);
       } else {
         try {
           const examsRes = await API.get(`/api/student/${id}/exams/`);
           setExams(examsRes.data || []);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
     } catch (err) {
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchGoals = async () => {
-    try {
-      const res = await API.get(`/api/goals/?student_id=${id}`);
-      setWeeklyGoals(res.data.goals || []);
-    } catch (err) {
-      console.log('Hedefler yüklenemedi');
     }
   };
 
@@ -113,7 +82,6 @@ export default function StudentDetail() {
       const res = await API.get(`/api/topics/?student_id=${id}`);
       setTopicsData(res.data);
     } catch (err) {
-      console.log('Konu verileri yüklenemedi');
     } finally {
       setTopicsLoading(false);
     }
@@ -125,7 +93,6 @@ export default function StudentDetail() {
       const res = await API.get(`/api/student/${id}/schedule/`);
       setStudentSchedule(res.data || []);
     } catch (err) {
-      console.log('Program yüklenemedi');
     } finally {
       setScheduleLoading(false);
     }
@@ -135,33 +102,7 @@ export default function StudentDetail() {
     try {
       const res = await API.get(`/api/subject-results/?student_id=${id}`);
       setSubjectResults(res.data || []);
-    } catch (err) {
-      console.log('Branş sonuçları yüklenemedi');
-    }
-  };
-
-  const fetchFocusAreas = async () => {
-    setFocusLoading(true);
-    try {
-      const res = await API.get(`/api/coach/student/${id}/focus-areas/`);
-      setFocusAreas(res.data.focus_areas || []);
-    } catch (err) {
-      console.error('Odak alanları yüklenemedi:', err.response?.data || err.message);
-    } finally {
-      setFocusLoading(false);
-    }
-  };
-
-  const fetchQuestionActivity = async () => {
-    setActivityLoading(true);
-    try {
-      const res = await API.get(`/api/coach/student/${id}/question-activity/`);
-      setQuestionActivity(res.data);
-    } catch (err) {
-      console.error('Soru aktivitesi yüklenemedi:', err.response?.data || err.message);
-    } finally {
-      setActivityLoading(false);
-    }
+    } catch (err) {}
   };
 
   const fetchDailyActivity = async () => {
@@ -170,7 +111,6 @@ export default function StudentDetail() {
       const res = await API.get(`/api/coach/student/${id}/daily-activity/`);
       setDailyActivity(res.data);
     } catch (err) {
-      console.error('Günlük aktivite yüklenemedi:', err.response?.data || err.message);
     } finally {
       setDailyActivityLoading(false);
     }
@@ -180,20 +120,14 @@ export default function StudentDetail() {
     try {
       const res = await API.get(`/api/coach/student/${id}/notes/`);
       setCoachNotes(res.data.notes || []);
-      // Son notu forma yükle
       if (res.data.notes?.length > 0) {
         setNoteContent(res.data.notes[0].content || '');
       }
-    } catch (err) {
-      console.log('Koç notları yüklenemedi');
-    }
+    } catch (err) {}
   };
 
   const handleSaveNote = async () => {
-    if (!noteContent.trim()) {
-      alert('Not içeriği boş olamaz');
-      return;
-    }
+    if (!noteContent.trim()) { alert('Not içeriği boş olamaz'); return; }
     setSavingNote(true);
     try {
       await API.post(`/api/coach/student/${id}/notes/`, {
@@ -209,7 +143,6 @@ export default function StudentDetail() {
     }
   };
 
-  // Bir denemenin branş sonuçlarını getir (exam_id veya tarih+tür ile)
   const getExamSubjectResults = (examId, examDate, examType) => {
     const byExamId = subjectResults.filter(r => r.exam_id === examId);
     if (byExamId.length > 0) return byExamId;
@@ -221,46 +154,10 @@ export default function StudentDetail() {
     setExpandedSubjects(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleCreateGoal = async () => {
-    if (!goalForm.target_value) {
-      alert('Hedef değeri giriniz');
-      return;
-    }
-
-    setSavingGoal(true);
-    try {
-      await API.post('/api/goals/create/', {
-        student_id: id,
-        goal_type: goalForm.goal_type,
-        target_value: parseInt(goalForm.target_value),
-        note: goalForm.note
-      });
-      setShowGoalModal(false);
-      setGoalForm({ goal_type: 'DENEME_TYT', target_value: '', note: '' });
-      fetchGoals();
-    } catch (err) {
-      alert('Hedef oluşturulamadı: ' + (err.response?.data?.error || err.message));
-    } finally {
-      setSavingGoal(false);
-    }
-  };
-
-  const handleDeleteGoal = async (goalId) => {
-    if (!window.confirm('Bu hedefi silmek istediğinize emin misiniz?')) return;
-
-    try {
-      await API.delete(`/api/goals/${goalId}/delete/`);
-      fetchGoals();
-    } catch (err) {
-      alert('Hedef silinemedi');
-    }
-  };
-
-  // Sıralamalar - backend'den gelen estimated_ranking kullanılıyor
+  // Sıralamalar
   const getLatestRankings = () => {
     const types = ['TYT', 'AYT_SAY', 'AYT_EA', 'AYT_SOZ'];
     const rankings = {};
-
     types.forEach(type => {
       const typeExams = exams.filter(e => e.exam_type === type);
       if (typeExams.length > 0) {
@@ -268,17 +165,15 @@ export default function StudentDetail() {
         const previous = typeExams[1];
         rankings[type] = {
           net: latest.net_score,
-          ranking: latest.estimated_ranking,  // Backend'den geliyor
+          ranking: latest.estimated_ranking,
           change: previous ? latest.net_score - previous.net_score : null,
           date: latest.date
         };
       }
     });
-
     return rankings;
   };
 
-  // Grafik verisi - backend'den gelen estimated_ranking kullanılıyor
   const getTYTChartData = () => {
     return exams
       .filter(e => e.exam_type === 'TYT')
@@ -287,18 +182,16 @@ export default function StudentDetail() {
       .map(e => ({
         date: new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
         net: e.net_score,
-        ranking: e.estimated_ranking  // Backend'den geliyor
+        ranking: e.estimated_ranking
       }));
   };
 
   const rankings = getLatestRankings();
   const tytChartData = getTYTChartData();
 
-  // İstatistikler
   const getStats = (type) => {
     const typeExams = exams.filter(e => e.exam_type === type);
     if (typeExams.length === 0) return null;
-    
     const nets = typeExams.map(e => e.net_score);
     return {
       count: typeExams.length,
@@ -311,7 +204,7 @@ export default function StudentDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -320,7 +213,7 @@ export default function StudentDetail() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Öğrenci bulunamadı</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-indigo-600 hover:underline">
+        <button onClick={() => navigate(-1)} className="mt-4 text-orange-600 hover:underline">
           Geri Dön
         </button>
       </div>
@@ -330,9 +223,9 @@ export default function StudentDetail() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 max-w-[100vw] overflow-x-hidden">
       <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
-        
+
         {/* Header */}
-        <button 
+        <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
         >
@@ -342,7 +235,7 @@ export default function StudentDetail() {
 
         {/* Öğrenci Bilgi Kartı */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 md:px-6 py-4 md:py-5">
+          <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 md:px-6 py-4 md:py-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
                 <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/20 flex items-center justify-center text-white text-xl md:text-2xl font-bold flex-shrink-0">
@@ -350,7 +243,7 @@ export default function StudentDetail() {
                 </div>
                 <div className="text-white min-w-0 flex-1">
                   <h1 className="text-lg md:text-2xl font-bold truncate">{student.name}</h1>
-                  <p className="text-indigo-100 flex items-center gap-1.5 mt-0.5 md:mt-1 text-xs md:text-sm truncate">
+                  <p className="text-orange-100 flex items-center gap-1.5 mt-0.5 md:mt-1 text-xs md:text-sm truncate">
                     <Mail size={12} className="flex-shrink-0" />
                     <span className="truncate">{student.email}</span>
                   </p>
@@ -358,24 +251,20 @@ export default function StudentDetail() {
               </div>
               {/* Diploma Notu & Hedef Bilgisi */}
               <div className="hidden md:flex items-center gap-3">
-                {/* Diploma Notu */}
                 <div className="bg-white/10 rounded-xl px-4 py-2 text-white text-center">
                   <p className="text-xs opacity-80">Diploma Notu</p>
                   <p className="text-lg font-bold">{student.diploma_notu ? student.diploma_notu.toFixed(2) : '-'}</p>
                 </div>
-                {/* Alan */}
                 <div className="bg-white/10 rounded-xl px-4 py-2 text-white text-center">
                   <p className="text-xs opacity-80">Alan</p>
                   <p className="text-lg font-bold">{student.exam_goal_type || 'SAY'}</p>
                 </div>
-                {/* Hedef Sıralama */}
                 {student.target_ranking && (
                   <div className="bg-white/10 rounded-xl px-4 py-2 text-white text-center">
                     <p className="text-xs opacity-80">Hedef</p>
                     <p className="text-lg font-bold">{formatRanking(student.target_ranking)}</p>
                   </div>
                 )}
-                {/* Veli Notu Yaz Butonu */}
                 <button
                   onClick={() => setShowNoteModal(true)}
                   className="bg-white/20 hover:bg-white/30 rounded-xl px-4 py-2 text-white transition-colors flex items-center gap-2"
@@ -385,7 +274,7 @@ export default function StudentDetail() {
                 </button>
               </div>
             </div>
-            {/* Mobil görünüm için diploma ve hedef bilgisi */}
+            {/* Mobil görünüm */}
             <div className="flex md:hidden items-center gap-2 mt-3 flex-wrap">
               <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-lg">
                 📊 Diploma: {student.diploma_notu ? student.diploma_notu.toFixed(2) : '-'}
@@ -400,10 +289,9 @@ export default function StudentDetail() {
               )}
             </div>
           </div>
-          
-          {/* Sıralama Kartları - ORTALAMAYA GÖRE */}
+
+          {/* Sıralama Kartları */}
           <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-            {/* TYT Sıralama (Ortalamaya göre) */}
             <div className="bg-blue-50 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-blue-600">TYT Sıralama</span>
@@ -423,7 +311,6 @@ export default function StudentDetail() {
               </p>
             </div>
 
-            {/* AYT Sıralama (Ortalamaya göre) */}
             <div className="bg-purple-50 rounded-xl p-4">
               <span className="text-sm font-medium text-purple-600">AYT Sıralama</span>
               <p className="text-2xl font-bold text-purple-700 mt-2">
@@ -434,7 +321,6 @@ export default function StudentDetail() {
               </p>
             </div>
 
-            {/* Ort. TYT Net */}
             <div className="bg-green-50 rounded-xl p-4">
               <span className="text-sm font-medium text-green-600">Ort. TYT</span>
               <p className="text-2xl font-bold text-green-700 mt-2">
@@ -445,7 +331,6 @@ export default function StudentDetail() {
               </p>
             </div>
 
-            {/* Ort. AYT Net */}
             <div className="bg-amber-50 rounded-xl p-4">
               <span className="text-sm font-medium text-amber-600">Ort. AYT</span>
               <p className="text-2xl font-bold text-amber-700 mt-2">
@@ -465,11 +350,8 @@ export default function StudentDetail() {
               {[
                 { key: 'overview', label: 'Genel', icon: BarChart3 },
                 { key: 'activity', label: 'Aktivite', icon: Activity },
-                { key: 'focus', label: 'Odak', icon: Target },
-                { key: 'questions', label: 'Sorular', icon: FileQuestion },
-                { key: 'exams', label: 'Deneme', icon: Award },
+                { key: 'exams', label: 'Denemeler', icon: Award },
                 { key: 'topics', label: 'Konular', icon: BookOpen },
-                { key: 'goals', label: 'Hedef', icon: Trophy },
                 { key: 'schedule', label: 'Program', icon: Calendar },
               ].map(tab => (
                 <button
@@ -477,7 +359,7 @@ export default function StudentDetail() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`flex items-center gap-1.5 px-4 md:px-6 py-3 text-xs md:text-sm font-medium border-b-2 transition-colors whitespace-nowrap
                     ${activeTab === tab.key
-                      ? 'text-indigo-600 border-indigo-600 bg-indigo-50/50'
+                      ? 'text-orange-600 border-orange-500 bg-orange-50/50'
                       : 'text-gray-500 border-transparent hover:text-gray-700'}`}
                 >
                   <tab.icon size={16} />
@@ -488,7 +370,7 @@ export default function StudentDetail() {
           </div>
 
           <div className="p-6">
-            {/* Overview */}
+            {/* ===== GENEL ===== */}
             {activeTab === 'overview' && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* TYT Chart */}
@@ -497,7 +379,6 @@ export default function StudentDetail() {
                     <TrendingUp className="text-blue-500" size={18} />
                     TYT Net Gelişimi
                   </h3>
-                  
                   {tytChartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={220}>
                       <AreaChart data={tytChartData}>
@@ -527,19 +408,18 @@ export default function StudentDetail() {
                     <Trophy className="text-amber-500" size={18} />
                     Sıralama Gelişimi
                   </h3>
-                  
                   {tytChartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={220}>
                       <LineChart data={tytChartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9CA3AF" />
-                        <YAxis 
-                          tick={{ fontSize: 11 }} 
-                          stroke="#9CA3AF" 
+                        <YAxis
+                          tick={{ fontSize: 11 }}
+                          stroke="#9CA3AF"
                           tickFormatter={(v) => v > 1000000 ? `${(v/1000000).toFixed(1)}M` : v > 1000 ? `${(v/1000).toFixed(0)}K` : v}
                           reversed
                         />
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                           formatter={(value) => [formatRanking(value), 'Sıralama']}
                         />
@@ -558,9 +438,7 @@ export default function StudentDetail() {
                   {['TYT', 'AYT_SAY', 'AYT_EA', 'AYT_SOZ'].map(type => {
                     const stats = getStats(type);
                     if (!stats) return null;
-                    
                     const labels = { 'TYT': 'TYT', 'AYT_SAY': 'AYT Sayısal', 'AYT_EA': 'AYT EA', 'AYT_SOZ': 'AYT Sözel' };
-                    
                     return (
                       <div key={type} className="bg-gray-50 rounded-xl p-4">
                         <p className="text-sm font-medium text-gray-600 mb-3">{labels[type]}</p>
@@ -589,7 +467,7 @@ export default function StudentDetail() {
               </div>
             )}
 
-            {/* Daily Activity - Günlük Aktivite (Koç görünümü) */}
+            {/* ===== AKTİVİTE ===== */}
             {activeTab === 'activity' && (
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -601,7 +479,7 @@ export default function StudentDetail() {
 
                 {dailyActivityLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : !dailyActivity ? (
                   <div className="text-center py-12 text-gray-400">
@@ -616,7 +494,7 @@ export default function StudentDetail() {
                         <div className="flex items-center justify-center gap-3">
                           <Star size={24} />
                           <div className="text-center">
-                            <p className="text-lg font-bold">🎯 Bugünkü Hedefi Tamamladı!</p>
+                            <p className="text-lg font-bold">Bugünkü Hedefi Tamamladı!</p>
                             <p className="text-sm opacity-90">50/50 puana ulaştı</p>
                           </div>
                           <Star size={24} />
@@ -626,7 +504,6 @@ export default function StudentDetail() {
 
                     {/* Ana Metrikler */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {/* Streak */}
                       <div className={`rounded-xl p-4 ${dailyActivity.streak?.alive ? 'bg-gradient-to-br from-orange-100 to-amber-100 border-2 border-orange-300' : 'bg-gray-50'}`}>
                         <div className="flex items-center gap-2 mb-2">
                           <Flame size={20} className={dailyActivity.streak?.alive ? 'text-orange-500' : 'text-gray-400'} />
@@ -636,7 +513,6 @@ export default function StudentDetail() {
                         <p className="text-xs text-gray-500 mt-1">En uzun: {dailyActivity.streak?.longest || 0} gün</p>
                       </div>
 
-                      {/* Bugünkü Puan */}
                       <div className={`rounded-xl p-4 ${dailyActivity.points?.daily_complete ? 'bg-gradient-to-br from-green-100 to-emerald-100 border-2 border-green-300' : 'bg-amber-50'}`}>
                         <div className="flex items-center gap-2 mb-2">
                           <Star size={20} className={dailyActivity.points?.daily_complete ? 'text-green-500' : 'text-amber-500'} />
@@ -651,17 +527,15 @@ export default function StudentDetail() {
                         </div>
                       </div>
 
-                      {/* Toplam Puan */}
-                      <div className="bg-indigo-50 rounded-xl p-4">
+                      <div className="bg-orange-50 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
-                          <Sparkles size={20} className="text-indigo-500" />
+                          <Sparkles size={20} className="text-orange-500" />
                           <span className="text-sm text-gray-600">Toplam</span>
                         </div>
-                        <p className="text-2xl font-bold text-indigo-700">{dailyActivity.points?.total || 0}</p>
+                        <p className="text-2xl font-bold text-orange-700">{dailyActivity.points?.total || 0}</p>
                         <p className="text-xs text-gray-500 mt-1">puan</p>
                       </div>
 
-                      {/* Haftalık Özet */}
                       <div className="bg-purple-50 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Calendar size={20} className="text-purple-500" />
@@ -734,8 +608,8 @@ export default function StudentDetail() {
                     )}
 
                     {/* Manuel Aktivite Durumu */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <h4 className="text-sm font-semibold text-blue-800 mb-3">Manuel Çalışma Aktiviteleri</h4>
+                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                      <h4 className="text-sm font-semibold text-orange-800 mb-3">Manuel Çalışma Aktiviteleri</h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {[
                           { key: 'study_topic', label: 'Konu çalıştı', icon: '📘', points: 10 },
@@ -755,7 +629,7 @@ export default function StudentDetail() {
                               <p className={`text-xs mt-1 ${isActive ? 'text-green-700 font-medium' : 'text-gray-500'}`}>
                                 {item.label}
                               </p>
-                              {isActive && <span className="text-xs text-green-600">✓ +{item.points}</span>}
+                              {isActive && <span className="text-xs text-green-600">+{item.points}</span>}
                             </div>
                           );
                         })}
@@ -779,243 +653,12 @@ export default function StudentDetail() {
                         </div>
                       </div>
                     )}
-
-                    {/* Koç Notu */}
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                      <p className="text-sm text-amber-800">
-                        💡 <strong>Koç olarak:</strong> Öğrencinin çalışma disiplinini buradan takip edebilirsin.
-                        Streak kırılırsa veya aktivite düşerse motive edici mesajlar gönderebilirsin.
-                      </p>
-                    </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Focus Areas - Odak Alanları (Koç görünümü) */}
-            {activeTab === 'focus' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">Öğrencinin Odak Alanları</h3>
-                    <p className="text-sm text-gray-500">Öğrencinin belirlediği öncelikli konular</p>
-                  </div>
-                </div>
-
-                {focusLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                ) : focusAreas.length === 0 ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <Target size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Henüz odak alanı belirlenmemiş</p>
-                    <p className="text-sm mt-2">Öğrenci kendi panelinden ekleyebilir</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {focusAreas.map((area, idx) => {
-                      const priorityColors = {
-                        1: { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700' },
-                        2: { bg: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-700' },
-                        3: { bg: 'bg-green-50', border: 'border-green-200', badge: 'bg-green-100 text-green-700' },
-                      };
-                      const statusLabels = {
-                        active: { label: 'Aktif', icon: Clock, color: 'text-blue-600 bg-blue-50' },
-                        working: { label: 'Yoğun çalışılıyor', icon: Flame, color: 'text-orange-600 bg-orange-50' },
-                      };
-                      const colors = priorityColors[area.priority] || priorityColors[2];
-                      const status = statusLabels[area.status] || statusLabels.active;
-                      const StatusIcon = status.icon;
-
-                      return (
-                        <div key={area.id} className={`${colors.bg} ${colors.border} border-2 rounded-xl p-4`}>
-                          <div className="flex items-start gap-4">
-                            {/* Numara */}
-                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
-                              {idx + 1}
-                            </div>
-
-                            {/* İçerik */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-semibold text-gray-800">{area.subject}</span>
-                                <span className="text-gray-400">•</span>
-                                <span className="text-gray-700">{area.topic}</span>
-                              </div>
-
-                              {area.reason && (
-                                <p className="text-sm text-gray-500 mb-2 italic">"{area.reason}"</p>
-                              )}
-
-                              {/* Etiketler */}
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {/* Durum */}
-                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
-                                  <StatusIcon size={12} />
-                                  {status.label}
-                                </span>
-
-                                {/* Süre */}
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                  <Clock size={12} />
-                                  {area.days_in_focus} gündür odakta
-                                </span>
-
-                                {/* Kırmızı Bayrak */}
-                                {area.is_stale && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                    <AlertTriangle size={12} />
-                                    7+ gün değişiklik yok
-                                  </span>
-                                )}
-
-                                {/* İlişkili Sorular */}
-                                {area.related_questions > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                    <FileQuestion size={12} />
-                                    {area.unsolved_questions}/{area.related_questions} soru
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Öncelik Badge */}
-                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${colors.badge}`}>
-                              {area.priority === 1 ? 'Yüksek' : area.priority === 2 ? 'Orta' : 'Düşük'}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Koç Notu */}
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                  <p className="text-sm text-blue-800">
-                    💡 <strong>Koç olarak:</strong> Odak alanlarını sadece görebilirsin. Öğrenci bunları kendi belirler.
-                    Ders sırasında bu konulara odaklanarak yardımcı olabilirsin.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Question Activity - Soru Aktivitesi (Koç görünümü) */}
-            {activeTab === 'questions' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">Soru Aktivitesi</h3>
-                    <p className="text-sm text-gray-500">Öğrencinin soru çarkı kullanımı</p>
-                  </div>
-                </div>
-
-                {activityLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                ) : !questionActivity ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <FileQuestion size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Soru aktivitesi yüklenemedi</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* Metrikler */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <div className="bg-gray-50 rounded-xl p-4">
-                        <p className="text-xs text-gray-500 mb-1">Toplam Yüklenen</p>
-                        <p className="text-2xl font-bold text-gray-800">{questionActivity.metrics?.total_uploaded || 0}</p>
-                      </div>
-                      <div className="bg-orange-50 rounded-xl p-4">
-                        <p className="text-xs text-orange-600 mb-1">Bekleyen</p>
-                        <p className="text-2xl font-bold text-orange-700">{questionActivity.metrics?.total_pending || 0}</p>
-                      </div>
-                      <div className="bg-green-50 rounded-xl p-4">
-                        <p className="text-xs text-green-600 mb-1">Çözülen</p>
-                        <p className="text-2xl font-bold text-green-700">{questionActivity.metrics?.total_solved || 0}</p>
-                      </div>
-                      <div className="bg-red-50 rounded-xl p-4">
-                        <p className="text-xs text-red-600 mb-1">Çözemedi</p>
-                        <p className="text-2xl font-bold text-red-700">{questionActivity.metrics?.total_failed || 0}</p>
-                      </div>
-                    </div>
-
-                    {/* Son 7 Gün */}
-                    <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-                      <h4 className="text-sm font-semibold text-indigo-800 mb-2">Son 7 Gün</h4>
-                      <p className="text-gray-700">
-                        <strong>{questionActivity.metrics?.recent_uploaded_7d || 0}</strong> soru yükledi,
-                        <strong className="text-orange-600 ml-1">{questionActivity.metrics?.recent_pending_7d || 0}</strong>'i hâlâ bekliyor
-                      </p>
-                    </div>
-
-                    {/* Kırmızı Bayraklar */}
-                    {questionActivity.has_red_flags && (
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                          <AlertTriangle className="text-red-500" size={16} />
-                          Dikkat Gerektiren Durumlar
-                        </h4>
-                        {questionActivity.red_flags?.map((flag, idx) => (
-                          <div
-                            key={idx}
-                            className={`p-3 rounded-lg border-l-4 ${
-                              flag.severity === 'high'
-                                ? 'bg-red-50 border-red-500 text-red-800'
-                                : 'bg-yellow-50 border-yellow-500 text-yellow-800'
-                            }`}
-                          >
-                            <p className="text-sm font-medium">{flag.message}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Branş Dağılımı */}
-                    {questionActivity.subject_breakdown?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-800 mb-3">Çözülmemiş Sorular (Branşa Göre)</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {questionActivity.subject_breakdown.map((item, idx) => (
-                            <span
-                              key={idx}
-                              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                                item.count >= 5
-                                  ? 'bg-red-100 text-red-700'
-                                  : 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {item.subject || 'Belirtilmemiş'}: {item.count}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Boş Durum */}
-                    {questionActivity.metrics?.total_uploaded === 0 && (
-                      <div className="text-center py-8 text-gray-400">
-                        <HelpCircle size={40} className="mx-auto mb-3 opacity-50" />
-                        <p>Henüz soru yüklememiş</p>
-                        <p className="text-sm mt-1">Öğrenci "Soru Çarkı" özelliğini kullanmaya başladığında burada göreceksin</p>
-                      </div>
-                    )}
-
-                    {/* Koç Notu */}
-                    <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
-                      <p className="text-sm text-purple-800">
-                        💡 <strong>Koç olarak:</strong> Öğrencinin fotoğraflarını göremezsin (gizlilik).
-                        Sadece desenleri ve takıldığı konuları görürsün. Derste bu konulara odaklanabilirsin.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Exams */}
+            {/* ===== DENEMELER ===== */}
             {activeTab === 'exams' && (
               <div>
                 {exams.length === 0 ? (
@@ -1034,7 +677,6 @@ export default function StudentDetail() {
 
                       return (
                         <div key={exam.id || idx} className={`bg-${color}-50 rounded-xl border border-${color}-100 overflow-hidden`}>
-                          {/* Deneme Header - Tıklanabilir */}
                           <div
                             className="p-4 cursor-pointer hover:bg-opacity-80 transition-colors"
                             onClick={() => setExpandedExamId(isExpanded ? null : exam.id)}
@@ -1058,18 +700,13 @@ export default function StudentDetail() {
                               <div className="flex items-center gap-4">
                                 <div className="text-right">
                                   <p className="text-xl font-bold text-gray-800">{exam.net_score} <span className="text-sm font-normal text-gray-500">net</span></p>
-                                  <p className="text-sm text-indigo-600 font-medium">~{formatRanking(exam.estimated_ranking)}</p>
+                                  <p className="text-sm text-orange-600 font-medium">~{formatRanking(exam.estimated_ranking)}</p>
                                 </div>
-                                {isExpanded ? (
-                                  <ChevronUp size={20} className="text-gray-400" />
-                                ) : (
-                                  <ChevronDown size={20} className="text-gray-400" />
-                                )}
+                                {isExpanded ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
                               </div>
                             </div>
                           </div>
 
-                          {/* Branş Detayları - Expandable */}
                           {isExpanded && (
                             <div className="border-t border-gray-200 bg-white p-4">
                               {examSubjects.length === 0 ? (
@@ -1087,7 +724,6 @@ export default function StudentDetail() {
                                     };
                                     const net = subject.net || (subject.correct - (subject.wrong / 4));
                                     const blank = subject.blank || 0;
-
                                     return (
                                       <div key={subject.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
                                         <div>
@@ -1122,12 +758,12 @@ export default function StudentDetail() {
               </div>
             )}
 
-            {/* Topics - Konu Takibi */}
+            {/* ===== KONULAR ===== */}
             {activeTab === 'topics' && (
               <div>
                 {topicsLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : !topicsData ? (
                   <div className="text-center py-12 text-gray-400">
@@ -1138,7 +774,7 @@ export default function StudentDetail() {
                   <div className="space-y-6">
                     {/* Genel İlerleme */}
                     <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-5 py-3 rounded-2xl shadow-lg">
+                      <div className="flex items-center gap-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 py-3 rounded-2xl shadow-lg">
                         <Trophy size={28} />
                         <div>
                           <p className="text-sm opacity-80">Genel İlerleme</p>
@@ -1196,9 +832,9 @@ export default function StudentDetail() {
                             : (topicsData.ayt?.total - topicsData.ayt?.completed)}
                         </p>
                       </div>
-                      <div className="bg-indigo-50 rounded-xl p-4">
-                        <p className="text-xs text-indigo-600 mb-1">İlerleme</p>
-                        <p className="text-xl font-bold text-indigo-700">
+                      <div className="bg-amber-50 rounded-xl p-4">
+                        <p className="text-xs text-amber-600 mb-1">İlerleme</p>
+                        <p className="text-xl font-bold text-amber-700">
                           %{topicsTab === 'TYT' ? topicsData.tyt?.progress : topicsData.ayt?.progress}
                         </p>
                       </div>
@@ -1222,7 +858,6 @@ export default function StudentDetail() {
 
                         return (
                           <div key={key} className={`rounded-xl border ${colors.border} ${colors.bg} overflow-hidden`}>
-                            {/* Ders Header */}
                             <div
                               className="p-4 flex items-center justify-between cursor-pointer hover:opacity-80"
                               onClick={() => toggleSubjectExpand(key)}
@@ -1244,14 +879,12 @@ export default function StudentDetail() {
                               </div>
                             </div>
 
-                            {/* Progress Bar */}
                             <div className="px-4 pb-3">
                               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div className={`h-full ${colors.progress} rounded-full transition-all`} style={{ width: `${subject.progress}%` }} />
                               </div>
                             </div>
 
-                            {/* Konular */}
                             {isExpanded && (
                               <div className="border-t border-gray-200 bg-white p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -1282,7 +915,6 @@ export default function StudentDetail() {
                       })}
                     </div>
 
-                    {/* Boş durum */}
                     {Object.keys((topicsTab === 'TYT' ? topicsData.tyt?.topics : topicsData.ayt?.topics) || {}).length === 0 && (
                       <div className="text-center py-8 text-gray-400">
                         <BookOpen size={40} className="mx-auto mb-3 opacity-50" />
@@ -1294,82 +926,12 @@ export default function StudentDetail() {
               </div>
             )}
 
-            {/* Goals - Haftalık Hedefler */}
-            {activeTab === 'goals' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800">Bu Hafta Hedefler</h3>
-                  <button
-                    onClick={() => setShowGoalModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
-                  >
-                    <Plus size={18} />
-                    Hedef Ekle
-                  </button>
-                </div>
-
-                {weeklyGoals.length === 0 ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <Target size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Bu hafta için hedef belirlenmemiş</p>
-                    <button
-                      onClick={() => setShowGoalModal(true)}
-                      className="mt-4 text-indigo-600 hover:underline font-medium"
-                    >
-                      İlk hedefi oluştur →
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {weeklyGoals.map((goal) => (
-                      <div
-                        key={goal.id}
-                        className={`bg-gray-50 rounded-xl p-4 border-l-4 ${goal.is_completed ? 'border-green-500' : 'border-indigo-500'}`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="font-semibold text-gray-800">{goal.goal_type_display}</span>
-                              {goal.is_completed && (
-                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Tamamlandı ✓</span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                              <span>Hedef: <strong>{goal.target_value}</strong></span>
-                              <span>Mevcut: <strong className={goal.is_completed ? 'text-green-600' : 'text-indigo-600'}>{goal.current_value}</strong></span>
-                            </div>
-                            {goal.note && (
-                              <p className="text-sm text-gray-500 italic">📝 {goal.note}</p>
-                            )}
-                            {/* Progress bar */}
-                            <div className="mt-3 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full transition-all duration-500 ${goal.is_completed ? 'bg-green-500' : 'bg-indigo-500'}`}
-                                style={{ width: `${goal.progress_percentage}%` }}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-400 mt-1">{goal.progress_percentage}% tamamlandı</p>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteGoal(goal.id)}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <X size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Schedule */}
+            {/* ===== PROGRAM ===== */}
             {activeTab === 'schedule' && (
               <div>
                 {scheduleLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : studentSchedule.length === 0 ? (
                   <div className="text-center py-12 text-gray-400">
@@ -1402,7 +964,7 @@ export default function StudentDetail() {
                                     {plan.category} {plan.subject}
                                   </span>
                                   {plan.activity_type && (
-                                    <span className="text-xs text-gray-400 ml-2">• {plan.activity_type}</span>
+                                    <span className="text-xs text-gray-400 ml-2">{plan.activity_type}</span>
                                   )}
                                 </div>
                               </div>
@@ -1419,94 +981,12 @@ export default function StudentDetail() {
         </div>
       </div>
 
-      {/* Hedef Oluşturma Modal */}
-      {showGoalModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-800">🎯 Haftalık Hedef Oluştur</h3>
-              <button onClick={() => setShowGoalModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X size={20} className="text-gray-500" />
-              </button>
-            </div>
-
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hedef Tipi
-                </label>
-                <select
-                  value={goalForm.goal_type}
-                  onChange={(e) => setGoalForm({ ...goalForm, goal_type: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                >
-                  <option value="DENEME_TYT">TYT Denemesi</option>
-                  <option value="DENEME_AYT">AYT Denemesi</option>
-                  <option value="SORU">Soru Çözümü</option>
-                  <option value="KONU">Konu Tamamlama</option>
-                  <option value="CALISMA">Çalışma Süresi (dk)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hedef Değer
-                </label>
-                <input
-                  type="number"
-                  value={goalForm.target_value}
-                  onChange={(e) => setGoalForm({ ...goalForm, target_value: e.target.value })}
-                  placeholder={goalForm.goal_type === 'CALISMA' ? 'Örn: 300 (dakika)' : goalForm.goal_type === 'SORU' ? 'Örn: 500' : 'Örn: 3'}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Not (Opsiyonel)
-                </label>
-                <input
-                  type="text"
-                  value={goalForm.note}
-                  onChange={(e) => setGoalForm({ ...goalForm, note: e.target.value })}
-                  placeholder="Örn: Her gün 1 deneme çöz"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowGoalModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
-              >
-                İptal
-              </button>
-              <button
-                onClick={handleCreateGoal}
-                disabled={savingGoal}
-                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {savingGoal ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Save size={18} />
-                    Oluştur
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Koç Notu Modal */}
       {showNoteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-800">📝 Veliye Not Yaz</h3>
+              <h3 className="text-xl font-bold text-gray-800">Veliye Not Yaz</h3>
               <button onClick={() => setShowNoteModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
                 <X size={20} className="text-gray-500" />
               </button>
@@ -1521,7 +1001,7 @@ export default function StudentDetail() {
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 placeholder="Örn: Bu hafta motivasyon dalgalıydı ama tekrar disiplini toparlandı..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none"
                 rows={4}
                 maxLength={500}
               />
@@ -1530,7 +1010,6 @@ export default function StudentDetail() {
               </p>
             </div>
 
-            {/* Önceki notlar */}
             {coachNotes.length > 0 && (
               <div className="mb-4 p-3 bg-gray-50 rounded-xl">
                 <p className="text-xs text-gray-500 mb-2">Son not ({coachNotes[0]?.week_start}):</p>
@@ -1548,7 +1027,7 @@ export default function StudentDetail() {
               <button
                 onClick={handleSaveNote}
                 disabled={savingNote || !noteContent.trim()}
-                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {savingNote ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1562,7 +1041,7 @@ export default function StudentDetail() {
             </div>
 
             <p className="text-xs text-amber-600 mt-4 text-center">
-              💡 Not bu haftaya kaydedilir ve veliye görünür olur.
+              Not bu haftaya kaydedilir ve veliye görünür olur.
             </p>
           </div>
         </div>
