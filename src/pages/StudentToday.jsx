@@ -104,7 +104,7 @@ export default function StudentToday() {
       setNoteText('');
       fetchToday();
     } catch (err) {
-      alert('Görev güncellenemedi');
+      alert('Çalışma güncellenemedi');
     } finally {
       setCompletingId(null);
     }
@@ -183,7 +183,7 @@ export default function StudentToday() {
       // Bugüne denk geliyorsa günlük veriyi de yenile
       if (selectedDay === todayWeekday) fetchToday();
     } catch (err) {
-      alert(err.response?.data?.error || 'Görev kaydedilemedi');
+      alert(err.response?.data?.error || 'Çalışma kaydedilemedi');
     } finally {
       setSaving(false);
     }
@@ -196,7 +196,7 @@ export default function StudentToday() {
       // Bugüne denk geliyorsa günlük veriyi de yenile
       if (selectedDay === todayWeekday) fetchToday();
     } catch (err) {
-      alert('Görev silinemedi');
+      alert('Çalışma silinemedi');
     }
   };
 
@@ -278,7 +278,7 @@ export default function StudentToday() {
                 <p className="text-2xl font-bold text-gray-800">
                   {data.metrics.tasks_completed}<span className="text-gray-400 text-lg">/{data.metrics.tasks_total}</span>
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Bugün görev</p>
+                <p className="text-xs text-gray-500 mt-1">Bugün çalışma</p>
               </div>
               <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
                 <p className="text-2xl font-bold text-orange-600">{data.metrics.streak}</p>
@@ -292,17 +292,17 @@ export default function StudentToday() {
 
             {/* Günün Görevleri */}
             <div>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Günün Görevleri</h2>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Günün Çalışmaları</h2>
 
               {data.tasks.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
                   <BookOpen size={40} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-500 font-medium">Bugün için görev yok</p>
+                  <p className="text-gray-500 font-medium">Bugün için çalışma yok</p>
                   <button
                     onClick={() => setTab('weekly')}
                     className="text-sm text-primary-600 font-medium mt-2 hover:underline"
                   >
-                    Haftalık plandan görev ekle →
+                    Haftalık plandan çalışma ekle →
                   </button>
                 </div>
               ) : (
@@ -487,7 +487,7 @@ export default function StudentToday() {
                         <p className={`text-[11px] sm:text-xs font-semibold ${isSelected ? 'text-white' : 'text-gray-500'}`}>{day}</p>
                         {taskCount > 0 && (
                           <p className={`text-[10px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
-                            {taskCount} görev
+                            {taskCount} çalışma
                           </p>
                         )}
                         {isToday && (
@@ -504,7 +504,7 @@ export default function StudentToday() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-700">{DAYS[selectedDay]}</h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400">{dayTasks.length}/3 görev</span>
+                    <span className="text-sm text-gray-400">{dayTasks.length}/3 çalışma</span>
                     <button
                       onClick={() => setShowMinModal(true)}
                       className="text-xs px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50"
@@ -518,8 +518,8 @@ export default function StudentToday() {
                 {dayTasks.length === 0 ? (
                   <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-8 text-center">
                     <BookOpen size={40} className="mx-auto text-gray-300 mb-3" />
-                    <p className="text-gray-500 font-medium">Bu gün için görev yok</p>
-                    <p className="text-sm text-gray-400 mt-1">Aşağıdan görev ekle.</p>
+                    <p className="text-gray-500 font-medium">Bu gün için çalışma yok</p>
+                    <p className="text-sm text-gray-400 mt-1">Aşağıdan yeni çalışma ekle.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -571,7 +571,7 @@ export default function StudentToday() {
                     onClick={openAddModal}
                     className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-300 text-gray-500 font-medium hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/50 transition-all flex items-center justify-center gap-2"
                   >
-                    <Plus size={20} /> Görev Ekle
+                    <Plus size={20} /> Yeni Çalışma Ekle
                   </button>
                 )}
 
@@ -581,7 +581,7 @@ export default function StudentToday() {
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
                       <p className="text-xl font-bold text-gray-800">{planData?.summary?.total_tasks || 0}</p>
-                      <p className="text-xs text-gray-500">Toplam görev</p>
+                      <p className="text-xs text-gray-500">Toplam çalışma</p>
                     </div>
                     <div>
                       <p className="text-xl font-bold text-primary-600">{planData?.summary?.total_duration || 0}</p>
@@ -625,7 +625,7 @@ export default function StudentToday() {
           <div className="relative bg-white rounded-2xl max-w-md w-full overflow-hidden animate-fade-up max-h-[90vh] overflow-y-auto">
             <div className="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-800">
-                {editingTask ? 'Görevi Düzenle' : 'Yeni Görev'}
+                {editingTask ? 'Çalışmayı Düzenle' : 'Yeni Çalışma'}
               </h3>
               <button onClick={() => { setShowAddModal(false); resetForm(); }} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
@@ -661,7 +661,7 @@ export default function StudentToday() {
                 <textarea
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Bu görevi neden yapıyorsun? ör. Sınavda en çok hata yaptığım konu..."
+                  placeholder="Bu çalışmayı neden yapıyorsun? ör. Sınavda en çok hata yaptığım konu..."
                   maxLength={300}
                   rows={2}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-400 resize-none"
