@@ -653,6 +653,53 @@ export default function StudentDetail() {
                         </div>
                       </div>
                     )}
+
+                    {/* Gün Değerlendirmeleri (Check-in) */}
+                    {dailyActivity.checkins?.length > 0 && (
+                      <div className="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-4">Gün Değerlendirmeleri</h4>
+                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                          {dailyActivity.checkins.map((ci, idx) => {
+                            const pctColor = ci.completion_pct >= 75 ? 'bg-green-500' : ci.completion_pct >= 50 ? 'bg-amber-500' : 'bg-red-500';
+                            const pctBg = ci.completion_pct >= 75 ? 'bg-green-50 border-green-200' : ci.completion_pct >= 50 ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200';
+                            const pctText = ci.completion_pct >= 75 ? 'text-green-700' : ci.completion_pct >= 50 ? 'text-amber-700' : 'text-red-700';
+                            const dateObj = new Date(ci.date + 'T00:00:00');
+                            const dateStr = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' });
+
+                            return (
+                              <div key={idx} className={`p-3 rounded-xl border ${pctBg}`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium text-gray-700">{dateStr}</span>
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-2 w-20 bg-gray-200 rounded-full overflow-hidden">
+                                      <div className={`h-full rounded-full ${pctColor}`} style={{ width: `${ci.completion_pct}%` }} />
+                                    </div>
+                                    <span className={`text-sm font-bold ${pctText}`}>%{ci.completion_pct}</span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {ci.difficulty_tag !== 'yok' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700">
+                                      ⚠️ {ci.difficulty_label}
+                                    </span>
+                                  )}
+                                  {ci.correction_tag !== 'duzeltme_yok' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">
+                                      💡 {ci.correction_label}
+                                    </span>
+                                  )}
+                                  {ci.difficulty_tag === 'yok' && ci.correction_tag === 'duzeltme_yok' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">
+                                      ✅ Sorunsuz gün
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
