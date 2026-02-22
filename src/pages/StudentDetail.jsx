@@ -209,9 +209,12 @@ export default function StudentDetail() {
     }
   };
 
-  // Bir denemenin branş sonuçlarını getir (tarihe göre)
-  const getExamSubjectResults = (examDate) => {
-    return subjectResults.filter(r => r.date === examDate);
+  // Bir denemenin branş sonuçlarını getir (exam_id veya tarih+tür ile)
+  const getExamSubjectResults = (examId, examDate, examType) => {
+    const byExamId = subjectResults.filter(r => r.exam_id === examId);
+    if (byExamId.length > 0) return byExamId;
+    const prefix = examType === 'TYT' ? 'TYT_' : 'AYT_';
+    return subjectResults.filter(r => r.date === examDate && r.subject.startsWith(prefix));
   };
 
   const toggleSubjectExpand = (key) => {
@@ -1026,7 +1029,7 @@ export default function StudentDetail() {
                       const typeColors = { 'TYT': 'blue', 'AYT_SAY': 'purple', 'AYT_EA': 'green', 'AYT_SOZ': 'orange' };
                       const typeNames = { 'TYT': 'TYT', 'AYT_SAY': 'AYT Sayısal', 'AYT_EA': 'AYT EA', 'AYT_SOZ': 'AYT Sözel' };
                       const isExpanded = expandedExamId === exam.id;
-                      const examSubjects = getExamSubjectResults(exam.date);
+                      const examSubjects = getExamSubjectResults(exam.id, exam.date, exam.exam_type);
                       const color = typeColors[exam.exam_type] || 'gray';
 
                       return (

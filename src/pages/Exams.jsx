@@ -211,27 +211,6 @@ function SubjectDetails({ examType, examDate, subjectResults }) {
         })}
       </div>
 
-      {/* Bulunamayan branşlar için de sonuçları göster */}
-      {subjectResults
-        .filter(r => !subjects.find(s => s.key === r.subject))
-        .map(result => (
-          <div key={result.id} className="bg-gray-100 border border-gray-200 rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-800 text-sm">{result.subject_display || result.subject}</p>
-                <p className="text-xs text-gray-500">
-                  <span className="text-green-600">{result.correct}D</span>
-                  {' / '}
-                  <span className="text-red-500">{result.wrong}Y</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-green-600">{result.net?.toFixed(2) || '-'}</p>
-                <p className="text-xs text-gray-400">net</p>
-              </div>
-            </div>
-          </div>
-        ))}
     </div>
   );
 }
@@ -282,9 +261,15 @@ export default function Exams() {
     }
   };
 
-  // Bir denemenin branş sonuçlarını getir (tarihe göre)
-  const getExamSubjectResults = (examDate) => {
-    return subjectResults.filter(r => r.date === examDate);
+  // Bir denemenin branş sonuçlarını getir (exam_id veya tarih+tür ile)
+  const getExamSubjectResults = (examId, examDate, examType) => {
+    // Önce exam_id ile filtrele (yeni kayıtlar)
+    const byExamId = subjectResults.filter(r => r.exam_id === examId);
+    if (byExamId.length > 0) return byExamId;
+
+    // Eski kayıtlar: tarih + branş prefix'ine göre filtrele
+    const prefix = examType === 'TYT' ? 'TYT_' : 'AYT_';
+    return subjectResults.filter(r => r.date === examDate && r.subject.startsWith(prefix));
   };
 
   const resetForm = () => {
@@ -347,13 +332,14 @@ export default function Exams() {
     setSaving(true);
     
     try {
-      await API.post("/api/exams/add/", {
+      const examRes = await API.post("/api/exams/add/", {
         exam_type: examType,
         net_score: totalNet,
         date: examDate,
       });
-      
-      // Branş sonuçlarını da kaydet
+      const examId = examRes.data.id;
+
+      // Branş sonuçlarını da kaydet (exam_id ile bağla)
       const currentSubjects = EXAM_TYPES.find(e => e.key === examType)?.subjects || [];
       const subjectScores = currentSubjects
         .filter(sub => {
@@ -366,10 +352,10 @@ export default function Exams() {
           wrong: scores[sub.key]?.wrong || 0,
           date: examDate,
         }));
-      
+
       if (subjectScores.length > 0) {
         try {
-          await API.post("/api/subject-results/add/", { results: subjectScores });
+          await API.post("/api/subject-results/add/", { exam_id: examId, results: subjectScores });
         } catch (e) {
         }
       }
@@ -842,7 +828,7 @@ export default function Exams() {
                         <SubjectDetails
                           examType={exam.exam_type}
                           examDate={exam.date}
-                          subjectResults={getExamSubjectResults(exam.date)}
+                          subjectResults={getExamSubjectResults(exam.id, exam.date, exam.exam_type)}
                         />
                       </div>
                     )}

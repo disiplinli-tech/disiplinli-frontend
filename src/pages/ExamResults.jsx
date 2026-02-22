@@ -234,13 +234,14 @@ export default function ExamResults() {
     
     try {
       // Ana deneme sonucunu kaydet
-      await API.post("/api/exams/add/", {
+      const examRes = await API.post("/api/exams/add/", {
         exam_type: examType,
         net_score: totalNet,
         date: examDate,
       });
-      
-      // Branş sonuçlarını kaydet (yeni endpoint gerekecek)
+      const examId = examRes.data.id;
+
+      // Branş sonuçlarını kaydet (exam_id ile bağla)
       const currentSubjects = EXAM_TYPES.find(e => e.key === examType)?.subjects || [];
       const subjectScores = currentSubjects
         .filter(sub => {
@@ -255,11 +256,12 @@ export default function ExamResults() {
           net: getSubjectNet(sub.key),
           date: examDate,
         }));
-      
-      // Branş sonuçlarını kaydet (backend endpoint varsa)
-      try {
-        await API.post("/api/subject-results/add/", { results: subjectScores });
-      } catch (e) {
+
+      if (subjectScores.length > 0) {
+        try {
+          await API.post("/api/subject-results/add/", { exam_id: examId, results: subjectScores });
+        } catch (e) {
+        }
       }
       
       fetchExams();
