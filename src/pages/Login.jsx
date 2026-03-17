@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import API from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import {
-  Eye, EyeOff, Mail, Lock, ArrowRight, ArrowLeft, Target, TrendingUp,
-  Users, BookOpen, ChevronRight, Phone, Shield, KeyRound
+  Eye, EyeOff, Mail, Lock, ArrowRight, ArrowLeft,
+  BookOpen, ChevronRight, Phone, Shield
 } from "lucide-react";
 
 export default function Login({ setUser }) {
@@ -223,62 +223,18 @@ export default function Login({ setUser }) {
         }} />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
-          {/* Logo */}
-          <div>
-            <Link to="/" className="inline-block group">
-              <span className="text-white font-display font-bold text-xl group-hover:opacity-80 transition-opacity">Disiplinli.com</span>
-            </Link>
-          </div>
-
-          {/* Ana Mesaj */}
-          <div className="space-y-8">
+        <div className="relative z-10 flex flex-col justify-center items-center p-12 xl:p-16 w-full">
+          <div className="text-center space-y-6">
+            <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto">
+              <BookOpen size={32} className="text-white" />
+            </div>
             <div>
-              <h2 className="text-4xl xl:text-5xl font-display font-bold text-white leading-tight">
-                Hedefine giden
-                <br />
-                yol burada
-                <span className="text-warm-400">.</span>
+              <h2 className="text-3xl xl:text-4xl font-display font-bold text-white leading-tight">
+                Disiplinli.com
               </h2>
-              <p className="text-primary-200 text-lg mt-4 leading-relaxed max-w-md">
-                Binlerce öğrenci Disiplinli ile hedeflerine ulaşıyor.
-                Sıra sende.
+              <p className="text-primary-200 text-lg mt-3 leading-relaxed max-w-sm mx-auto">
+                Koçluk desteği ile hedeflerine ulaş.
               </p>
-            </div>
-
-            {/* Feature highlights */}
-            <div className="space-y-4">
-              {[
-                { icon: Target, text: "Kişiselleştirilmiş çalışma planı" },
-                { icon: TrendingUp, text: "Net artışını takip et" },
-                { icon: Users, text: "Birebir koç desteği" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 text-primary-100">
-                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <item.icon size={16} className="text-warm-400" />
-                  </div>
-                  <span className="text-sm font-medium">{item.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Alt kısım - sosyal kanıt */}
-          <div className="flex items-center gap-3">
-            <div className="flex -space-x-2">
-              {['AK', 'EB', 'SY', 'MK'].map((initials, i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full border-2 border-primary-500 flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ backgroundColor: ['#f97316', '#ea580c', '#22c55e', '#3b82f6'][i] }}
-                >
-                  {initials}
-                </div>
-              ))}
-            </div>
-            <div className="text-sm">
-              <span className="text-white font-semibold">5+ veli</span>
-              <span className="text-primary-300"> tarafından önerildi</span>
             </div>
           </div>
         </div>
@@ -290,7 +246,8 @@ export default function Login({ setUser }) {
 
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <Link to="/" className="inline-block">
+            <Link to="/login" className="inline-flex items-center gap-2">
+              <BookOpen size={24} className="text-primary-500" />
               <span className="font-display font-bold text-xl text-surface-800">Disiplinli.com</span>
             </Link>
           </div>
@@ -568,7 +525,7 @@ export default function Login({ setUser }) {
 
           {/* Footer */}
           <p className="text-center text-surface-400 text-xs mt-8">
-            © 2026 Disiplinli - Tüm hakları saklıdır
+            &copy; 2026 Disiplinli
           </p>
         </div>
       </div>
